@@ -1,1946 +1,4118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Xray Panel</title>
-
-<style>
-:root{
-  --bg:#050505;
-  --panel:#0b0b0b;
-  --panel2:#101010;
-  --line:#1d1d1d;
-  --text:#f3f3f3;
-  --muted:#858585;
-  --green:#00ff88;
-  --red:#ff4757;
-  --yellow:#ffc857;
-  --blue:#4da3ff;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:
-    radial-gradient(circle at 20% 0%,rgba(0,255,136,.08),transparent 30%),
-    radial-gradient(circle at 90% 90%,rgba(0,160,255,.05),transparent 30%),
-    var(--bg);
-  color:var(--text);
-  font-family:Inter,Arial,sans-serif;
-  min-height:100vh;
-}
-
-button,input,select,textarea{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-.hidden{display:none!important}
-
-.login{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.login-card{
-  width:390px;
-  background:rgba(10,10,10,.94);
-  border:1px solid #252525;
-  border-radius:20px;
-  padding:35px;
-  box-shadow:0 0 80px rgba(0,255,136,.08);
-  animation:up .6s ease;
-}
-
-@keyframes up{
-  from{opacity:0;transform:translateY(25px)}
-  to{opacity:1;transform:none}
-}
-
-.logo{
-  color:var(--green);
-  font-size:28px;
-  font-weight:800;
-  text-align:center;
-  letter-spacing:2px;
-  margin-bottom:8px;
-}
-
-.subtitle{
-  text-align:center;
-  color:var(--muted);
-  margin-bottom:30px;
-}
-
-.field{
-  margin-bottom:16px;
-}
-
-label{
-  display:block;
-  font-size:12px;
-  color:#aaa;
-  margin-bottom:7px;
-}
-
-input,select,textarea{
-  width:100%;
-  background:#080808;
-  color:white;
-  border:1px solid #292929;
-  border-radius:9px;
-  padding:11px 12px;
-  outline:none;
-}
-
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
-input:focus,select:focus,textarea:focus{
-  border-color:var(--green);
-  box-shadow:0 0 0 2px rgba(0,255,136,.08);
-}
-
-.primary{
-  width:100%;
-  border:0;
-  background:var(--green);
-  color:#00170c;
-  padding:12px;
-  border-radius:9px;
-  font-weight:800;
-}
-
-.primary:hover{
-  box-shadow:0 0 20px rgba(0,255,136,.2);
-}
-
-.error{
-  color:var(--red);
-  font-size:13px;
-  margin-top:12px;
-  text-align:center;
-}
-
-.app{
-  min-height:100vh;
-  display:flex;
-}
-
-.sidebar{
-  width:235px;
-  border-right:1px solid var(--line);
-  background:rgba(6,6,6,.95);
-  padding:20px 12px;
-  position:fixed;
-  left:0;
-  top:0;
-  bottom:0;
-  z-index:10;
-}
-
-.brand{
-  font-size:21px;
-  font-weight:900;
-  color:var(--green);
-  padding:10px 12px 25px;
-}
-
-.nav{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-
-.nav button{
-  text-align:left;
-  border:0;
-  background:transparent;
-  color:#929292;
-  padding:11px 13px;
-  border-radius:8px;
-}
-
-.nav button:hover,
-.nav button.active{
-  background:#121212;
-  color:white;
-}
-
-.nav button.active{
-  box-shadow:inset 2px 0 var(--green);
-}
-
-.main{
-  margin-left:235px;
-  width:calc(100% - 235px);
-  padding:25px;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:25px;
-}
-
-.title{
-  font-size:25px;
-  font-weight:800;
-}
-
-.logout{
-  background:#151515;
-  border:1px solid #292929;
-  color:#aaa;
-  padding:8px 13px;
-  border-radius:8px;
-}
-
-.content{
-  animation:fade .25s ease;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(5px)}
-  to{opacity:1;transform:none}
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.card{
-  background:linear-gradient(145deg,#0e0e0e,#090909);
-  border:1px solid var(--line);
-  border-radius:13px;
-  padding:20px;
-}
-
-.card-label{
-  color:#777;
-  font-size:12px;
-}
-
-.card-value{
-  font-size:30px;
-  margin-top:9px;
-  font-weight:800;
-}
-
-.card-value.green{color:var(--green)}
-
-.panel{
-  background:#0b0b0b;
-  border:1px solid var(--line);
-  border-radius:13px;
-  overflow:hidden;
-}
-
-.panel-head{
-  padding:17px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.panel-title{
-  font-weight:800;
-}
-
-.toolbar{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.search{
-  max-width:300px;
-}
-
-.add{
-  background:var(--green);
-  border:0;
-  color:#00170c;
-  padding:10px 15px;
-  border-radius:8px;
-  font-weight:800;
-}
-
-.table-wrap{
-  overflow:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  color:#777;
-  font-size:11px;
-  text-align:left;
-  text-transform:uppercase;
-}
-
-th,td{
-  padding:14px 16px;
-  border-bottom:1px solid #181818;
-  white-space:nowrap;
-}
-
-td{
-  font-size:13px;
-}
-
-.empty{
-  text-align:center;
-  padding:45px;
-  color:#666;
-}
-
-.badge{
-  display:inline-block;
-  padding:4px 8px;
-  border-radius:20px;
-  font-size:11px;
-}
-
-.badge.green{
-  color:var(--green);
-  background:rgba(0,255,136,.08);
-}
-
-.badge.red{
-  color:var(--red);
-  background:rgba(255,71,87,.08);
-}
-
-.actions{
-  display:flex;
-  gap:6px;
-}
-
-.action{
-  border:1px solid #292929;
-  background:#111;
-  color:#aaa;
-  border-radius:6px;
-  padding:6px 9px;
-}
-
-.action:hover{
-  color:white;
-  border-color:#444;
-}
-
-.action.delete:hover{
-  color:var(--red);
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.78);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:100;
-  padding:20px;
-}
-
-.modal.show{
-  display:flex;
-}
-
-.modal-box{
-  width:720px;
-  max-width:100%;
-  max-height:92vh;
-  overflow:auto;
-  background:#0b0b0b;
-  border:1px solid #292929;
-  border-radius:15px;
-  box-shadow:0 30px 100px #000;
-}
-
-.modal-head{
-  padding:17px 20px;
-  border-bottom:1px solid var(--line);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.close{
-  background:none;
-  color:#888;
-  border:0;
-  font-size:22px;
-}
-
-.modal-body{
-  padding:20px;
-}
-
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-
-.form-grid.three{
-  grid-template-columns:repeat(3,1fr);
-}
-
-.full{
-  grid-column:1/-1;
-}
-
-.section{
-  margin-top:22px;
-  margin-bottom:12px;
-  color:var(--green);
-  font-weight:800;
-  font-size:13px;
-  text-transform:uppercase;
-}
-
-.checkbox{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:#aaa;
-}
-
-.checkbox input{
-  width:auto;
-}
-
-.modal-foot{
-  padding:15px 20px;
-  border-top:1px solid var(--line);
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-}
-
-.secondary{
-  background:#151515;
-  color:#bbb;
-  border:1px solid #292929;
-  padding:10px 15px;
-  border-radius:8px;
-}
-
-.toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  background:#101010;
-  border:1px solid #292929;
-  padding:12px 16px;
-  border-radius:9px;
-  display:none;
-  z-index:200;
-}
-
-.toast.show{
-  display:block;
-}
-
-@media(max-width:900px){
-  .sidebar{
-    width:70px;
-  }
-
-  .brand{
-    font-size:0;
-  }
-
-  .brand:first-letter{
-    font-size:20px;
-  }
-
-  .nav button{
-    font-size:0;
-    text-align:center;
-  }
-
-  .nav button::first-letter{
-    font-size:18px;
-  }
-
-  .main{
-    margin-left:70px;
-    width:calc(100% - 70px);
-  }
-
-  .cards{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-
-@media(max-width:600px){
-  .main{
-    padding:15px;
-  }
-
-  .cards{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .form-grid,
-  .form-grid.three{
-    grid-template-columns:1fr;
-  }
-
-  .toolbar{
-    flex-direction:column;
-    align-items:stretch;
-  }
-
-  .search{
-    max-width:none;
-  }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xray Control Panel</title>
+
+  <style>
+    :root {
+      --bg: #050807;
+      --bg2: #080d0a;
+      --panel: rgba(10, 17, 13, .88);
+      --panel2: rgba(14, 23, 17, .94);
+      --line: rgba(57, 255, 120, .14);
+      --line2: rgba(57, 255, 120, .28);
+      --green: #39ff78;
+      --green2: #19d95c;
+      --text: #e9fff0;
+      --muted: #789083;
+      --danger: #ff4d67;
+      --warning: #ffd166;
+      --blue: #53b9ff;
+      --shadow: 0 0 35px rgba(57,255,120,.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: #173d25 #050807;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* ================= BACKGROUND ================= */
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -5;
+      background:
+        linear-gradient(rgba(57,255,120,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,120,.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      animation: gridMove 18s linear infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      background: linear-gradient(
+        transparent 0%,
+        rgba(57,255,120,.018) 50%,
+        transparent 100%
+      );
+      background-size: 100% 7px;
+      opacity: .35;
+    }
+
+    @keyframes gridMove {
+      from { transform: translateY(0); }
+      to { transform: translateY(42px); }
+    }
+
+    .orb {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(100px);
+      opacity: .07;
+      z-index: -4;
+      background: var(--green);
+      animation: orbFloat 14s ease-in-out infinite;
+    }
+
+    .orb.one {
+      top: -180px;
+      left: 20%;
+    }
+
+    .orb.two {
+      bottom: -220px;
+      right: 5%;
+      animation-delay: -7s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(60px,30px) scale(1.12); }
+    }
+
+    /* ================= LOGIN ================= */
+
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    .login-box {
+      width: min(430px, 100%);
+      background: rgba(7,12,9,.9);
+      border: 1px solid var(--line2);
+      border-radius: 24px;
+      padding: 34px;
+      box-shadow:
+        0 0 80px rgba(57,255,120,.08),
+        inset 0 0 40px rgba(57,255,120,.025);
+      animation: loginIn .8s cubic-bezier(.16,1,.3,1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 70%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      animation: scanLine 3s linear infinite;
+    }
+
+    @keyframes scanLine {
+      to { left: 140%; }
+    }
+
+    @keyframes loginIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(.96);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      border: 1px solid var(--green);
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      font-size: 30px;
+      margin-bottom: 22px;
+      box-shadow: 0 0 30px rgba(57,255,120,.16);
+      animation: logoPulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(57,255,120,.1); }
+      50% { box-shadow: 0 0 45px rgba(57,255,120,.28); }
+    }
+
+    .login-box h1 {
+      margin: 0 0 8px;
+      font-size: 27px;
+    }
+
+    .login-box p {
+      color: var(--muted);
+      margin: 0 0 26px;
+    }
+
+    /* ================= LAYOUT ================= */
+
+    .app {
+      min-height: 100vh;
+      display: none;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 255px;
+      padding: 20px 14px;
+      border-right: 1px solid var(--line);
+      background: rgba(4,8,6,.94);
+      backdrop-filter: blur(20px);
+      z-index: 20;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 12px 12px 22px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: .5px;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .nav-group {
+      margin: 18px 7px 7px;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #4f6758;
+      letter-spacing: 1.4px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 12px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      background: transparent;
+      color: #94aa9b;
+      text-align: left;
+      transition: .25s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--text);
+      background: rgba(57,255,120,.05);
+      border-color: var(--line);
+      transform: translateX(3px);
+    }
+
+    .nav-btn.active {
+      color: var(--green);
+      background: rgba(57,255,120,.075);
+      border-color: var(--line2);
+      box-shadow: inset 3px 0 0 var(--green), 0 0 20px rgba(57,255,120,.04);
+    }
+
+    .nav-icon {
+      width: 22px;
+      text-align: center;
+    }
+
+    .main {
+      margin-left: 255px;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 72px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(4,8,6,.72);
+      backdrop-filter: blur(18px);
+      position: sticky;
+      top: 0;
+      z-index: 15;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 750;
+    }
+
+    .content {
+      padding: 28px;
+      max-width: 1500px;
+      margin: auto;
+    }
+
+    /* ================= BUTTONS ================= */
+
+    .btn {
+      border: 1px solid var(--line2);
+      background: rgba(57,255,120,.06);
+      color: var(--green);
+      padding: 10px 15px;
+      border-radius: 10px;
+      transition: .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-120%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.09), transparent);
+      transition: .5s;
+    }
+
+    .btn:hover::after {
+      transform: translateX(120%);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--green);
+      box-shadow: 0 0 24px rgba(57,255,120,.13);
+    }
+
+    .btn.primary {
+      background: var(--green);
+      color: #031006;
+      font-weight: 800;
+      border-color: var(--green);
+    }
+
+    .btn.danger {
+      color: var(--danger);
+      border-color: rgba(255,77,103,.25);
+      background: rgba(255,77,103,.05);
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    /* ================= CARDS ================= */
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .card-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    /* ================= STATS ================= */
+
+    .stat {
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      animation: itemIn .55s both;
+    }
+
+    .stat::before {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      right: -35px;
+      top: -35px;
+      background: var(--green);
+      filter: blur(45px);
+      opacity: .08;
+    }
+
+    .stat:hover {
+      transform: translateY(-4px);
+      border-color: var(--line2);
+    }
+
+    .stat-value {
+      font-size: 31px;
+      font-weight: 850;
+      color: var(--green);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    /* ================= FORMS ================= */
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      animation: fieldIn .45s both;
+    }
+
+    .field:nth-child(2) { animation-delay: .03s; }
+    .field:nth-child(3) { animation-delay: .06s; }
+    .field:nth-child(4) { animation-delay: .09s; }
+    .field:nth-child(5) { animation-delay: .12s; }
+    .field:nth-child(6) { animation-delay: .15s; }
+
+    @keyframes fieldIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #91a99a;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      color: var(--text);
+      background: #070d09;
+      border: 1px solid #193023;
+      border-radius: 10px;
+      outline: none;
+      padding: 11px 12px;
+      transition: .25s ease;
+    }
+
+    input:hover,
+    select:hover,
+    textarea:hover {
+      border-color: rgba(57,255,120,.28);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow:
+        0 0 0 3px rgba(57,255,120,.07),
+        0 0 24px rgba(57,255,120,.08);
+      transform: translateY(-1px);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* ================= ANIMATED FORM SECTIONS ================= */
+
+    .form-sections {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-section {
+      border: 1px solid var(--line);
+      background: rgba(8,14,10,.78);
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+      transition: .3s ease;
+    }
+
+    .form-section::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: transparent;
+      transition: .35s;
+    }
+
+    .form-section.open {
+      border-color: var(--line2);
+      box-shadow: 0 0 28px rgba(57,255,120,.045);
+    }
+
+    .form-section.open::before {
+      background: var(--green);
+      box-shadow: 0 0 14px var(--green);
+    }
+
+    .section-head {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 16px 17px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      text-align: left;
+    }
+
+    .section-head:hover {
+      background: rgba(57,255,120,.025);
+    }
+
+    .section-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 10px;
+      border: 1px solid var(--line2);
+      display: grid;
+      place-items: center;
+      color: var(--green);
+      background: rgba(57,255,120,.045);
+      transition: .35s;
+    }
+
+    .form-section.open .section-icon {
+      transform: rotate(-5deg) scale(1.06);
+      box-shadow: 0 0 20px rgba(57,255,120,.12);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .section-subtitle {
+      color: #607669;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .section-copy {
+      flex: 1;
+    }
+
+    .chevron {
+      color: #5c7667;
+      transition: .35s;
+      font-size: 18px;
+    }
+
+    .form-section.open .chevron {
+      color: var(--green);
+      transform: rotate(180deg);
+    }
+
+    .section-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transform: translateY(-7px);
+      transition:
+        grid-template-rows .42s cubic-bezier(.16,1,.3,1),
+        opacity .25s ease,
+        transform .3s ease;
+    }
+
+    .form-section.open .section-body {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      transform: none;
+    }
+
+    .section-inner {
+      min-height: 0;
+      overflow: hidden;
+      padding: 0 17px;
+      transition: padding .35s ease;
+    }
+
+    .form-section.open .section-inner {
+      padding: 0 17px 18px;
+    }
+
+    /* ================= CONDITIONAL AREAS ================= */
+
+    .conditional {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      overflow: hidden;
+      transition:
+        grid-template-rows .45s cubic-bezier(.16,1,.3,1),
+        opacity .25s;
+    }
+
+    .conditional.show {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .conditional-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .conditional-box {
+      margin-top: 14px;
+      padding: 15px;
+      border-radius: 13px;
+      border: 1px dashed rgba(57,255,120,.2);
+      background: rgba(57,255,120,.018);
+    }
+
+    /* ================= SWITCH ================= */
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 10px 0;
+    }
+
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 25px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      display: none;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border: 1px solid #254331;
+      border-radius: 30px;
+      background: #0a120d;
+      transition: .3s;
+    }
+
+    .slider::before {
+      content: "";
+      width: 17px;
+      height: 17px;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: #547061;
+      transition: .3s;
+    }
+
+    .switch input:checked + .slider {
+      background: rgba(57,255,120,.12);
+      border-color: var(--green);
+      box-shadow: 0 0 16px rgba(57,255,120,.12);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(21px);
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    /* ================= CLIENT CARDS ================= */
+
+    .clients-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .client-card {
+      border: 1px solid #1a3524;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(12,23,15,.9), rgba(6,12,8,.92));
+      padding: 15px;
+      position: relative;
+      animation: clientAdd .5s cubic-bezier(.16,1,.3,1);
+      transition: .3s;
+    }
+
+    .client-card:hover {
+      border-color: rgba(57,255,120,.32);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 35px rgba(0,0,0,.2);
+    }
+
+    @keyframes clientAdd {
+      from {
+        opacity: 0;
+        transform: translateX(-15px) scale(.97);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .client-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .client-title {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .client-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      width: 31px;
+      height: 31px;
+      border-radius: 8px;
+      border: 1px solid #1d3927;
+      background: #09120c;
+      color: #7c9585;
+      transition: .2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--green);
+      border-color: var(--green);
+      transform: scale(1.06);
+    }
+
+    .icon-btn.danger:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .add-client {
+      width: 100%;
+      padding: 15px;
+      border: 1px dashed rgba(57,255,120,.25);
+      border-radius: 13px;
+      background: rgba(57,255,120,.025);
+      color: var(--green);
+      transition: .3s;
+    }
+
+    .add-client:hover {
+      border-style: solid;
+      background: rgba(57,255,120,.055);
+      box-shadow: 0 0 25px rgba(57,255,120,.06);
+      transform: translateY(-2px);
+    }
+
+    /* ================= TABLE ================= */
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      color: #60796a;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 13px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 13px;
+      border-bottom: 1px solid rgba(57,255,120,.055);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      animation: rowIn .4s both;
+      transition: .2s;
+    }
+
+    tbody tr:hover {
+      background: rgba(57,255,120,.025);
+    }
+
+    @keyframes rowIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line2);
+      border-radius: 30px;
+      padding: 4px 8px;
+      font-size: 10px;
+      color: var(--green);
+      background: rgba(57,255,120,.045);
+    }
+
+    .badge.off {
+      color: #75887c;
+      border-color: #25372c;
+      background: rgba(255,255,255,.02);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* ================= MODAL ================= */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal.show {
+      display: flex;
+      animation: fadeIn .2s ease;
+    }
+
+    .modal-box {
+      width: min(900px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #071009;
+      border: 1px solid var(--line2);
+      border-radius: 20px;
+      box-shadow: 0 0 80px rgba(57,255,120,.12);
+      animation: modalIn .42s cubic-bezier(.16,1,.3,1);
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(.95);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-head {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      background: rgba(7,16,9,.95);
+      z-index: 2;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-foot {
+      padding: 15px 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid var(--line);
+      position: sticky;
+      bottom: 0;
+      background: rgba(7,16,9,.95);
+    }
+
+    /* ================= DASHBOARD ================= */
+
+    .hero {
+      padding: 24px;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      margin: 7px 0 0;
+    }
+
+    .hero-line {
+      position: absolute;
+      height: 1px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      animation: heroScan 4s linear infinite;
+    }
+
+    @keyframes heroScan {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(100%); }
+    }
+
+    /* ================= EMPTY ================= */
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+      opacity: .65;
+    }
+
+    /* ================= TOAST ================= */
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 300;
+      min-width: 250px;
+      max-width: 400px;
+      padding: 13px 15px;
+      border: 1px solid var(--line2);
+      border-radius: 12px;
+      background: rgba(7,16,9,.96);
+      color: var(--text);
+      box-shadow: 0 0 35px rgba(57,255,120,.1);
+      transform: translateY(30px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .35s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media(max-width: 950px) {
+      .sidebar {
+        width: 215px;
+      }
+
+      .main {
+        margin-left: 215px;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(2,1fr);
+      }
+    }
+
+    @media(max-width: 700px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .nav-group {
+        margin-top: 10px;
+      }
+
+      .topbar {
+        position: relative;
+        padding: 0 16px;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .login-box {
+        padding: 25px;
+      }
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+  <div class="orb one"></div>
+  <div class="orb two"></div>
 
-<div id="loginScreen" class="login">
-  <div class="login-card">
-    <div class="logo">XRAY PANEL</div>
-    <div class="subtitle">Secure Management Console</div>
+  <!-- ================= LOGIN ================= -->
 
-    <form id="loginForm">
-      <div class="field">
-        <label>Username</label>
-        <input id="username" value="admin" autocomplete="username">
-      </div>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-box">
+      <div class="logo">⌁</div>
+      <h1>Xray Control Panel</h1>
+      <p>Secure infrastructure management</p>
 
-      <div class="field">
-        <label>Password</label>
-        <input id="password" type="password" autocomplete="current-password">
-      </div>
+      <form id="loginForm" class="form">
+        <div class="field">
+          <label>Username</label>
+          <input id="loginUser" autocomplete="username" value="admin">
+        </div>
 
-      <button class="primary">Sign In</button>
+        <div class="field">
+          <label>Password</label>
+          <input id="loginPass" type="password" autocomplete="current-password">
+        </div>
 
-      <div id="loginError" class="error"></div>
-    </form>
-  </div>
-</div>
-
-<!-- APP -->
-
-<div id="app" class="app hidden">
-
-  <aside class="sidebar">
-    <div class="brand">XRAY PANEL</div>
-
-    <nav class="nav">
-      <button data-page="dashboard">◉ Dashboard</button>
-      <button data-page="inbounds">◈ Inbounds</button>
-      <button data-page="clients">◎ Clients</button>
-      <button data-page="groups">▣ Groups</button>
-      <button data-page="nodes">◆ Nodes</button>
-      <button data-page="hosts">◇ Hosts</button>
-      <button data-page="xray">⚡ Xray</button>
-      <button data-page="outbound">↗ Outbound</button>
-      <button data-page="routing">⇄ Routing</button>
-      <button data-page="settings">⚙ Settings</button>
-      <button data-page="api">⌘ API Docs</button>
-    </nav>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div id="pageTitle" class="title">Dashboard</div>
-      <button class="logout" onclick="logout()">Logout</button>
-    </div>
-
-    <div id="content" class="content"></div>
-  </main>
-
-</div>
-
-<!-- MODAL -->
-
-<div id="modal" class="modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <strong id="modalTitle">Create</strong>
-      <button class="close" onclick="closeModal()">×</button>
-    </div>
-
-    <div id="modalBody" class="modal-body"></div>
-
-    <div class="modal-foot">
-      <button class="secondary" onclick="closeModal()">Cancel</button>
-      <button id="modalSave" class="add">Save</button>
+        <button class="btn primary" type="submit">Sign in</button>
+      </form>
     </div>
   </div>
-</div>
 
-<div id="toast" class="toast"></div>
+  <!-- ================= APP ================= -->
+
+  <div id="app" class="app">
+
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-title">XRAY // CONTROL</div>
+        <div class="brand-sub">NEON INFRASTRUCTURE PANEL</div>
+      </div>
+
+      <div class="nav-group">Overview</div>
+
+      <button class="nav-btn active" data-page="dashboard">
+        <span class="nav-icon">◈</span>
+        Dashboard
+      </button>
+
+      <div class="nav-group">Traffic</div>
+
+      <button class="nav-btn" data-page="inbounds">
+        <span class="nav-icon">↓</span>
+        Inbounds
+      </button>
+
+      <button class="nav-btn" data-page="clients">
+        <span class="nav-icon">◎</span>
+        Clients
+      </button>
+
+      <button class="nav-btn" data-page="groups">
+        <span class="nav-icon">◉</span>
+        Groups
+      </button>
+
+      <div class="nav-group">Infrastructure</div>
+
+      <button class="nav-btn" data-page="nodes">
+        <span class="nav-icon">◇</span>
+        Nodes
+      </button>
+
+      <button class="nav-btn" data-page="hosts">
+        <span class="nav-icon">⌂</span>
+        Hosts
+      </button>
+
+      <button class="nav-btn" data-page="outbound">
+        <span class="nav-icon">↑</span>
+        Outbound
+      </button>
+
+      <button class="nav-btn" data-page="routing">
+        <span class="nav-icon">⤢</span>
+        Routing
+      </button>
+
+      <div class="nav-group">System</div>
+
+      <button class="nav-btn" data-page="xray">
+        <span class="nav-icon">⚡</span>
+        Xray Core
+      </button>
+
+      <button class="nav-btn" data-page="settings">
+        <span class="nav-icon">⚙</span>
+        Settings
+      </button>
+
+      <button class="nav-btn" data-page="docs">
+        <span class="nav-icon">?</span>
+        API Docs
+      </button>
+
+      <button class="nav-btn" onclick="logout()">
+        <span class="nav-icon">⇥</span>
+        Logout
+      </button>
+
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar">
+        <div id="pageTitle" class="page-title">Dashboard</div>
+        <div>
+          <span class="badge">
+            <span class="dot"></span>
+            PANEL ONLINE
+          </span>
+        </div>
+      </header>
+
+      <div id="content" class="content"></div>
+
+    </main>
+  </div>
+
+  <!-- ================= MODAL ================= -->
+
+  <div id="modal" class="modal">
+    <div class="modal-box">
+
+      <div class="modal-head">
+        <div id="modalTitle" class="modal-title"></div>
+
+        <button class="icon-btn" onclick="closeModal()">×</button>
+      </div>
+
+      <div id="modalBody" class="modal-body"></div>
+
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button id="modalSave" class="btn primary">Save Changes</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 
 <script>
+/* =========================================================
+   CORE
+========================================================= */
+
 const $ = id => document.getElementById(id);
 
-let token = localStorage.getItem("xray_token");
 let currentPage = "dashboard";
-let editingId = null;
+let currentEditId = null;
+let inboundClients = [];
 
-const api = async (url, options={}) => {
-  options.headers = {
-    ...(options.body ? {"Content-Type":"application/json"} : {}),
-    ...(options.headers || {}),
-    Authorization: `Bearer ${token}`
-  };
+async function api(url, options = {}) {
+  const res = await fetch("/api" + url, {
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
 
-  const r = await fetch(url, options);
-  const data = await r.json().catch(()=>({}));
+  if (res.status === 401) {
+    showLogin();
+    throw new Error("Unauthorized");
+  }
 
-  if(!r.ok) throw new Error(data.error || "Request failed");
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.error || "Request failed");
+  }
 
   return data;
-};
-
-function toast(text){
-  $("toast").textContent = text;
-  $("toast").classList.add("show");
-
-  setTimeout(()=>$("toast").classList.remove("show"),2500);
 }
 
-function escapeHtml(v){
-  return String(v ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;");
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function modal(title, html, save){
-  $("modalTitle").textContent = title;
-  $("modalBody").innerHTML = html;
-  $("modalSave").onclick = save;
-  $("modal").classList.add("show");
+function toast(message, error = false) {
+  const el = $("toast");
+
+  el.textContent = message;
+  el.style.borderColor = error
+    ? "rgba(255,77,103,.4)"
+    : "rgba(57,255,120,.28)";
+
+  el.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(() => {
+    el.classList.remove("show");
+  }, 2800);
 }
 
-function closeModal(){
-  $("modal").classList.remove("show");
-  editingId = null;
+function showLogin() {
+  $("loginScreen").style.display = "grid";
+  $("app").style.display = "none";
 }
 
-function nav(page){
-  currentPage = page;
-
-  document.querySelectorAll(".nav button")
-    .forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-
-  const titles={
-    dashboard:"Dashboard",
-    inbounds:"Inbounds",
-    clients:"Clients",
-    groups:"Groups",
-    nodes:"Nodes",
-    hosts:"Hosts",
-    xray:"Xray",
-    outbound:"Outbound",
-    routing:"Routing",
-    settings:"Settings",
-    api:"API Docs"
-  };
-
-  $("pageTitle").textContent=titles[page] || page;
-
-  loadPage();
+function showApp() {
+  $("loginScreen").style.display = "none";
+  $("app").style.display = "block";
 }
 
-document.querySelectorAll(".nav button").forEach(btn=>{
-  btn.onclick=()=>nav(btn.dataset.page);
-});
-
-/* LOGIN */
-
-$("loginForm").onsubmit=async e=>{
-  e.preventDefault();
-
-  $("loginError").textContent="";
-
-  try{
-    const data=await fetch("/api/login",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        username:$("username").value,
-        password:$("password").value
-      })
-    }).then(r=>r.json());
-
-    if(!data.token){
-      throw new Error(data.error || "Login failed");
-    }
-
-    token=data.token;
-    localStorage.setItem("xray_token",token);
-
-    $("loginScreen").classList.add("hidden");
-    $("app").classList.remove("hidden");
-
-    nav("dashboard");
-
-  }catch(e){
-    $("loginError").textContent=e.message;
-  }
-};
-
-function logout(){
-  localStorage.removeItem("xray_token");
+function logout() {
+  localStorage.removeItem("xray_session");
   location.reload();
 }
 
-/* DASHBOARD */
+/* =========================================================
+   LOGIN
+========================================================= */
 
-async function dashboard(){
-  const s=await api("/api/stats");
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
 
-  $("content").innerHTML=`
-    <div class="cards">
-      <div class="card">
-        <div class="card-label">INBOUNDS</div>
-        <div class="card-value green">${s.inbounds}</div>
-      </div>
-
-      <div class="card">
-        <div class="card-label">CLIENTS</div>
-        <div class="card-value">${s.clients}</div>
-      </div>
-
-      <div class="card">
-        <div class="card-label">GROUPS</div>
-        <div class="card-value">${s.groups}</div>
-      </div>
-
-      <div class="card">
-        <div class="card-label">NODES</div>
-        <div class="card-value">${s.nodes}</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">System Status</span>
-      </div>
-
-      <div style="padding:20px">
-        <span class="badge green">PANEL ONLINE</span>
-        <span style="margin-left:10px;color:#777">
-          Xray Core: ${s.xray ? "Running" : "Not Running"}
-        </span>
-      </div>
-    </div>
-  `;
-}
-
-/* INBOUNDS */
-
-async function inbounds(){
-  const rows=await api("/api/inbounds");
-
-  $("content").innerHTML=`
-    <div class="toolbar">
-      <input class="search" id="search" placeholder="Search inbounds...">
-      <button class="add" onclick="createInbound()">+ Add Inbound</button>
-    </div>
-
-    <div class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Protocol</th>
-              <th>Port</th>
-              <th>Network</th>
-              <th>Security</th>
-              <th>Clients</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="rows">
-          ${rows.length ? rows.map(r=>`
-            <tr>
-              <td>${escapeHtml(r.name)}</td>
-              <td>${escapeHtml(r.protocol)}</td>
-              <td>${r.port}</td>
-              <td>${escapeHtml(r.network)}</td>
-              <td>${escapeHtml(r.security)}</td>
-              <td>${r.client_count}</td>
-              <td>
-                <span class="badge ${r.enabled?'green':'red'}">
-                  ${r.enabled?'Enabled':'Disabled'}
-                </span>
-              </td>
-              <td>
-                <div class="actions">
-                  <button class="action" onclick='editInbound(${JSON.stringify(r)})'>Edit</button>
-                  <button class="action" onclick="toggleInbound('${r.id}')">Toggle</button>
-                  <button class="action delete" onclick="deleteItem('/api/inbounds/${r.id}')">Delete</button>
-                </div>
-              </td>
-            </tr>
-          `).join("") : `
-            <tr><td colspan="8" class="empty">No inbounds yet</td></tr>
-          `}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-
-  $("search").oninput=e=>{
-    const q=e.target.value.toLowerCase();
-
-    document.querySelectorAll("#rows tr").forEach(tr=>{
-      tr.style.display=tr.textContent.toLowerCase().includes(q)?"":"none";
+  try {
+    await api("/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: $("loginUser").value,
+        password: $("loginPass").value
+      })
     });
+
+    localStorage.setItem("xray_session", "1");
+
+    showApp();
+    loadPage("dashboard");
+
+  } catch (err) {
+    toast(err.message, true);
+  }
+});
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+document.querySelectorAll(".nav-btn[data-page]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    loadPage(btn.dataset.page);
+  });
+});
+
+async function loadPage(page) {
+  currentPage = page;
+
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.classList.toggle(
+      "active",
+      btn.dataset.page === page
+    );
+  });
+
+  const names = {
+    dashboard: "Dashboard",
+    inbounds: "Inbounds",
+    clients: "Clients",
+    groups: "Groups",
+    nodes: "Nodes",
+    hosts: "Hosts",
+    outbound: "Outbound",
+    routing: "Routing",
+    xray: "Xray Core",
+    settings: "Settings",
+    docs: "API Docs"
   };
+
+  $("pageTitle").textContent = names[page] || page;
+
+  try {
+    if (page === "dashboard") return dashboard();
+    if (page === "inbounds") return inbounds();
+    if (page === "clients") return clients();
+    if (page === "groups") return groups();
+    if (page === "nodes") return nodes();
+    if (page === "hosts") return hosts();
+    if (page === "outbound") return outbound();
+    if (page === "routing") return routing();
+    if (page === "xray") return xray();
+    if (page === "settings") return settings();
+    if (page === "docs") return apiDocs();
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
-function inboundForm(r={}){
-  const s=r.settings || {};
-  const reality=s.reality || {};
-  const tls=s.tls || {};
-  const stream=r.stream_settings || {};
+/* =========================================================
+   FORM HELPERS
+========================================================= */
 
+function section(title, subtitle, body, open = false, icon = "◆") {
   return `
-    <div class="section">Basic</div>
+    <div class="form-section ${open ? "open" : ""}">
 
-    <div class="form-grid">
-      <div class="field">
-        <label>Name / Remark</label>
-        <input id="f_name" value="${escapeHtml(r.name||"")}">
+      <button type="button"
+              class="section-head"
+              onclick="toggleSection(this)">
+
+        <div class="section-icon">${icon}</div>
+
+        <div class="section-copy">
+          <div class="section-title">${title}</div>
+          <div class="section-subtitle">${subtitle}</div>
+        </div>
+
+        <div class="chevron">⌄</div>
+      </button>
+
+      <div class="section-body">
+        <div class="section-inner">
+          ${body}
+        </div>
       </div>
 
-      <div class="field">
-        <label>Protocol</label>
-        <select id="f_protocol">
-          ${["vless","vmess","trojan","shadowsocks","socks","http","wireguard","hysteria2","dokodemo-door","tun"]
-          .map(x=>`<option ${r.protocol===x?"selected":""}>${x}</option>`).join("")}
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Listen IP</label>
-        <input id="f_listen" value="${escapeHtml(r.listen||"")}">
-      </div>
-
-      <div class="field">
-        <label>Port</label>
-        <input id="f_port" type="number" value="${r.port||443}">
-      </div>
-
-      <div class="field">
-        <label>Network / Transport</label>
-        <select id="f_network">
-          ${["tcp","ws","grpc","httpupgrade","xhttp"]
-          .map(x=>`<option ${r.network===x?"selected":""}>${x}</option>`).join("")}
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Security</label>
-        <select id="f_security">
-          ${["none","tls","reality"]
-          .map(x=>`<option ${r.security===x?"selected":""}>${x}</option>`).join("")}
-        </select>
-      </div>
-
-      <div class="field full">
-        <label>Remark</label>
-        <input id="f_remark" value="${escapeHtml(r.remark||"")}">
-      </div>
-
-      <label class="checkbox">
-        <input id="f_enabled" type="checkbox" ${r.enabled!==0?"checked":""}>
-        Enabled
-      </label>
-
-      <label class="checkbox">
-        <input id="f_sniffing" type="checkbox" ${s.sniffing?"checked":""}>
-        Sniffing
-      </label>
-    </div>
-
-    <div class="section">TLS</div>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>Server Name / SNI</label>
-        <input id="f_tlsServerName" value="${escapeHtml(tls.serverName||"")}">
-      </div>
-
-      <div class="field">
-        <label>Certificate Path</label>
-        <input id="f_tlsCert" value="${escapeHtml(tls.certPath||"")}">
-      </div>
-
-      <div class="field">
-        <label>Private Key Path</label>
-        <input id="f_tlsKey" value="${escapeHtml(tls.keyPath||"")}">
-      </div>
-    </div>
-
-    <div class="section">REALITY</div>
-
-    <div class="form-grid">
-      <div class="field full">
-        <label>Destination</label>
-        <input id="f_realityDest" value="${escapeHtml(reality.dest||"")}">
-      </div>
-
-      <div class="field">
-        <label>Server Names</label>
-        <input id="f_realityServerNames" value="${escapeHtml(reality.serverNames||"")}">
-      </div>
-
-      <div class="field">
-        <label>Private Key</label>
-        <input id="f_realityPrivateKey" value="${escapeHtml(reality.privateKey||"")}">
-      </div>
-
-      <div class="field">
-        <label>Short IDs</label>
-        <input id="f_realityShortIds" value="${escapeHtml(reality.shortIds||"")}">
-      </div>
-
-      <div class="field">
-        <label>Fingerprint</label>
-        <input id="f_realityFingerprint" value="${escapeHtml(reality.fingerprint||"chrome")}">
-      </div>
-    </div>
-
-    <div class="section">WebSocket</div>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>Path</label>
-        <input id="f_wsPath" value="${escapeHtml(stream.ws?.path||"/")}">
-      </div>
-
-      <div class="field">
-        <label>Host</label>
-        <input id="f_wsHost" value="${escapeHtml(stream.ws?.host||"")}">
-      </div>
-    </div>
-
-    <div class="section">gRPC</div>
-
-    <div class="field">
-      <label>Service Name</label>
-      <input id="f_grpcServiceName" value="${escapeHtml(stream.grpc?.serviceName||"")}">
-    </div>
-
-    <div class="section">XHTTP</div>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>Path</label>
-        <input id="f_xhttpPath" value="${escapeHtml(stream.xhttp?.path||"/")}">
-      </div>
-
-      <div class="field">
-        <label>Host</label>
-        <input id="f_xhttpHost" value="${escapeHtml(stream.xhttp?.host||"")}">
-      </div>
-    </div>
-
-    <div class="section">Client</div>
-
-    <div class="form-grid">
-      <div class="field">
-        <label>Email</label>
-        <input id="f_clientEmail" placeholder="client@example.com">
-      </div>
-
-      <div class="field">
-        <label>UUID</label>
-        <input id="f_clientUuid" placeholder="Auto generate">
-      </div>
-
-      <div class="field">
-        <label>Flow</label>
-        <input id="f_clientFlow" placeholder="xtls-rprx-vision">
-      </div>
-
-      <div class="field">
-        <label>Total Traffic (GB)</label>
-        <input id="f_clientTotalGb" type="number" value="0">
-      </div>
-
-      <div class="field">
-        <label>Expiry</label>
-        <input id="f_clientExpiry" type="date">
-      </div>
-
-      <div class="field">
-        <label>Reset Days</label>
-        <input id="f_clientResetDays" type="number" value="0">
-      </div>
-
-      <div class="field">
-        <label>Limit IP</label>
-        <input id="f_clientLimitIp" type="number" value="0">
-      </div>
-
-      <div class="field">
-        <label>Subscription ID</label>
-        <input id="f_clientSubscriptionId">
-      </div>
-
-      <div class="field full">
-        <label>Comment</label>
-        <textarea id="f_clientComment"></textarea>
-      </div>
     </div>
   `;
 }
 
-function createInbound(){
-  modal(
-    "Add Inbound",
-    inboundForm(),
-    saveInbound
-  );
+function toggleSection(button) {
+  button.closest(".form-section").classList.toggle("open");
 }
 
-function editInbound(r){
-  editingId=r.id;
-
-  modal(
-    "Edit Inbound",
-    inboundForm(r),
-    saveInbound
-  );
-}
-
-async function saveInbound(){
-  const body={
-    name:$("f_name").value,
-    protocol:$("f_protocol").value,
-    listen:$("f_listen").value,
-    port:Number($("f_port").value),
-    network:$("f_network").value,
-    security:$("f_security").value,
-    remark:$("f_remark").value,
-    enabled:$("f_enabled").checked,
-    sniffing:$("f_sniffing").checked,
-
-    tlsServerName:$("f_tlsServerName").value,
-    tlsCert:$("f_tlsCert").value,
-    tlsKey:$("f_tlsKey").value,
-
-    realityDest:$("f_realityDest").value,
-    realityServerNames:$("f_realityServerNames").value,
-    realityPrivateKey:$("f_realityPrivateKey").value,
-    realityShortIds:$("f_realityShortIds").value,
-    realityFingerprint:$("f_realityFingerprint").value,
-
-    wsPath:$("f_wsPath").value,
-    wsHost:$("f_wsHost").value,
-
-    grpcServiceName:$("f_grpcServiceName").value,
-
-    xhttpPath:$("f_xhttpPath").value,
-    xhttpHost:$("f_xhttpHost").value,
-
-    clientEmail:$("f_clientEmail").value,
-    clientUuid:$("f_clientUuid").value,
-    clientFlow:$("f_clientFlow").value,
-    clientTotalGb:Number($("f_clientTotalGb").value)||0,
-    clientExpiry:$("f_clientExpiry").value,
-    clientResetDays:Number($("f_clientResetDays").value)||0,
-    clientLimitIp:Number($("f_clientLimitIp").value)||0,
-    clientSubscriptionId:$("f_clientSubscriptionId").value,
-    clientComment:$("f_clientComment").value
-  };
-
-  await api(
-    editingId ? `/api/inbounds/${editingId}` : "/api/inbounds",
-    {
-      method:editingId?"PUT":"POST",
-      body:JSON.stringify(body)
-    }
-  );
-
-  closeModal();
-  toast(editingId?"Inbound updated":"Inbound created");
-  inbounds();
-}
-
-async function toggleInbound(id){
-  await api(`/api/inbounds/${id}/toggle`,{method:"PATCH"});
-  inbounds();
-}
-
-/* CLIENTS */
-
-async function clients(){
-  const rows=await api("/api/clients");
-
-  $("content").innerHTML=`
-    <div class="toolbar">
-      <input class="search" id="search" placeholder="Search clients...">
-      <button class="add" onclick="createClient()">+ Add Client</button>
-    </div>
-
-    <div class="panel">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Inbound</th>
-              <th>UUID</th>
-              <th>Traffic</th>
-              <th>Expiry</th>
-              <th>Group</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-          ${rows.length?rows.map(r=>`
-            <tr>
-              <td>${escapeHtml(r.email)}</td>
-              <td>${escapeHtml(r.inbound_name||"-")}</td>
-              <td>${escapeHtml(r.uuid)}</td>
-              <td>${r.total_gb||0} GB</td>
-              <td>${escapeHtml(r.expiry_at||"Unlimited")}</td>
-              <td>${escapeHtml(r.group_name||"-")}</td>
-              <td>
-                <span class="badge ${r.enabled?'green':'red'}">
-                  ${r.enabled?'Enabled':'Disabled'}
-                </span>
-              </td>
-              <td>
-                <div class="actions">
-                  <button class="action" onclick='editClient(${JSON.stringify(r)})'>Edit</button>
-                  <button class="action" onclick="toggleClient('${r.id}')">Toggle</button>
-                  <button class="action delete" onclick="deleteItem('/api/clients/${r.id}')">Delete</button>
-                </div>
-              </td>
-            </tr>
-          `).join(""):`
-            <tr><td colspan="8" class="empty">No clients yet</td></tr>
-          `}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-async function clientForm(r={}){
-  const [inbounds,groups]=await Promise.all([
-    api("/api/inbounds"),
-    api("/api/groups")
-  ]);
-
+function field(label, input) {
   return `
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Inbound</label>
-        <select id="c_inbound">
-          ${inbounds.map(x=>`
-            <option value="${x.id}" ${r.inbound_id===x.id?"selected":""}>
-              ${escapeHtml(x.name)}
-            </option>
-          `).join("")}
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Email</label>
-        <input id="c_email" value="${escapeHtml(r.email||"")}">
-      </div>
-
-      <div class="field">
-        <label>UUID</label>
-        <input id="c_uuid" value="${escapeHtml(r.uuid||"")}" placeholder="Auto generate">
-      </div>
-
-      <div class="field">
-        <label>Flow</label>
-        <input id="c_flow" value="${escapeHtml(r.flow||"")}">
-      </div>
-
-      <div class="field">
-        <label>Total GB</label>
-        <input id="c_total" type="number" value="${r.total_gb||0}">
-      </div>
-
-      <div class="field">
-        <label>Expiry</label>
-        <input id="c_expiry" type="date" value="${escapeHtml(r.expiry_at||"")}">
-      </div>
-
-      <div class="field">
-        <label>Reset Days</label>
-        <input id="c_reset" type="number" value="${r.reset_days||0}">
-      </div>
-
-      <div class="field">
-        <label>Limit IP</label>
-        <input id="c_limit" type="number" value="${r.limit_ip||0}">
-      </div>
-
-      <div class="field">
-        <label>Group</label>
-        <select id="c_group">
-          <option value="">No Group</option>
-          ${groups.map(g=>`
-            <option value="${g.id}" ${r.group_id===g.id?"selected":""}>
-              ${escapeHtml(g.name)}
-            </option>
-          `).join("")}
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Telegram ID</label>
-        <input id="c_telegram" value="${escapeHtml(r.telegram_id||"")}">
-      </div>
-
-      <div class="field">
-        <label>Subscription ID</label>
-        <input id="c_subscription" value="${escapeHtml(r.subscription_id||"")}">
-      </div>
-
-      <div class="field full">
-        <label>Comment</label>
-        <textarea id="c_comment">${escapeHtml(r.comment||"")}</textarea>
-      </div>
-
-      <label class="checkbox">
-        <input id="c_enabled" type="checkbox" ${r.enabled!==0?"checked":""}>
-        Enabled
-      </label>
-
+    <div class="field">
+      <label>${label}</label>
+      ${input}
     </div>
   `;
 }
 
-async function createClient(){
-  modal("Add Client",await clientForm(),saveClient);
+function input(name, value = "", placeholder = "") {
+  return `
+    <input
+      name="${name}"
+      value="${escapeHtml(value)}"
+      placeholder="${escapeHtml(placeholder)}"
+    >
+  `;
 }
 
-async function editClient(r){
-  editingId=r.id;
-  modal("Edit Client",await clientForm(r),saveClient);
+function select(name, options, value = "") {
+  return `
+    <select name="${name}">
+      ${options.map(o => `
+        <option value="${escapeHtml(o[0])}"
+          ${o[0] === value ? "selected" : ""}>
+          ${escapeHtml(o[1])}
+        </option>
+      `).join("")}
+    </select>
+  `;
 }
 
-async function saveClient(){
-  const body={
-    inbound_id:$("c_inbound").value,
-    email:$("c_email").value,
-    uuid:$("c_uuid").value,
-    flow:$("c_flow").value,
-    total_gb:Number($("c_total").value)||0,
-    expiry_at:$("c_expiry").value,
-    reset_days:Number($("c_reset").value)||0,
-    limit_ip:Number($("c_limit").value)||0,
-    group_id:$("c_group").value,
-    telegram_id:$("c_telegram").value,
-    subscription_id:$("c_subscription").value,
-    comment:$("c_comment").value,
-    enabled:$("c_enabled").checked
+function switchInput(name, checked = false) {
+  return `
+    <label class="switch">
+      <input
+        type="checkbox"
+        name="${name}"
+        ${checked ? "checked" : ""}
+      >
+      <span class="slider"></span>
+    </label>
+  `;
+}
+
+function getFormData(form) {
+  const fd = new FormData(form);
+  const obj = {};
+
+  for (const [key, value] of fd.entries()) {
+    obj[key] = value;
+  }
+
+  form.querySelectorAll('input[type="checkbox"]').forEach(i => {
+    obj[i.name] = i.checked;
+  });
+
+  return obj;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function modal(title, body, saveFn) {
+  $("modalTitle").textContent = title;
+  $("modalBody").innerHTML = body;
+
+  $("modalSave").onclick = async () => {
+    try {
+      await saveFn();
+    } catch (err) {
+      toast(err.message, true);
+    }
   };
 
-  await api(
-    editingId?`/api/clients/${editingId}`:"/api/clients",
-    {
-      method:editingId?"PUT":"POST",
-      body:JSON.stringify(body)
-    }
-  );
+  $("modal").classList.add("show");
 
-  closeModal();
-  toast(editingId?"Client updated":"Client created");
-  clients();
+  setTimeout(() => {
+    $("modalBody")
+      .querySelector("input,select,textarea")
+      ?.focus();
+  }, 150);
 }
 
-async function toggleClient(id){
-  await api(`/api/clients/${id}/toggle`,{method:"PATCH"});
-  clients();
+function closeModal() {
+  $("modal").classList.remove("show");
 }
 
-/* GENERIC */
+/* =========================================================
+   DASHBOARD
+========================================================= */
 
-async function deleteItem(url){
-  if(!confirm("Delete this item?")) return;
+async function dashboard() {
+  const s = await api("/stats");
 
-  await api(url,{method:"DELETE"});
-  toast("Deleted");
-  loadPage();
-}
+  $("content").innerHTML = `
 
-/* GROUPS */
-
-async function groups(){
-  const rows=await api("/api/groups");
-
-  $("content").innerHTML=genericTable(
-    "Groups",
-    "+ Create Group",
-    "createGroup()",
-    ["Name","Description","Status","Actions"],
-    rows.map(r=>[
-      escapeHtml(r.name),
-      escapeHtml(r.description),
-      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
-      `<button class="action delete" onclick="deleteItem('/api/groups/${r.id}')">Delete</button>`
-    ])
-  );
-}
-
-function createGroup(){
-  modal("Create Group",`
-    <div class="field">
-      <label>Name</label>
-      <input id="g_name">
+    <div class="card hero">
+      <h2>Infrastructure Overview</h2>
+      <p>Monitor your Xray deployment, traffic and services.</p>
+      <div class="hero-line"></div>
     </div>
 
-    <div class="field">
-      <label>Description</label>
-      <textarea id="g_description"></textarea>
-    </div>
+    <div class="grid grid-4">
 
-    <label class="checkbox">
-      <input id="g_enabled" type="checkbox" checked>
-      Enabled
-    </label>
-  `,async()=>{
-    await api("/api/groups",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("g_name").value,
-        description:$("g_description").value,
-        enabled:$("g_enabled").checked
-      })
-    });
-
-    closeModal();
-    toast("Group created");
-    groups();
-  });
-}
-
-/* NODES */
-
-async function nodes(){
-  const rows=await api("/api/nodes");
-
-  $("content").innerHTML=genericTable(
-    "Nodes",
-    "+ Add Node",
-    "createNode()",
-    ["Name","Address","Port","Protocol","Status","Actions"],
-    rows.map(r=>[
-      escapeHtml(r.name),
-      escapeHtml(r.address),
-      r.port,
-      escapeHtml(r.protocol),
-      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
-      `<button class="action delete" onclick="deleteItem('/api/nodes/${r.id}')">Delete</button>`
-    ])
-  );
-}
-
-function createNode(){
-  modal("Add Node",`
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Name</label>
-        <input id="n_name">
-      </div>
-
-      <div class="field">
-        <label>Address</label>
-        <input id="n_address" placeholder="server.example.com">
-      </div>
-
-      <div class="field">
-        <label>Port</label>
-        <input id="n_port" type="number" value="443">
-      </div>
-
-      <div class="field">
-        <label>API Port</label>
-        <input id="n_api" type="number" value="0">
-      </div>
-
-      <div class="field">
-        <label>Protocol</label>
-        <select id="n_protocol">
-          <option>http</option>
-          <option>https</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Username</label>
-        <input id="n_user">
-      </div>
-
-      <div class="field">
-        <label>Password</label>
-        <input id="n_pass" type="password">
-      </div>
-
-      <div class="field">
-        <label>Remark</label>
-        <input id="n_remark">
-      </div>
+      ${statCard("Inbound", s.inbounds || 0, "Active entry points")}
+      ${statCard("Clients", s.clients || 0, "Configured users")}
+      ${statCard("Nodes", s.nodes || 0, "Infrastructure nodes")}
+      ${statCard("Hosts", s.hosts || 0, "Configured hosts")}
 
     </div>
 
-    <label class="checkbox">
-      <input id="n_enabled" type="checkbox" checked>
-      Enabled
-    </label>
-  `,async()=>{
-    await api("/api/nodes",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("n_name").value,
-        address:$("n_address").value,
-        port:$("n_port").value,
-        api_port:$("n_api").value,
-        protocol:$("n_protocol").value,
-        username:$("n_user").value,
-        password:$("n_pass").value,
-        remark:$("n_remark").value,
-        enabled:$("n_enabled").checked
-      })
-    });
+    <div style="height:18px"></div>
 
-    closeModal();
-    toast("Node created");
-    nodes();
-  });
-}
+    <div class="grid grid-2">
 
-/* HOSTS */
+      <div class="card">
+        <div class="card-head">
+          <strong>System Status</strong>
+          <span class="badge">
+            <span class="dot"></span>
+            ONLINE
+          </span>
+        </div>
 
-async function hosts(){
-  const rows=await api("/api/hosts");
-
-  $("content").innerHTML=genericTable(
-    "Hosts",
-    "+ Add Host",
-    "createHost()",
-    ["Name","Address","Port","SNI","Type","Status","Actions"],
-    rows.map(r=>[
-      escapeHtml(r.name),
-      escapeHtml(r.address),
-      r.port,
-      escapeHtml(r.sni||"-"),
-      escapeHtml(r.type),
-      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
-      `<button class="action delete" onclick="deleteItem('/api/hosts/${r.id}')">Delete</button>`
-    ])
-  );
-}
-
-function createHost(){
-  modal("Add Host",`
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Name</label>
-        <input id="h_name" placeholder="Main CDN">
-      </div>
-
-      <div class="field">
-        <label>Address</label>
-        <input id="h_address" placeholder="example.com">
-      </div>
-
-      <div class="field">
-        <label>Port</label>
-        <input id="h_port" type="number" value="443">
-      </div>
-
-      <div class="field">
-        <label>SNI</label>
-        <input id="h_sni">
-      </div>
-
-      <div class="field">
-        <label>Type</label>
-        <select id="h_type">
-          <option>WebSocket</option>
-          <option>gRPC</option>
-          <option>XHTTP</option>
-          <option>TCP</option>
-          <option>REALITY</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Path</label>
-        <input id="h_path" value="/">
-      </div>
-
-      <div class="field full">
-        <label>Host Header</label>
-        <input id="h_header">
-      </div>
-
-      <div class="field full">
-        <label>Remark</label>
-        <input id="h_remark">
-      </div>
-
-    </div>
-
-    <label class="checkbox">
-      <input id="h_enabled" type="checkbox" checked>
-      Enabled
-    </label>
-  `,async()=>{
-    await api("/api/hosts",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("h_name").value,
-        address:$("h_address").value,
-        port:$("h_port").value,
-        sni:$("h_sni").value,
-        type:$("h_type").value,
-        path:$("h_path").value,
-        host_header:$("h_header").value,
-        remark:$("h_remark").value,
-        enabled:$("h_enabled").checked
-      })
-    });
-
-    closeModal();
-    toast("Host created");
-    hosts();
-  });
-}
-
-/* OUTBOUND */
-
-async function outbound(){
-  const rows=await api("/api/outbounds");
-
-  $("content").innerHTML=genericTable(
-    "Outbound",
-    "+ Add Outbound",
-    "createOutbound()",
-    ["Name","Protocol","Server","Port","Status","Actions"],
-    rows.map(r=>[
-      escapeHtml(r.name),
-      escapeHtml(r.protocol),
-      escapeHtml(r.server||"-"),
-      r.port,
-      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
-      `<button class="action delete" onclick="deleteItem('/api/outbounds/${r.id}')">Delete</button>`
-    ])
-  );
-}
-
-function createOutbound(){
-  modal("Add Outbound",`
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Name</label>
-        <input id="o_name">
-      </div>
-
-      <div class="field">
-        <label>Protocol</label>
-        <select id="o_protocol">
-          <option>freedom</option>
-          <option>blackhole</option>
-          <option>http</option>
-          <option>socks</option>
-          <option>vmess</option>
-          <option>vless</option>
-          <option>trojan</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Server</label>
-        <input id="o_server">
-      </div>
-
-      <div class="field">
-        <label>Port</label>
-        <input id="o_port" type="number" value="443">
-      </div>
-
-      <div class="field full">
-        <label>Settings JSON</label>
-        <textarea id="o_settings">{}</textarea>
-      </div>
-
-      <div class="field full">
-        <label>Remark</label>
-        <input id="o_remark">
-      </div>
-
-    </div>
-
-    <label class="checkbox">
-      <input id="o_enabled" type="checkbox" checked>
-      Enabled
-    </label>
-  `,async()=>{
-    let settings={};
-
-    try{
-      settings=JSON.parse($("o_settings").value||"{}");
-    }catch{
-      return alert("Invalid JSON");
-    }
-
-    await api("/api/outbounds",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("o_name").value,
-        protocol:$("o_protocol").value,
-        server:$("o_server").value,
-        port:$("o_port").value,
-        settings,
-        remark:$("o_remark").value,
-        enabled:$("o_enabled").checked
-      })
-    });
-
-    closeModal();
-    toast("Outbound created");
-    outbound();
-  });
-}
-
-/* ROUTING */
-
-async function routing(){
-  const rows=await api("/api/routing");
-
-  $("content").innerHTML=genericTable(
-    "Routing",
-    "+ Add Rule",
-    "createRule()",
-    ["Name","Domains","IPs","Outbound","Status","Actions"],
-    rows.map(r=>[
-      escapeHtml(r.name),
-      escapeHtml((r.domains||[]).join(", ")||"-"),
-      escapeHtml((r.ips||[]).join(", ")||"-"),
-      escapeHtml(r.outbound_tag||"-"),
-      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
-      `<button class="action delete" onclick="deleteItem('/api/routing/${r.id}')">Delete</button>`
-    ])
-  );
-}
-
-function createRule(){
-  modal("Add Routing Rule",`
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Name</label>
-        <input id="r_name">
-      </div>
-
-      <div class="field">
-        <label>Outbound Tag</label>
-        <input id="r_outbound" placeholder="direct">
-      </div>
-
-      <div class="field full">
-        <label>Domains</label>
-        <input id="r_domains" placeholder="google.com, youtube.com">
-      </div>
-
-      <div class="field full">
-        <label>IPs</label>
-        <input id="r_ips" placeholder="1.1.1.1, 8.8.8.8">
-      </div>
-
-      <div class="field full">
-        <label>Source</label>
-        <input id="r_sources">
-      </div>
-
-      <div class="field full">
-        <label>Remark</label>
-        <textarea id="r_remark"></textarea>
-      </div>
-
-    </div>
-
-    <label class="checkbox">
-      <input id="r_enabled" type="checkbox" checked>
-      Enabled
-    </label>
-  `,async()=>{
-    await api("/api/routing",{
-      method:"POST",
-      body:JSON.stringify({
-        name:$("r_name").value,
-        outbound_tag:$("r_outbound").value,
-        domains:$("r_domains").value,
-        ips:$("r_ips").value,
-        sources:$("r_sources").value,
-        remark:$("r_remark").value,
-        enabled:$("r_enabled").checked
-      })
-    });
-
-    closeModal();
-    toast("Rule created");
-    routing();
-  });
-}
-
-/* SETTINGS */
-
-async function settings(){
-  const s=await api("/api/settings");
-
-  $("content").innerHTML=`
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">Panel Settings</span>
-      </div>
-
-      <div style="padding:20px">
-
-        <div class="form-grid">
-
-          <div class="field">
-            <label>Panel Name</label>
-            <input id="set_name" value="${escapeHtml(s.panel_name||"Xray Panel")}">
+        <div class="card-body">
+          <div class="switch-row">
+            <span>Panel API</span>
+            <span class="badge"><span class="dot"></span>OK</span>
           </div>
 
-          <div class="field">
-            <label>Default Inbound Network</label>
-            <select id="set_network">
-              <option ${s.default_network==="tcp"?"selected":""}>tcp</option>
-              <option ${s.default_network==="ws"?"selected":""}>ws</option>
-              <option ${s.default_network==="grpc"?"selected":""}>grpc</option>
-              <option ${s.default_network==="xhttp"?"selected":""}>xhttp</option>
-            </select>
+          <div class="switch-row">
+            <span>Database</span>
+            <span class="badge"><span class="dot"></span>OK</span>
           </div>
 
-          <div class="field full">
-            <label>Subscription Base URL</label>
-            <input id="set_sub" value="${escapeHtml(s.subscription_url||"")}">
+          <div class="switch-row">
+            <span>Xray Core</span>
+            <span class="badge off"><span class="dot"></span>NOT RUNNING</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <strong>Quick Actions</strong>
+        </div>
+
+        <div class="card-body grid grid-2">
+          <button class="btn" onclick="createInbound()">+ New Inbound</button>
+          <button class="btn" onclick="createClient()">+ New Client</button>
+          <button class="btn" onclick="createNode()">+ New Node</button>
+          <button class="btn" onclick="createHost()">+ New Host</button>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function statCard(label, value, desc) {
+  return `
+    <div class="card stat">
+      <div class="stat-value">${escapeHtml(value)}</div>
+      <div class="stat-label">${label}</div>
+      <div style="color:#52685a;font-size:10px;margin-top:10px">
+        ${desc}
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   INBOUNDS
+========================================================= */
+
+async function inbounds() {
+  const data = await api("/inbounds");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Inbound Endpoints</strong>
+          <div style="color:var(--muted);font-size:11px;margin-top:4px">
+            Manage Xray entry points and client access.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createInbound()">
+          + Add Inbound
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Remark</th>
+                <th>Protocol</th>
+                <th>Port</th>
+                <th>Network</th>
+                <th>Security</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i * .035}s">
+
+                  <td>${escapeHtml(x.remark || x.tag || "-")}</td>
+
+                  <td>
+                    <span class="badge">
+                      ${escapeHtml(x.protocol || "-")}
+                    </span>
+                  </td>
+
+                  <td>${escapeHtml(x.port || "-")}</td>
+
+                  <td>${escapeHtml(x.network || "-")}</td>
+
+                  <td>${escapeHtml(x.security || "none")}</td>
+
+                  <td>
+                    <span class="badge ${x.enabled ? "" : "off"}">
+                      <span class="dot"></span>
+                      ${x.enabled ? "ENABLED" : "DISABLED"}
+                    </span>
+                  </td>
+
+                  <td>
+                    <button class="btn small" onclick='editInbound(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn small" onclick="toggleInbound('${x.id}', ${!x.enabled})">
+                      ${x.enabled ? "Disable" : "Enable"}
+                    </button>
+
+                    <button class="btn small danger"
+                            onclick="deleteItem('/inbounds/${x.id}','Inbound')">
+                      Delete
+                    </button>
+                  </td>
+
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          : `
+          <div class="empty">
+            <div class="empty-icon">↓</div>
+            No inbound endpoints configured.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   INBOUND FORM
+========================================================= */
+
+function inboundForm(x = {}) {
+
+  inboundClients = x.clients || [];
+
+  if (!inboundClients.length) {
+    inboundClients = [{
+      email: "",
+      uuid: "",
+      flow: "",
+      totalGB: 0,
+      expiryAt: "",
+      reset: "monthly",
+      limitIp: 0,
+      group: "",
+      subscriptionId: "",
+      comment: ""
+    }];
+  }
+
+  return `
+
+    <form id="inboundForm" class="form-sections">
+
+      ${section(
+        "Basic Settings",
+        "Identity, protocol and listener configuration",
+        `
+        <div class="grid grid-2">
+
+          ${field(
+            "Remark",
+            input("remark", x.remark || x.tag || "", "My VLESS Server")
+          )}
+
+          ${field(
+            "Protocol",
+            select("protocol", [
+              ["vless","VLESS"],
+              ["vmess","VMess"],
+              ["trojan","Trojan"],
+              ["shadowsocks","Shadowsocks"],
+              ["socks","SOCKS"],
+              ["http","HTTP"],
+              ["wireguard","WireGuard"],
+              ["hysteria2","Hysteria2"],
+              ["dokodemo-door","Dokodemo Door"],
+              ["tun","TUN"]
+            ], x.protocol || "vless")
+          )}
+
+          ${field(
+            "Listen",
+            input("listen", x.listen || "0.0.0.0")
+          )}
+
+          ${field(
+            "Port",
+            `<input name="port" type="number" value="${escapeHtml(x.port || "")}" placeholder="443">`
+          )}
+
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <strong style="font-size:13px">Enable Inbound</strong>
+            <div style="font-size:11px;color:var(--muted)">
+              Accept new connections on this listener.
+            </div>
+          </div>
+
+          ${switchInput("enabled", x.enabled !== false)}
+        </div>
+
+        <div class="conditional show">
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              ${field(
+                "Protocol Notes",
+                `<textarea name="protocol_notes"
+                  placeholder="Optional internal notes...">${escapeHtml(x.protocol_notes || "")}</textarea>`
+              )}
+
+            </div>
+          </div>
+        </div>
+        `,
+        true,
+        "01"
+      )}
+
+      ${section(
+        "Transport",
+        "Network layer and transport-specific options",
+        `
+
+        <div class="grid grid-2">
+
+          ${field(
+            "Network",
+            select("network", [
+              ["tcp","TCP"],
+              ["ws","WebSocket"],
+              ["grpc","gRPC"],
+              ["httpupgrade","HTTP Upgrade"],
+              ["xhttp","XHTTP"]
+            ], x.network || "tcp")
+          )}
+
+          ${field(
+            "Header Type",
+            select("headerType", [
+              ["none","None"],
+              ["http","HTTP"]
+            ], x.headerType || "none")
+          )}
+
+        </div>
+
+        <div id="networkWs"
+             class="conditional ${x.network === "ws" ? "show" : ""}">
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              <div class="grid grid-2">
+
+                ${field(
+                  "WebSocket Path",
+                  input("ws_path", x.ws_path || "/", "/xray")
+                )}
+
+                ${field(
+                  "WebSocket Host",
+                  input("ws_host", x.ws_host || "", "example.com")
+                )}
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="networkGrpc"
+             class="conditional ${x.network === "grpc" ? "show" : ""}">
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              ${field(
+                "gRPC Service Name",
+                input("grpc_service_name", x.grpc_service_name || "", "grpc-service")
+              )}
+
+            </div>
+          </div>
+        </div>
+
+        <div id="networkXhttp"
+             class="conditional ${x.network === "xhttp" ? "show" : ""}">
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              <div class="grid grid-2">
+
+                ${field(
+                  "XHTTP Path",
+                  input("xhttp_path", x.xhttp_path || "/", "/xhttp")
+                )}
+
+                ${field(
+                  "XHTTP Host",
+                  input("xhttp_host", x.xhttp_host || "", "example.com")
+                )}
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        `,
+        true,
+        "02"
+      )}
+
+      ${section(
+        "Security",
+        "TLS, REALITY and fingerprint configuration",
+        `
+
+        ${field(
+          "Security",
+          select("security", [
+            ["none","None"],
+            ["tls","TLS"],
+            ["reality","REALITY"]
+          ], x.security || "none")
+        )}
+
+        <div id="securityTls"
+             class="conditional ${x.security === "tls" ? "show" : ""}">
+
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              <div class="grid grid-2">
+
+                ${field(
+                  "SNI / Server Name",
+                  input("tls_server_name", x.tls_server_name || "", "example.com")
+                )}
+
+                ${field(
+                  "Fingerprint",
+                  select("tls_fingerprint", [
+                    ["chrome","Chrome"],
+                    ["firefox","Firefox"],
+                    ["safari","Safari"],
+                    ["edge","Edge"],
+                    ["ios","iOS"],
+                    ["android","Android"],
+                    ["random","Random"]
+                  ], x.tls_fingerprint || "chrome")
+                )}
+
+                ${field(
+                  "Certificate File",
+                  input("cert_path", x.cert_path || "", "/data/cert/fullchain.pem")
+                )}
+
+                ${field(
+                  "Private Key",
+                  input("key_path", x.key_path || "", "/data/cert/privkey.pem")
+                )}
+
+                ${field(
+                  "ALPN",
+                  input("alpn", x.alpn || "h2,http/1.1")
+                )}
+
+              </div>
+
+            </div>
           </div>
 
         </div>
 
-        <button class="add" onclick="saveSettings()">Save Settings</button>
+        <div id="securityReality"
+             class="conditional ${x.security === "reality" ? "show" : ""}">
+
+          <div class="conditional-inner">
+            <div class="conditional-box">
+
+              <div class="grid grid-2">
+
+                ${field(
+                  "Destination",
+                  input("reality_dest", x.reality_dest || "", "example.com:443")
+                )}
+
+                ${field(
+                  "Server Names",
+                  input("reality_server_names", x.reality_server_names || "", "example.com")
+                )}
+
+                ${field(
+                  "Private Key",
+                  input("reality_private_key", x.reality_private_key || "")
+                )}
+
+                ${field(
+                  "Short IDs",
+                  input("reality_short_ids", x.reality_short_ids || "")
+                )}
+
+                ${field(
+                  "Fingerprint",
+                  select("reality_fingerprint", [
+                    ["chrome","Chrome"],
+                    ["firefox","Firefox"],
+                    ["safari","Safari"],
+                    ["edge","Edge"],
+                    ["random","Random"]
+                  ], x.reality_fingerprint || "chrome")
+                )}
+
+                ${field(
+                  "SpiderX",
+                  input("reality_spider_x", x.reality_spider_x || "/", "/")
+                )}
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        `,
+        true,
+        "03"
+      )}
+
+      ${section(
+        "Sniffing",
+        "Traffic inspection and destination override",
+        `
+
+        <div class="switch-row">
+          <div>
+            <strong style="font-size:13px">Enable Sniffing</strong>
+            <div style="font-size:11px;color:var(--muted)">
+              Detect protocol information from traffic.
+            </div>
+          </div>
+
+          ${switchInput("sniffing", x.sniffing !== false)}
+        </div>
+
+        <div class="grid grid-2">
+
+          ${field(
+            "Destination Override",
+            input(
+              "dest_override",
+              x.dest_override || "http,tls,quic"
+            )
+          )}
+
+          ${field(
+            "FakeDNS",
+            select("fakedns", [
+              ["disabled","Disabled"],
+              ["enabled","Enabled"]
+            ], x.fakedns || "disabled")
+          )}
+
+        </div>
+
+        `,
+        false,
+        "04"
+      )}
+
+      ${section(
+        "Clients",
+        "Users, UUIDs, traffic limits and expiration",
+        `
+
+        <div id="clientsList" class="clients-list"></div>
+
+        <button type="button"
+                class="add-client"
+                onclick="addInboundClient()">
+          + Add Client
+        </button>
+
+        `,
+        true,
+        "05"
+      )}
+
+      ${section(
+        "Advanced",
+        "Additional metadata and internal configuration",
+        `
+
+        <div class="grid grid-2">
+
+          ${field(
+            "Tag",
+            input("tag", x.tag || "", "inbound-main")
+          )}
+
+          ${field(
+            "Group",
+            input("group", x.group || "", "default")
+          )}
+
+        </div>
+
+        ${field(
+          "Notes",
+          `<textarea name="notes"
+            placeholder="Internal notes...">${escapeHtml(x.notes || "")}</textarea>`
+        )}
+
+        `,
+        false,
+        "06"
+      )}
+
+    </form>
+  `;
+}
+
+/* =========================================================
+   CLIENT EDITOR
+========================================================= */
+
+function renderInboundClients() {
+
+  const list = $("clientsList");
+
+  if (!list) return;
+
+  list.innerHTML = inboundClients.map((c, index) => `
+
+    <div class="client-card">
+
+      <div class="client-head">
+
+        <div class="client-title">
+          CLIENT ${String(index + 1).padStart(2, "0")}
+        </div>
+
+        <div class="client-actions">
+
+          <button type="button"
+                  class="icon-btn"
+                  title="Generate UUID"
+                  onclick="generateClientUUID(${index})">
+            ↻
+          </button>
+
+          <button type="button"
+                  class="icon-btn danger"
+                  title="Remove"
+                  onclick="removeInboundClient(${index})">
+            ×
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="grid grid-2">
+
+        ${field(
+          "Email",
+          `<input
+             value="${escapeHtml(c.email || "")}"
+             onchange="updateClient(${index},'email',this.value)"
+             placeholder="user@example.com">`
+        )}
+
+        ${field(
+          "UUID",
+          `<input
+             value="${escapeHtml(c.uuid || "")}"
+             onchange="updateClient(${index},'uuid',this.value)"
+             placeholder="UUID">`
+        )}
+
+        ${field(
+          "Flow",
+          `<select onchange="updateClient(${index},'flow',this.value)">
+            <option value="" ${!c.flow ? "selected" : ""}>None</option>
+            <option value="xtls-rprx-vision" ${c.flow === "xtls-rprx-vision" ? "selected" : ""}>
+              xtls-rprx-vision
+            </option>
+          </select>`
+        )}
+
+        ${field(
+          "Traffic Limit (GB)",
+          `<input
+             type="number"
+             value="${escapeHtml(c.totalGB || 0)}"
+             onchange="updateClient(${index},'totalGB',this.value)"
+             min="0">`
+        )}
+
+        ${field(
+          "Expiry",
+          `<input
+             type="datetime-local"
+             value="${escapeHtml(c.expiryAt || "")}"
+             onchange="updateClient(${index},'expiryAt',this.value)">`
+        )}
+
+        ${field(
+          "Reset",
+          `<select onchange="updateClient(${index},'reset',this.value)">
+            <option value="monthly" ${c.reset === "monthly" ? "selected" : ""}>Monthly</option>
+            <option value="weekly" ${c.reset === "weekly" ? "selected" : ""}>Weekly</option>
+            <option value="daily" ${c.reset === "daily" ? "selected" : ""}>Daily</option>
+            <option value="never" ${c.reset === "never" ? "selected" : ""}>Never</option>
+          </select>`
+        )}
+
+        ${field(
+          "IP Limit",
+          `<input
+             type="number"
+             value="${escapeHtml(c.limitIp || 0)}"
+             onchange="updateClient(${index},'limitIp',this.value)"
+             min="0">`
+        )}
+
+        ${field(
+          "Group",
+          `<input
+             value="${escapeHtml(c.group || "")}"
+             onchange="updateClient(${index},'group',this.value)"
+             placeholder="default">`
+        )}
+
+        ${field(
+          "Subscription ID",
+          `<input
+             value="${escapeHtml(c.subscriptionId || "")}"
+             onchange="updateClient(${index},'subscriptionId',this.value)"
+             placeholder="subscription-id">`
+        )}
+
+      </div>
+
+      ${field(
+        "Comment",
+        `<input
+           value="${escapeHtml(c.comment || "")}"
+           onchange="updateClient(${index},'comment',this.value)"
+           placeholder="Optional comment">`
+      )}
+
+    </div>
+
+  `).join("");
+}
+
+function addInboundClient() {
+  inboundClients.push({
+    email: "",
+    uuid: generateUUID(),
+    flow: "",
+    totalGB: 0,
+    expiryAt: "",
+    reset: "monthly",
+    limitIp: 0,
+    group: "",
+    subscriptionId: "",
+    comment: ""
+  });
+
+  renderInboundClients();
+}
+
+function removeInboundClient(index) {
+  inboundClients.splice(index, 1);
+
+  if (!inboundClients.length) {
+    addInboundClient();
+    return;
+  }
+
+  renderInboundClients();
+}
+
+function updateClient(index, key, value) {
+  inboundClients[index][key] = value;
+}
+
+function generateUUID() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === "x" ? r : (r & 3 | 8);
+        return v.toString(16);
+      });
+}
+
+function generateClientUUID(index) {
+  inboundClients[index].uuid = generateUUID();
+  renderInboundClients();
+  toast("UUID generated");
+}
+
+/* =========================================================
+   INBOUND CONDITIONAL LOGIC
+========================================================= */
+
+function bindInboundDynamicFields() {
+
+  const form = $("inboundForm");
+
+  if (!form) return;
+
+  const network = form.elements.network;
+  const security = form.elements.security;
+
+  function updateNetwork() {
+
+    $("networkWs")
+      ?.classList.toggle("show", network.value === "ws");
+
+    $("networkGrpc")
+      ?.classList.toggle("show", network.value === "grpc");
+
+    $("networkXhttp")
+      ?.classList.toggle("show", network.value === "xhttp");
+  }
+
+  function updateSecurity() {
+
+    $("securityTls")
+      ?.classList.toggle("show", security.value === "tls");
+
+    $("securityReality")
+      ?.classList.toggle("show", security.value === "reality");
+  }
+
+  network?.addEventListener("change", updateNetwork);
+  security?.addEventListener("change", updateSecurity);
+
+  updateNetwork();
+  updateSecurity();
+
+  renderInboundClients();
+}
+
+/* =========================================================
+   CREATE / EDIT INBOUND
+========================================================= */
+
+function createInbound() {
+  currentEditId = null;
+
+  modal(
+    "Create Inbound",
+    inboundForm({
+      protocol: "vless",
+      network: "tcp",
+      security: "none",
+      enabled: true
+    }),
+    saveInbound
+  );
+
+  bindInboundDynamicFields();
+}
+
+function editInbound(x) {
+  currentEditId = x.id;
+
+  modal(
+    "Edit Inbound",
+    inboundForm(x),
+    saveInbound
+  );
+
+  bindInboundDynamicFields();
+}
+
+async function saveInbound() {
+
+  const form = $("inboundForm");
+  const data = getFormData(form);
+
+  const overrides = String(data.dest_override || "")
+    .split(",")
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  const payload = {
+    ...data,
+
+    port: Number(data.port || 0),
+
+    settings: {
+      sniffing: {
+        enabled: !!data.sniffing,
+        destOverride: overrides
+      },
+
+      tls: {
+        serverName: data.tls_server_name || "",
+        certificateFile: data.cert_path || "",
+        keyFile: data.key_path || "",
+        alpn: data.alpn || "",
+        fingerprint: data.tls_fingerprint || ""
+      },
+
+      reality: {
+        dest: data.reality_dest || "",
+        serverNames: data.reality_server_names || "",
+        privateKey: data.reality_private_key || "",
+        shortIds: data.reality_short_ids || "",
+        fingerprint: data.reality_fingerprint || "",
+        spiderX: data.reality_spider_x || ""
+      }
+    },
+
+    stream_settings: {
+      network: data.network,
+      security: data.security,
+
+      wsSettings: {
+        path: data.ws_path || "",
+        host: data.ws_host || ""
+      },
+
+      grpcSettings: {
+        serviceName: data.grpc_service_name || ""
+      },
+
+      xhttpSettings: {
+        path: data.xhttp_path || "",
+        host: data.xhttp_host || ""
+      }
+    }
+  };
+
+  let result;
+
+  if (currentEditId) {
+
+    result = await api(`/inbounds/${currentEditId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
+
+  } else {
+
+    result = await api("/inbounds", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+  }
+
+  /*
+   * Save client data separately when an inbound ID
+   * is available.
+   */
+  const inboundId =
+    result?.id ||
+    currentEditId;
+
+  if (inboundId && inboundClients.length) {
+
+    for (const client of inboundClients) {
+
+      if (!client.uuid && !client.email) continue;
+
+      try {
+
+        await api("/clients", {
+          method: "POST",
+          body: JSON.stringify({
+            ...client,
+            inbound_id: inboundId,
+            total_gb: Number(client.totalGB || 0),
+            limit_ip: Number(client.limitIp || 0)
+          })
+        });
+
+      } catch (err) {
+        console.warn("Client save failed:", err);
+      }
+    }
+  }
+
+  closeModal();
+
+  toast(currentEditId
+    ? "Inbound updated successfully"
+    : "Inbound created successfully"
+  );
+
+  inbounds();
+}
+
+async function toggleInbound(id, enabled) {
+
+  await api(`/inbounds/${id}/toggle`, {
+    method: "POST",
+    body: JSON.stringify({ enabled })
+  });
+
+  toast(enabled ? "Inbound enabled" : "Inbound disabled");
+
+  inbounds();
+}
+
+/* =========================================================
+   CLIENTS PAGE
+========================================================= */
+
+async function clients() {
+
+  const data = await api("/clients");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Clients</strong>
+          <div style="color:var(--muted);font-size:11px;margin-top:4px">
+            Manage users, UUIDs, quotas and expiration.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createClient()">
+          + Add Client
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>UUID</th>
+                <th>Inbound</th>
+                <th>Traffic</th>
+                <th>Expiry</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.email || "-")}</td>
+                  <td style="font-family:monospace;font-size:11px">
+                    ${escapeHtml(x.uuid || "-")}
+                  </td>
+                  <td>${escapeHtml(x.inbound_id || "-")}</td>
+                  <td>${escapeHtml(x.total_gb || 0)} GB</td>
+                  <td>${escapeHtml(x.expiry_at || "-")}</td>
+                  <td>
+                    <span class="badge ${x.enabled ? "" : "off"}">
+                      <span class="dot"></span>
+                      ${x.enabled ? "ACTIVE" : "DISABLED"}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn small"
+                      onclick='editClient(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn small danger"
+                      onclick="deleteItem('/clients/${x.id}','Client')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">◎</div>
+            No clients configured.
+          </div>
+          `
+        }
 
       </div>
     </div>
   `;
 }
 
-async function saveSettings(){
-  await api("/api/settings",{
-    method:"PUT",
-    body:JSON.stringify({
-      panel_name:$("set_name").value,
-      default_network:$("set_network").value,
-      subscription_url:$("set_sub").value
-    })
+function clientForm(x = {}) {
+
+  return `
+
+    <form id="clientForm" class="form-sections">
+
+      ${section(
+        "Identity",
+        "User identity and authentication",
+        `
+        <div class="grid grid-2">
+
+          ${field(
+            "Email",
+            input("email", x.email || "", "user@example.com")
+          )}
+
+          ${field(
+            "UUID",
+            `<div style="display:flex;gap:7px">
+              <input id="clientUuid"
+                     name="uuid"
+                     value="${escapeHtml(x.uuid || generateUUID())}">
+              <button type="button"
+                      class="btn"
+                      onclick="document.getElementById('clientUuid').value=generateUUID()">
+                Generate
+              </button>
+            </div>`
+          )}
+
+          ${field(
+            "Inbound ID",
+            input("inbound_id", x.inbound_id || "", "Inbound ID")
+          )}
+
+          ${field(
+            "Flow",
+            select("flow", [
+              ["","None"],
+              ["xtls-rprx-vision","xtls-rprx-vision"]
+            ], x.flow || "")
+          )}
+
+        </div>
+        `,
+        true,
+        "01"
+      )}
+
+      ${section(
+        "Traffic",
+        "Usage limits and connection restrictions",
+        `
+        <div class="grid grid-2">
+
+          ${field(
+            "Traffic Limit (GB)",
+            `<input name="total_gb"
+              type="number"
+              min="0"
+              value="${escapeHtml(x.total_gb || 0)}">`
+          )}
+
+          ${field(
+            "IP Limit",
+            `<input name="limit_ip"
+              type="number"
+              min="0"
+              value="${escapeHtml(x.limit_ip || 0)}">`
+          )}
+
+        </div>
+        `,
+        true,
+        "02"
+      )}
+
+      ${section(
+        "Expiry & Reset",
+        "Expiration and quota reset behavior",
+        `
+        <div class="grid grid-2">
+
+          ${field(
+            "Expiry",
+            `<input name="expiry_at"
+              type="datetime-local"
+              value="${escapeHtml(x.expiry_at || "")}">`
+          )}
+
+          ${field(
+            "Reset",
+            select("reset", [
+              ["monthly","Monthly"],
+              ["weekly","Weekly"],
+              ["daily","Daily"],
+              ["never","Never"]
+            ], x.reset || "monthly")
+          )}
+
+        </div>
+        `,
+        false,
+        "03"
+      )}
+
+      ${section(
+        "Subscription",
+        "Subscription and grouping metadata",
+        `
+        <div class="grid grid-2">
+
+          ${field(
+            "Group",
+            input("group", x.group || "", "default")
+          )}
+
+          ${field(
+            "Subscription ID",
+            input("subscription_id", x.subscription_id || "")
+          )}
+
+        </div>
+
+        ${field(
+          "Comment",
+          `<textarea name="comment"
+            placeholder="Internal comment...">${escapeHtml(x.comment || "")}</textarea>`
+        )}
+        `,
+        false,
+        "04"
+      )}
+
+      ${section(
+        "Status",
+        "Enable or disable this client",
+        `
+        <div class="switch-row">
+          <div>
+            <strong style="font-size:13px">Client Enabled</strong>
+            <div style="font-size:11px;color:var(--muted)">
+              Allow this client to authenticate.
+            </div>
+          </div>
+
+          ${switchInput("enabled", x.enabled !== false)}
+        </div>
+        `,
+        false,
+        "05"
+      )}
+
+    </form>
+  `;
+}
+
+function createClient() {
+  currentEditId = null;
+
+  modal(
+    "Create Client",
+    clientForm(),
+    saveClient
+  );
+}
+
+function editClient(x) {
+  currentEditId = x.id;
+
+  modal(
+    "Edit Client",
+    clientForm(x),
+    saveClient
+  );
+}
+
+async function saveClient() {
+
+  const data = getFormData($("clientForm"));
+
+  if (currentEditId) {
+
+    await api(`/clients/${currentEditId}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+
+  } else {
+
+    await api("/clients", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+
+  }
+
+  closeModal();
+  toast("Client saved successfully");
+  clients();
+}
+
+/* =========================================================
+   GROUPS
+========================================================= */
+
+async function groups() {
+
+  const data = await api("/groups");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Client Groups</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Organize clients and apply shared policies.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createGroup()">
+          + Add Group
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Traffic Limit</th>
+                <th>Expiry</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.name || "-")}</td>
+                  <td>${escapeHtml(x.total_gb || 0)} GB</td>
+                  <td>${escapeHtml(x.expiry_at || "-")}</td>
+                  <td>
+                    <button class="btn small"
+                      onclick='createGroup(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+                    <button class="btn small danger"
+                      onclick="deleteItem('/groups/${x.id}','Group')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">◉</div>
+            No groups configured.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+function createGroup(x = null) {
+
+  currentEditId = x?.id || null;
+
+  modal(
+    x ? "Edit Group" : "Create Group",
+    `
+      <form id="groupForm" class="form-sections">
+
+        ${section(
+          "Basic",
+          "Group identity",
+          `
+          <div class="grid grid-2">
+            ${field("Name", input("name", x?.name || "", "Premium Users"))}
+            ${field("Traffic Limit (GB)",
+              `<input name="total_gb" type="number"
+                value="${escapeHtml(x?.total_gb || 0)}">`
+            )}
+          </div>
+          `,
+          true,
+          "01"
+        )}
+
+        ${section(
+          "Policy",
+          "Expiration and reset policy",
+          `
+          <div class="grid grid-2">
+            ${field(
+              "Expiry",
+              `<input name="expiry_at" type="datetime-local"
+                value="${escapeHtml(x?.expiry_at || "")}">`
+            )}
+
+            ${field(
+              "Reset",
+              select("reset", [
+                ["monthly","Monthly"],
+                ["weekly","Weekly"],
+                ["daily","Daily"],
+                ["never","Never"]
+              ], x?.reset || "monthly")
+            )}
+          </div>
+          `,
+          false,
+          "02"
+        )}
+
+        ${section(
+          "Notes",
+          "Internal information",
+          field(
+            "Description",
+            `<textarea name="description">${escapeHtml(x?.description || "")}</textarea>`
+          ),
+          false,
+          "03"
+        )}
+
+      </form>
+    `,
+    async () => {
+
+      const data = getFormData($("groupForm"));
+
+      if (currentEditId) {
+        await api(`/groups/${currentEditId}`, {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
+      } else {
+        await api("/groups", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+      }
+
+      closeModal();
+      toast("Group saved");
+      groups();
+    }
+  );
+}
+
+/* =========================================================
+   NODES
+========================================================= */
+
+async function nodes() {
+
+  const data = await api("/nodes");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Nodes</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Remote infrastructure and Xray endpoints.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createNode()">
+          + Add Node
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Port</th>
+                <th>Protocol</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.name || "-")}</td>
+                  <td>${escapeHtml(x.address || "-")}</td>
+                  <td>${escapeHtml(x.port || "-")}</td>
+                  <td>${escapeHtml(x.protocol || "-")}</td>
+                  <td>
+                    <span class="badge">
+                      <span class="dot"></span>
+                      ${escapeHtml(x.status || "unknown")}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn small"
+                      onclick='createNode(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn small danger"
+                      onclick="deleteItem('/nodes/${x.id}','Node')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">◇</div>
+            No nodes configured.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+function createNode(x = null) {
+
+  currentEditId = x?.id || null;
+
+  modal(
+    x ? "Edit Node" : "Create Node",
+    `
+      <form id="nodeForm" class="form-sections">
+
+        ${section(
+          "Connection",
+          "Node address and transport connection",
+          `
+          <div class="grid grid-2">
+
+            ${field("Name", input("name", x?.name || "", "Node 01"))}
+
+            ${field("Address", input(
+              "address",
+              x?.address || "",
+              "node.example.com"
+            ))}
+
+            ${field(
+              "Port",
+              `<input name="port" type="number"
+                value="${escapeHtml(x?.port || 443)}">`
+            )}
+
+            ${field(
+              "Protocol",
+              select("protocol", [
+                ["vless","VLESS"],
+                ["vmess","VMess"],
+                ["trojan","Trojan"],
+                ["shadowsocks","Shadowsocks"]
+              ], x?.protocol || "vless")
+            )}
+
+          </div>
+          `,
+          true,
+          "01"
+        )}
+
+        ${section(
+          "Authentication",
+          "Node credentials",
+          `
+          <div class="grid grid-2">
+
+            ${field("UUID", input("uuid", x?.uuid || ""))}
+
+            ${field("Password", input(
+              "password",
+              x?.password || "",
+              "Optional"
+            ))}
+
+          </div>
+          `,
+          true,
+          "02"
+        )}
+
+        ${section(
+          "Protocol",
+          "Transport and security options",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Security",
+              select("security", [
+                ["none","None"],
+                ["tls","TLS"],
+                ["reality","REALITY"]
+              ], x?.security || "tls")
+            )}
+
+            ${field(
+              "Network",
+              select("network", [
+                ["tcp","TCP"],
+                ["ws","WebSocket"],
+                ["grpc","gRPC"],
+                ["xhttp","XHTTP"]
+              ], x?.network || "tcp")
+            )}
+
+          </div>
+          `,
+          false,
+          "03"
+        )}
+
+        ${section(
+          "Health Check",
+          "Node monitoring",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Interval",
+              input("health_interval", x?.health_interval || "60")
+            )}
+
+            ${field(
+              "Timeout",
+              input("health_timeout", x?.health_timeout || "10")
+            )}
+
+          </div>
+          `,
+          false,
+          "04"
+        )}
+
+      </form>
+    `,
+    async () => {
+
+      const data = getFormData($("nodeForm"));
+
+      if (currentEditId) {
+        await api(`/nodes/${currentEditId}`, {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
+      } else {
+        await api("/nodes", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+      }
+
+      closeModal();
+      toast("Node saved");
+      nodes();
+    }
+  );
+}
+
+/* =========================================================
+   HOSTS
+========================================================= */
+
+async function hosts() {
+
+  const data = await api("/hosts");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Hosts</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Domains, SNI and transport host configuration.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createHost()">
+          + Add Host
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Domain</th>
+                <th>SNI</th>
+                <th>Transport</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.name || "-")}</td>
+                  <td>${escapeHtml(x.domain || "-")}</td>
+                  <td>${escapeHtml(x.sni || "-")}</td>
+                  <td>${escapeHtml(x.network || "-")}</td>
+                  <td>
+                    <button class="btn small"
+                      onclick='createHost(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn small danger"
+                      onclick="deleteItem('/hosts/${x.id}','Host')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">⌂</div>
+            No hosts configured.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+function createHost(x = null) {
+
+  currentEditId = x?.id || null;
+
+  modal(
+    x ? "Edit Host" : "Create Host",
+    `
+      <form id="hostForm" class="form-sections">
+
+        ${section(
+          "Basic",
+          "Domain and host identity",
+          `
+          <div class="grid grid-2">
+            ${field("Name", input("name", x?.name || "", "Main Host"))}
+            ${field("Domain", input("domain", x?.domain || "", "example.com"))}
+          </div>
+          `,
+          true,
+          "01"
+        )}
+
+        ${section(
+          "TLS / SNI",
+          "Certificate and SNI behavior",
+          `
+          <div class="grid grid-2">
+
+            ${field("SNI", input("sni", x?.sni || ""))}
+
+            ${field(
+              "TLS",
+              select("tls", [
+                ["enabled","Enabled"],
+                ["disabled","Disabled"]
+              ], x?.tls || "enabled")
+            )}
+
+            ${field("ALPN", input("alpn", x?.alpn || "h2,http/1.1"))}
+
+            ${field(
+              "Fingerprint",
+              select("fingerprint", [
+                ["chrome","Chrome"],
+                ["firefox","Firefox"],
+                ["safari","Safari"],
+                ["random","Random"]
+              ], x?.fingerprint || "chrome")
+            )}
+
+          </div>
+          `,
+          true,
+          "02"
+        )}
+
+        ${section(
+          "Transport",
+          "Network and path configuration",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Network",
+              select("network", [
+                ["tcp","TCP"],
+                ["ws","WebSocket"],
+                ["grpc","gRPC"],
+                ["xhttp","XHTTP"]
+              ], x?.network || "ws")
+            )}
+
+            ${field("Path", input("path", x?.path || "/", "/xray"))}
+
+            ${field("Host Header", input("host_header", x?.host_header || ""))}
+
+          </div>
+          `,
+          true,
+          "03"
+        )}
+
+        ${section(
+          "Advanced",
+          "Custom headers and metadata",
+          field(
+            "Headers",
+            `<textarea name="headers"
+              placeholder='{"Host":"example.com"}'>${escapeHtml(x?.headers || "")}</textarea>`
+          ),
+          false,
+          "04"
+        )}
+
+      </form>
+    `,
+    async () => {
+
+      const data = getFormData($("hostForm"));
+
+      if (currentEditId) {
+        await api(`/hosts/${currentEditId}`, {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
+      } else {
+        await api("/hosts", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+      }
+
+      closeModal();
+      toast("Host saved");
+      hosts();
+    }
+  );
+}
+
+/* =========================================================
+   OUTBOUND
+========================================================= */
+
+async function outbound() {
+
+  const data = await api("/outbounds");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Outbound</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Xray outbound routing destinations.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createOutbound()">
+          + Add Outbound
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Tag</th>
+                <th>Protocol</th>
+                <th>Address</th>
+                <th>Port</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.tag || x.name || "-")}</td>
+                  <td>${escapeHtml(x.protocol || "-")}</td>
+                  <td>${escapeHtml(x.address || "-")}</td>
+                  <td>${escapeHtml(x.port || "-")}</td>
+                  <td>
+                    <button class="btn small"
+                      onclick='createOutbound(${JSON.stringify(x)})'>
+                      Edit
+                    </button>
+
+                    <button class="btn small danger"
+                      onclick="deleteItem('/outbounds/${x.id}','Outbound')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">↑</div>
+            No outbound configurations.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+function createOutbound(x = null) {
+
+  currentEditId = x?.id || null;
+
+  modal(
+    x ? "Edit Outbound" : "Create Outbound",
+    `
+      <form id="outboundForm" class="form-sections">
+
+        ${section(
+          "Basic",
+          "Outbound identity and protocol",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Tag",
+              input("tag", x?.tag || "", "proxy")
+            )}
+
+            ${field(
+              "Protocol",
+              select("protocol", [
+                ["freedom","Freedom"],
+                ["blackhole","Blackhole"],
+                ["vless","VLESS"],
+                ["vmess","VMess"],
+                ["trojan","Trojan"],
+                ["shadowsocks","Shadowsocks"]
+              ], x?.protocol || "freedom")
+            )}
+
+          </div>
+          `,
+          true,
+          "01"
+        )}
+
+        ${section(
+          "Server",
+          "Remote destination",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Address",
+              input("address", x?.address || "", "example.com")
+            )}
+
+            ${field(
+              "Port",
+              `<input name="port" type="number"
+                value="${escapeHtml(x?.port || 443)}">`
+            )}
+
+            ${field(
+              "UUID",
+              input("uuid", x?.uuid || "")
+            )}
+
+            ${field(
+              "Password",
+              input("password", x?.password || "")
+            )}
+
+          </div>
+          `,
+          true,
+          "02"
+        )}
+
+        ${section(
+          "Transport & Security",
+          "Network, TLS and REALITY",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Network",
+              select("network", [
+                ["tcp","TCP"],
+                ["ws","WebSocket"],
+                ["grpc","gRPC"],
+                ["xhttp","XHTTP"]
+              ], x?.network || "tcp")
+            )}
+
+            ${field(
+              "Security",
+              select("security", [
+                ["none","None"],
+                ["tls","TLS"],
+                ["reality","REALITY"]
+              ], x?.security || "none")
+            )}
+
+            ${field(
+              "SNI",
+              input("sni", x?.sni || "")
+            )}
+
+            ${field(
+              "Fingerprint",
+              select("fingerprint", [
+                ["chrome","Chrome"],
+                ["firefox","Firefox"],
+                ["safari","Safari"],
+                ["random","Random"]
+              ], x?.fingerprint || "chrome")
+            )}
+
+          </div>
+          `,
+          true,
+          "03"
+        )}
+
+        ${section(
+          "Advanced",
+          "Outbound-specific options",
+          `
+          ${field(
+            "Settings",
+            `<textarea name="settings"
+              placeholder='{"domainStrategy":"UseIP"}'>${escapeHtml(x?.settings || "")}</textarea>`
+          )}
+          `,
+          false,
+          "04"
+        )}
+
+      </form>
+    `,
+    async () => {
+
+      const data = getFormData($("outboundForm"));
+
+      if (currentEditId) {
+        await api(`/outbounds/${currentEditId}`, {
+          method: "PUT",
+          body: JSON.stringify(data)
+        });
+      } else {
+        await api("/outbounds", {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+      }
+
+      closeModal();
+      toast("Outbound saved");
+      outbound();
+    }
+  );
+}
+
+/* =========================================================
+   ROUTING
+========================================================= */
+
+async function routing() {
+
+  const data = await api("/routing");
+
+  $("content").innerHTML = `
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Routing Rules</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Route domains, IPs and protocols to outbounds.
+          </div>
+        </div>
+
+        <button class="btn primary" onclick="createRule()">
+          + Add Rule
+        </button>
+      </div>
+
+      <div class="card-body table-wrap">
+
+        ${
+          data.length
+          ? `
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Match</th>
+                <th>Outbound</th>
+                <th>Priority</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${data.map((x,i) => `
+                <tr style="animation-delay:${i*.035}s">
+                  <td>${escapeHtml(x.type || "-")}</td>
+                  <td>${escapeHtml(x.match || "-")}</td>
+                  <td>${escapeHtml(x.outbound || "-")}</td>
+                  <td>${escapeHtml(x.priority || 0)}</td>
+                  <td>
+                    <button class="btn small danger"
+                      onclick="deleteItem('/routing/${x.id}','Rule')">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          `
+          :
+          `
+          <div class="empty">
+            <div class="empty-icon">⤢</div>
+            No routing rules configured.
+          </div>
+          `
+        }
+
+      </div>
+    </div>
+  `;
+}
+
+function createRule() {
+
+  modal(
+    "Create Routing Rule",
+    `
+      <form id="ruleForm" class="form-sections">
+
+        ${section(
+          "Match Conditions",
+          "Define which traffic should match",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Type",
+              select("type", [
+                ["domain","Domain"],
+                ["ip","IP"],
+                ["protocol","Protocol"],
+                ["port","Port"],
+                ["source","Source"]
+              ], "domain")
+            )}
+
+            ${field(
+              "Match",
+              input("match", "", "geosite:google")
+            )}
+
+          </div>
+          `,
+          true,
+          "01"
+        )}
+
+        ${section(
+          "Outbound",
+          "Choose the destination route",
+          field(
+            "Outbound Tag",
+            input("outbound", "", "proxy")
+          ),
+          true,
+          "02"
+        )}
+
+        ${section(
+          "Advanced",
+          "Rule priority and metadata",
+          `
+          <div class="grid grid-2">
+
+            ${field(
+              "Priority",
+              `<input name="priority" type="number" value="0">`
+            )}
+
+            ${field(
+              "Enabled",
+              switchInput("enabled", true)
+            )}
+
+          </div>
+          `,
+          false,
+          "03"
+        )}
+
+      </form>
+    `,
+    async () => {
+
+      const data = getFormData($("ruleForm"));
+
+      await api("/routing", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      closeModal();
+      toast("Routing rule created");
+      routing();
+    }
+  );
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+async function settings() {
+
+  const x = await api("/settings");
+
+  $("content").innerHTML = `
+
+    <div class="card">
+
+      <div class="card-head">
+        <div>
+          <strong>Panel Settings</strong>
+          <div style="color:var(--muted);font-size:11px">
+            Configure control panel behavior.
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+
+        <form id="settingsForm" class="form-sections">
+
+          ${section(
+            "General",
+            "Panel identity and defaults",
+            `
+            <div class="grid grid-2">
+
+              ${field(
+                "Panel Name",
+                input("panel_name", x.panel_name || "Xray Control Panel")
+              )}
+
+              ${field(
+                "Default Language",
+                select("language", [
+                  ["en","English"],
+                  ["fa","Persian"]
+                ], x.language || "en")
+              )}
+
+            </div>
+            `,
+            true,
+            "01"
+          )}
+
+          ${section(
+            "Security",
+            "Authentication and session behavior",
+            `
+            <div class="grid grid-2">
+
+              ${field(
+                "Session Lifetime",
+                input(
+                  "session_lifetime",
+                  x.session_lifetime || "24h"
+                )
+              )}
+
+              ${field(
+                "Secure Cookies",
+                select("secure_cookies", [
+                  ["true","Enabled"],
+                  ["false","Disabled"]
+                ], String(x.secure_cookies ?? true))
+              )}
+
+            </div>
+            `,
+            true,
+            "02"
+          )}
+
+          ${section(
+            "Database",
+            "Persistent storage information",
+            `
+            ${field(
+              "Database Path",
+              input(
+                "db_path",
+                x.db_path || "/data/panel.db"
+              )
+            )}
+            `,
+            false,
+            "03"
+          )}
+
+          ${section(
+            "API",
+            "API access configuration",
+            `
+            <div class="switch-row">
+
+              <div>
+                <strong style="font-size:13px">
+                  API Enabled
+                </strong>
+
+                <div style="font-size:11px;color:var(--muted)">
+                  Allow panel API requests.
+                </div>
+              </div>
+
+              ${switchInput(
+                "api_enabled",
+                x.api_enabled !== false
+              )}
+
+            </div>
+            `,
+            false,
+            "04"
+          )}
+
+        </form>
+
+        <div style="margin-top:15px;text-align:right">
+          <button class="btn primary" onclick="saveSettings()">
+            Save Settings
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function saveSettings() {
+
+  const data = getFormData($("settingsForm"));
+
+  await api("/settings", {
+    method: "PUT",
+    body: JSON.stringify(data)
   });
 
   toast("Settings saved");
 }
 
-/* XRAY */
+/* =========================================================
+   XRAY
+========================================================= */
 
-async function xray(){
-  const c=await api("/api/config");
+async function xray() {
 
-  $("content").innerHTML=`
-    <div class="cards">
-      <div class="card">
-        <div class="card-label">CORE STATUS</div>
-        <div class="card-value">${c.xray_core_running?"ON":"OFF"}</div>
-      </div>
+  $("content").innerHTML = `
+
+    <div class="grid grid-2">
 
       <div class="card">
-        <div class="card-label">INBOUNDS</div>
-        <div class="card-value">${c.inbounds.length}</div>
-      </div>
 
-      <div class="card">
-        <div class="card-label">CLIENTS</div>
-        <div class="card-value">${c.clients.length}</div>
-      </div>
+        <div class="card-head">
+          <strong>Xray Core</strong>
 
-      <div class="card">
-        <div class="card-label">OUTBOUNDS</div>
-        <div class="card-value">${c.outbounds.length}</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">Generated Configuration</span>
-        <button class="add" onclick="downloadConfig()">Generate JSON</button>
-      </div>
-
-      <pre style="padding:20px;overflow:auto;color:#aaa">${escapeHtml(JSON.stringify(c,null,2))}</pre>
-    </div>
-  `;
-}
-
-async function downloadConfig(){
-  const c=await api("/api/config");
-
-  const blob=new Blob(
-    [JSON.stringify(c,null,2)],
-    {type:"application/json"}
-  );
-
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="xray-config.json";
-  a.click();
-}
-
-/* API */
-
-async function apiDocs(){
-  const docs=await api("/api/docs");
-
-  $("content").innerHTML=`
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">API Endpoints</span>
-      </div>
-
-      ${docs.map(x=>`
-        <div style="padding:13px 17px;border-bottom:1px solid #181818;color:#aaa">
-          ${escapeHtml(x)}
+          <span class="badge off">
+            <span class="dot"></span>
+            NOT RUNNING
+          </span>
         </div>
-      `).join("")}
-    </div>
-  `;
-}
 
-/* GENERIC TABLE */
+        <div class="card-body">
 
-function genericTable(title,button,onclick,headers,rows){
-  return `
-    <div class="toolbar">
-      <button class="add" onclick="${onclick}">${button}</button>
-    </div>
+          <div style="
+            font-size:42px;
+            color:#3f5848;
+            text-align:center;
+            padding:25px 0;
+          ">
+            ⚡
+          </div>
 
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">${title}</span>
-      </div>
+          <p style="
+            text-align:center;
+            color:var(--muted);
+            font-size:13px;
+          ">
+            Xray core process is not managed by this UI yet.
+          </p>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              ${headers.map(x=>`<th>${x}</th>`).join("")}
-            </tr>
-          </thead>
-
-          <tbody>
-            ${rows.length
-              ?rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")
-              :`<tr><td colspan="${headers.length}" class="empty">No data yet</td></tr>`
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-/* PAGE LOADER */
-
-async function loadPage(){
-  try{
-    if(currentPage==="dashboard") await dashboard();
-    else if(currentPage==="inbounds") await inbounds();
-    else if(currentPage==="clients") await clients();
-    else if(currentPage==="groups") await groups();
-    else if(currentPage==="nodes") await nodes();
-    else if(currentPage==="hosts") await hosts();
-    else if(currentPage==="xray") await xray();
-    else if(currentPage==="outbound") await outbound();
-    else if(currentPage==="routing") await routing();
-    else if(currentPage==="settings") await settings();
-    else if(currentPage==="api") await apiDocs();
-  }catch(e){
-    $("content").innerHTML=`
-      <div class="panel">
-        <div class="empty" style="color:#ff4757">
-          ${escapeHtml(e.message)}
         </div>
+
       </div>
-    `;
+
+      <div class="card">
+
+        <div class="card-head">
+          <strong>Configuration</strong>
+        </div>
+
+        <div class="card-body">
+
+          <button class="btn"
+            onclick="downloadConfig()">
+            Download Config
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function downloadConfig() {
+
+  try {
+
+    const data = await api("/config");
+
+    const blob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      { type: "application/json" }
+    );
+
+    const a = document.createElement("a");
+
+    a.href = URL.createObjectURL(blob);
+    a.download = "xray-config.json";
+
+    a.click();
+
+    URL.revokeObjectURL(a.href);
+
+  } catch (err) {
+    toast(err.message, true);
   }
 }
 
-/* SESSION */
+/* =========================================================
+   API DOCS
+========================================================= */
 
-async function checkSession(){
-  if(!token) return;
+async function apiDocs() {
 
-  try{
-    await api("/api/me");
+  let data = {};
 
-    $("loginScreen").classList.add("hidden");
-    $("app").classList.remove("hidden");
+  try {
+    data = await api("/docs");
+  } catch {}
 
-    nav("dashboard");
-  }catch{
-    localStorage.removeItem("xray_token");
-    token=null;
+  $("content").innerHTML = `
+
+    <div class="card">
+
+      <div class="card-head">
+        <strong>API Documentation</strong>
+      </div>
+
+      <div class="card-body">
+
+        <pre style="
+          margin:0;
+          white-space:pre-wrap;
+          color:#9dffb7;
+          font-size:12px;
+          line-height:1.7;
+        ">${escapeHtml(
+          JSON.stringify(
+            data || {
+              GET: [
+                "/api/stats",
+                "/api/inbounds",
+                "/api/clients",
+                "/api/groups",
+                "/api/nodes",
+                "/api/hosts",
+                "/api/outbounds",
+                "/api/routing"
+              ]
+            },
+            null,
+            2
+          )
+        )}</pre>
+
+      </div>
+
+    </div>
+  `;
+}
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+async function deleteItem(url, name) {
+
+  if (!confirm(`Delete this ${name}?`)) {
+    return;
+  }
+
+  await api(url, {
+    method: "DELETE"
+  });
+
+  toast(`${name} deleted`);
+
+  loadPage(currentPage);
+}
+
+/* =========================================================
+   SESSION CHECK
+========================================================= */
+
+async function checkSession() {
+
+  try {
+
+    await api("/me");
+
+    showApp();
+
+    loadPage("dashboard");
+
+  } catch {
+
+    showLogin();
+
   }
 }
 
 checkSession();
+
+/* =========================================================
+   CLOSE MODAL ON BACKDROP
+========================================================= */
+
+$("modal").addEventListener("click", e => {
+
+  if (e.target === $("modal")) {
+    closeModal();
+  }
+
+});
+
+/* =========================================================
+   ESC CLOSE
+========================================================= */
+
+document.addEventListener("keydown", e => {
+
+  if (e.key === "Escape") {
+    closeModal();
+  }
+
+});
 </script>
 
 </body>
