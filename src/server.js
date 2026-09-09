@@ -7,34 +7,65 @@ const fs = require("fs");
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
-
+const PORT = Number(process.env.PORT || 3000);
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
-
-const ADMIN_PASSWORD =
-  process.env.ADMIN_PASSWORD || "change-this-password";
-
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-this-password";
 const JWT_SECRET =
   process.env.JWT_SECRET || "change-this-to-a-long-random-secret";
+const DB_PATH = process.env.DB_PATH || "./data/panel.db";
 
-const DB_PATH =
-  process.env.DB_PATH || "./data/panel.db";
-
-/* =========================================================
-   DATABASE
-========================================================= */
-
-const dbDir = path.dirname(DB_PATH);
-
-if (dbDir !== ".") {
-  fs.mkdirSync(dbDir, {
-    recursive: true
-  });
-}
+const dir = path.dirname(DB_PATH);
+if (dir && dir !== ".") fs.mkdirSync(dir, { recursive: true });
 
 const db = new Database(DB_PATH);
-
 db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
+
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "../public")));
+
+function now() {
+  return new Date().toISOString();
+}
+
+function id() {
+  return crypto.randomUUID();
+}
+
+function str(v) {
+  return v == null ? "" : String(v).trim();
+}
+
+function bool(v, fallback = true) {
+  if (v === undefined || v === null || v === "") return fallback;
+  return v === true || v === 1 || v === "1" || v === "true" ? 1 : 0;
+}
+
+function port(v) {
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 1 && n <= 65535 ? n : null;
+}
+
+function json(v, fallback = {}) {
+  if (typeof v === "object" && v !== null) return v;
+  try {
+    return JSON.parse(v || JSON.stringify(fallback));
+  } catch {
+    return fallback;
+  }
+}
+
+function ensureColumn(table, column, definition) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!columns.some((x) => x.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+/* -------------------------------------------------------
+   DATABASE
+------------------------------------------------------- */
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS inbounds (
@@ -43,48 +74,12 @@ CREATE TABLE IF NOT EXISTS inbounds (
   protocol TEXT NOT NULL,
   port INTEGER NOT NULL,
   listen TEXT DEFAULT '',
-  transport TEXT DEFAULT 'tcp',
+  network TEXT DEFAULT 'tcp',
   security TEXT DEFAULT 'none',
   remark TEXT DEFAULT '',
   enabled INTEGER DEFAULT 1,
-  created_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS clients (
-  id TEXT PRIMARY KEY,
-  inbound_id TEXT NOT NULL,
-  email TEXT NOT NULL,
-  uuid TEXT NOT NULL,
-  password TEXT DEFAULT '',
-  flow TEXT DEFAULT '',
-  total_gb REAL DEFAULT 0,
-  expiry_time TEXT DEFAULT '',
-  enabled INTEGER DEFAULT 1,
-  created_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS hosts (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  address TEXT NOT NULL,
-  port INTEGER DEFAULT 443,
-  protocol TEXT DEFAULT 'https',
-  path TEXT DEFAULT '/',
-  sni TEXT DEFAULT '',
-  remark TEXT DEFAULT '',
-  enabled INTEGER DEFAULT 1,
-  created_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS nodes (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  address TEXT NOT NULL,
-  port INTEGER DEFAULT 443,
-  api_url TEXT DEFAULT '',
-  username TEXT DEFAULT '',
-  remark TEXT DEFAULT '',
-  enabled INTEGER DEFAULT 1,
+  settings_json TEXT DEFAULT '{}',
+  stream_settings_json TEXT DEFAULT '{}',
   created_at TEXT NOT NULL
 );
 
@@ -96,28 +91,75 @@ CREATE TABLE IF NOT EXISTS groups (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS clients (
+  id TEXT PRIMARY KEY,
+  inbound_id TEXT NOT NULL,
+  email TEXT NOT NULL,
+  uuid TEXT NOT NULL,
+  flow TEXT DEFAULT '',
+  total_gb REAL DEFAULT 0,
+  expiry_at TEXT DEFAULT '',
+  reset_days INTEGER DEFAULT 0,
+  limit_ip INTEGER DEFAULT 0,
+  telegram_id TEXT DEFAULT '',
+  subscription_id TEXT DEFAULT '',
+  group_id TEXT DEFAULT '',
+  comment TEXT DEFAULT '',
+  enabled INTEGER DEFAULT 1,
+  credential_json TEXT DEFAULT '{}',
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(inbound_id) REFERENCES inbounds(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS nodes (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  port INTEGER DEFAULT 443,
+  api_port INTEGER DEFAULT 0,
+  protocol TEXT DEFAULT 'http',
+  username TEXT DEFAULT '',
+  password TEXT DEFAULT '',
+  enabled INTEGER DEFAULT 1,
+  remark TEXT DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS hosts (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  port INTEGER DEFAULT 443,
+  sni TEXT DEFAULT '',
+  path TEXT DEFAULT '/',
+  host_header TEXT DEFAULT '',
+  type TEXT DEFAULT 'WebSocket',
+  enabled INTEGER DEFAULT 1,
+  remark TEXT DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS outbounds (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   protocol TEXT NOT NULL,
-  address TEXT DEFAULT '',
-  port INTEGER DEFAULT 0,
-  settings TEXT DEFAULT '{}',
-  remark TEXT DEFAULT '',
+  server TEXT DEFAULT '',
+  port INTEGER DEFAULT 443,
+  settings_json TEXT DEFAULT '{}',
   enabled INTEGER DEFAULT 1,
+  remark TEXT DEFAULT '',
   created_at TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS routing_rules (
+CREATE TABLE IF NOT EXISTS routings (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  domain TEXT DEFAULT '',
-  ip TEXT DEFAULT '',
-  port TEXT DEFAULT '',
-  protocol TEXT DEFAULT '',
-  source TEXT DEFAULT '',
-  outbound TEXT NOT NULL,
+  domains_json TEXT DEFAULT '[]',
+  ips_json TEXT DEFAULT '[]',
+  sources_json TEXT DEFAULT '[]',
+  outbound_tag TEXT DEFAULT '',
   enabled INTEGER DEFAULT 1,
+  remark TEXT DEFAULT '',
   created_at TEXT NOT NULL
 );
 
@@ -127,1220 +169,855 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 `);
 
-/* =========================================================
-   EXPRESS
-========================================================= */
+/* Migration for old database */
+const migrations = [
+  ["inbounds", "listen", "TEXT DEFAULT ''"],
+  ["inbounds", "network", "TEXT DEFAULT 'tcp'"],
+  ["inbounds", "security", "TEXT DEFAULT 'none'"],
+  ["inbounds", "enabled", "INTEGER DEFAULT 1"],
+  ["inbounds", "settings_json", "TEXT DEFAULT '{}'"],
+  ["inbounds", "stream_settings_json", "TEXT DEFAULT '{}'"],
 
-app.use(express.json());
+  ["clients", "flow", "TEXT DEFAULT ''"],
+  ["clients", "total_gb", "REAL DEFAULT 0"],
+  ["clients", "expiry_at", "TEXT DEFAULT ''"],
+  ["clients", "reset_days", "INTEGER DEFAULT 0"],
+  ["clients", "limit_ip", "INTEGER DEFAULT 0"],
+  ["clients", "telegram_id", "TEXT DEFAULT ''"],
+  ["clients", "subscription_id", "TEXT DEFAULT ''"],
+  ["clients", "group_id", "TEXT DEFAULT ''"],
+  ["clients", "comment", "TEXT DEFAULT ''"],
+  ["clients", "enabled", "INTEGER DEFAULT 1"],
+  ["clients", "credential_json", "TEXT DEFAULT '{}'"
+  ]
+];
 
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
-
-app.use(
-  express.static(
-    path.join(__dirname, "../public")
-  )
-);
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
-function now() {
-  return new Date().toISOString();
+for (const [table, column, definition] of migrations) {
+  ensureColumn(table, column, definition);
 }
 
-function id() {
-  return crypto.randomUUID();
-}
+/* -------------------------------------------------------
+   AUTH
+------------------------------------------------------- */
 
-function createToken() {
-  return jwt.sign(
-    {
-      username: ADMIN_USER
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "7d"
-    }
-  );
+function token() {
+  return jwt.sign({ username: ADMIN_USER }, JWT_SECRET, {
+    expiresIn: "7d"
+  });
 }
 
 function auth(req, res, next) {
-  const header =
-    req.headers.authorization || "";
+  const h = req.headers.authorization || "";
 
-  if (!header.startsWith("Bearer ")) {
-    return res.status(401).json({
-      error: "Unauthorized"
-    });
+  if (!h.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
-
-  const token = header.substring(7);
 
   try {
-    req.user = jwt.verify(
-      token,
-      JWT_SECRET
-    );
-
+    req.user = jwt.verify(h.slice(7), JWT_SECRET);
     next();
-  } catch (error) {
-    return res.status(401).json({
-      error: "Invalid token"
-    });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
   }
 }
 
-function clean(value) {
-  if (value === undefined || value === null) {
-    return "";
-  }
+/* -------------------------------------------------------
+   BASIC
+------------------------------------------------------- */
 
-  return String(value).trim();
-}
-
-function boolValue(value, defaultValue = 1) {
-  if (value === undefined) {
-    return defaultValue;
-  }
-
-  if (
-    value === true ||
-    value === 1 ||
-    value === "1" ||
-    value === "true"
-  ) {
-    return 1;
-  }
-
-  return 0;
-}
-
-function integerValue(value, fallback = 0) {
-  const number = Number(value);
-
-  if (!Number.isInteger(number)) {
-    return fallback;
-  }
-
-  return number;
-}
-
-/* =========================================================
-   HEALTH
-========================================================= */
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true,
-    service: "xray-panel"
-  });
+app.get("/api/health", (_, res) => {
+  res.json({ ok: true, service: "xray-panel" });
 });
 
-/* =========================================================
-   AUTH
-========================================================= */
-
 app.post("/api/login", (req, res) => {
-  const username =
-    clean(req.body.username);
-
-  const password =
-    clean(req.body.password);
-
   if (
-    username !== ADMIN_USER ||
-    password !== ADMIN_PASSWORD
+    str(req.body.username) !== ADMIN_USER ||
+    str(req.body.password) !== ADMIN_PASSWORD
   ) {
-    return res.status(401).json({
-      error:
-        "Invalid username or password"
-    });
+    return res.status(401).json({ error: "Invalid username or password" });
   }
 
   res.json({
-    token: createToken(),
+    token: token(),
     username: ADMIN_USER
   });
 });
 
 app.get("/api/me", auth, (req, res) => {
+  res.json({ username: req.user.username });
+});
+
+/* -------------------------------------------------------
+   DASHBOARD
+------------------------------------------------------- */
+
+app.get("/api/stats", auth, (req, res) => {
+  const inbounds = db.prepare("SELECT COUNT(*) c FROM inbounds").get().c;
+  const clients = db.prepare("SELECT COUNT(*) c FROM clients").get().c;
+  const groups = db.prepare("SELECT COUNT(*) c FROM groups").get().c;
+  const nodes = db.prepare("SELECT COUNT(*) c FROM nodes").get().c;
+  const hosts = db.prepare("SELECT COUNT(*) c FROM hosts").get().c;
+
   res.json({
-    username: req.user.username
+    inbounds,
+    clients,
+    groups,
+    nodes,
+    hosts,
+    cpu: 0,
+    ram: 0,
+    xray: false
   });
 });
 
-/* =========================================================
+/* -------------------------------------------------------
    INBOUNDS
-========================================================= */
+------------------------------------------------------- */
 
 app.get("/api/inbounds", auth, (req, res) => {
-  const rows = db
-    .prepare(`
-      SELECT *
-      FROM inbounds
-      ORDER BY created_at DESC
-    `)
-    .all();
+  const rows = db.prepare(`
+    SELECT
+      i.*,
+      (
+        SELECT COUNT(*)
+        FROM clients c
+        WHERE c.inbound_id = i.id
+      ) AS client_count
+    FROM inbounds i
+    ORDER BY i.created_at DESC
+  `).all();
 
-  res.json(rows);
+  res.json(rows.map((r) => ({
+    ...r,
+    settings: json(r.settings_json),
+    stream_settings: json(r.stream_settings_json)
+  })));
 });
 
 app.post("/api/inbounds", auth, (req, res) => {
-  const name = clean(req.body.name);
-  const protocol =
-    clean(req.body.protocol);
+  const body = req.body;
+  const p = port(body.port);
 
-  const port =
-    integerValue(req.body.port);
-
-  const listen =
-    clean(req.body.listen);
-
-  const transport =
-    clean(req.body.transport) || "tcp";
-
-  const security =
-    clean(req.body.security) || "none";
-
-  const remark =
-    clean(req.body.remark);
-
-  if (!name || !protocol) {
-    return res.status(400).json({
-      error:
-        "Name and protocol are required"
-    });
+  if (!str(body.name)) {
+    return res.status(400).json({ error: "Inbound name is required" });
   }
 
-  if (
-    port < 1 ||
-    port > 65535
-  ) {
-    return res.status(400).json({
-      error: "Invalid port"
-    });
+  if (!str(body.protocol)) {
+    return res.status(400).json({ error: "Protocol is required" });
+  }
+
+  if (!p) {
+    return res.status(400).json({ error: "Invalid port" });
   }
 
   const inboundId = id();
-  const createdAt = now();
+  const created = now();
+
+  const settings = {
+    sniffing: bool(body.sniffing, false),
+    destOverride: str(body.destOverride),
+    tls: {
+      serverName: str(body.tlsServerName),
+      certPath: str(body.tlsCert),
+      keyPath: str(body.tlsKey)
+    },
+    reality: {
+      dest: str(body.realityDest),
+      serverNames: str(body.realityServerNames),
+      privateKey: str(body.realityPrivateKey),
+      shortIds: str(body.realityShortIds),
+      fingerprint: str(body.realityFingerprint)
+    }
+  };
+
+  const stream = {
+    network: str(body.network) || "tcp",
+    ws: {
+      path: str(body.wsPath) || "/",
+      host: str(body.wsHost)
+    },
+    grpc: {
+      serviceName: str(body.grpcServiceName)
+    },
+    xhttp: {
+      path: str(body.xhttpPath) || "/",
+      host: str(body.xhttpHost)
+    }
+  };
 
   db.prepare(`
-    INSERT INTO inbounds (
-      id,
-      name,
-      protocol,
-      port,
-      listen,
-      transport,
-      security,
-      remark,
-      enabled,
-      created_at
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO inbounds
+    (id,name,protocol,port,listen,network,security,remark,enabled,
+     settings_json,stream_settings_json,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     inboundId,
-    name,
-    protocol,
-    port,
-    listen,
-    transport,
-    security,
-    remark,
-    1,
-    createdAt
+    str(body.name),
+    str(body.protocol),
+    p,
+    str(body.listen),
+    str(body.network) || "tcp",
+    str(body.security) || "none",
+    str(body.remark),
+    bool(body.enabled),
+    JSON.stringify(settings),
+    JSON.stringify(stream),
+    created
   );
 
-  const row = db
-    .prepare(
-      "SELECT * FROM inbounds WHERE id = ?"
-    )
-    .get(inboundId);
-
-  res.status(201).json(row);
-});
-
-app.put(
-  "/api/inbounds/:id",
-  auth,
-  (req, res) => {
-    const existing = db
-      .prepare(
-        "SELECT * FROM inbounds WHERE id = ?"
-      )
-      .get(req.params.id);
-
-    if (!existing) {
-      return res.status(404).json({
-        error: "Inbound not found"
-      });
-    }
-
-    const name =
-      clean(req.body.name) ||
-      existing.name;
-
-    const protocol =
-      clean(req.body.protocol) ||
-      existing.protocol;
-
-    const port =
-      req.body.port === undefined
-        ? existing.port
-        : integerValue(req.body.port);
-
-    const listen =
-      req.body.listen === undefined
-        ? existing.listen
-        : clean(req.body.listen);
-
-    const transport =
-      req.body.transport === undefined
-        ? existing.transport
-        : clean(req.body.transport);
-
-    const security =
-      req.body.security === undefined
-        ? existing.security
-        : clean(req.body.security);
-
-    const remark =
-      req.body.remark === undefined
-        ? existing.remark
-        : clean(req.body.remark);
-
-    const enabled =
-      boolValue(
-        req.body.enabled,
-        existing.enabled
-      );
-
-    if (
-      port < 1 ||
-      port > 65535
-    ) {
-      return res.status(400).json({
-        error: "Invalid port"
-      });
-    }
+  if (body.clientEmail) {
+    const clientId = id();
 
     db.prepare(`
-      UPDATE inbounds
-      SET
-        name = ?,
-        protocol = ?,
-        port = ?,
-        listen = ?,
-        transport = ?,
-        security = ?,
-        remark = ?,
-        enabled = ?
-      WHERE id = ?
+      INSERT INTO clients
+      (id,inbound_id,email,uuid,flow,total_gb,expiry_at,reset_days,
+       limit_ip,telegram_id,subscription_id,group_id,comment,enabled,
+       credential_json,created_at)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `).run(
-      name,
-      protocol,
-      port,
-      listen,
-      transport,
-      security,
-      remark,
-      enabled,
-      req.params.id
-    );
-
-    res.json(
-      db
-        .prepare(
-          "SELECT * FROM inbounds WHERE id = ?"
-        )
-        .get(req.params.id)
+      clientId,
+      inboundId,
+      str(body.clientEmail),
+      str(body.clientUuid) || crypto.randomUUID(),
+      str(body.clientFlow),
+      Number(body.clientTotalGb) || 0,
+      str(body.clientExpiry),
+      Number(body.clientResetDays) || 0,
+      Number(body.clientLimitIp) || 0,
+      str(body.clientTelegramId),
+      str(body.clientSubscriptionId),
+      str(body.clientGroupId),
+      str(body.clientComment),
+      bool(body.clientEnabled),
+      "{}",
+      created
     );
   }
-);
 
-app.delete(
-  "/api/inbounds/:id",
-  auth,
-  (req, res) => {
-    const transaction =
-      db.transaction(() => {
-        db.prepare(
-          "DELETE FROM clients WHERE inbound_id = ?"
-        ).run(req.params.id);
+  res.status(201).json({ ok: true, id: inboundId });
+});
 
-        return db
-          .prepare(
-            "DELETE FROM inbounds WHERE id = ?"
-          )
-          .run(req.params.id);
-      });
+app.put("/api/inbounds/:id", auth, (req, res) => {
+  const old = db.prepare("SELECT * FROM inbounds WHERE id=?").get(req.params.id);
 
-    const result = transaction();
+  if (!old) return res.status(404).json({ error: "Inbound not found" });
 
-    if (result.changes === 0) {
-      return res.status(404).json({
-        error: "Inbound not found"
-      });
-    }
+  const b = req.body;
+  const p = port(b.port);
 
-    res.json({
-      ok: true
-    });
+  if (!str(b.name) || !p) {
+    return res.status(400).json({ error: "Invalid inbound data" });
   }
-);
 
-/* =========================================================
+  db.prepare(`
+    UPDATE inbounds SET
+      name=?,
+      protocol=?,
+      port=?,
+      listen=?,
+      network=?,
+      security=?,
+      remark=?,
+      enabled=?,
+      settings_json=?,
+      stream_settings_json=?
+    WHERE id=?
+  `).run(
+    str(b.name),
+    str(b.protocol),
+    p,
+    str(b.listen),
+    str(b.network) || "tcp",
+    str(b.security) || "none",
+    str(b.remark),
+    bool(b.enabled),
+    JSON.stringify(json(b.settings)),
+    JSON.stringify(json(b.stream_settings)),
+    req.params.id
+  );
+
+  res.json({ ok: true });
+});
+
+app.patch("/api/inbounds/:id/toggle", auth, (req, res) => {
+  const row = db.prepare("SELECT enabled FROM inbounds WHERE id=?").get(req.params.id);
+
+  if (!row) return res.status(404).json({ error: "Inbound not found" });
+
+  db.prepare("UPDATE inbounds SET enabled=? WHERE id=?")
+    .run(row.enabled ? 0 : 1, req.params.id);
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/inbounds/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM inbounds WHERE id=?").run(req.params.id);
+
+  if (!result.changes) {
+    return res.status(404).json({ error: "Inbound not found" });
+  }
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
    CLIENTS
-========================================================= */
+------------------------------------------------------- */
 
 app.get("/api/clients", auth, (req, res) => {
-  const rows = db
-    .prepare(`
-      SELECT
-        clients.*,
-        inbounds.name AS inbound_name
-      FROM clients
-      LEFT JOIN inbounds
-        ON clients.inbound_id = inbounds.id
-      ORDER BY clients.created_at DESC
-    `)
-    .all();
+  const rows = db.prepare(`
+    SELECT
+      c.*,
+      i.name AS inbound_name,
+      g.name AS group_name
+    FROM clients c
+    LEFT JOIN inbounds i ON i.id=c.inbound_id
+    LEFT JOIN groups g ON g.id=c.group_id
+    ORDER BY c.created_at DESC
+  `).all();
 
   res.json(rows);
 });
 
 app.post("/api/clients", auth, (req, res) => {
-  const inboundId =
-    clean(req.body.inbound_id);
+  const b = req.body;
 
-  const email =
-    clean(req.body.email);
-
-  if (!inboundId || !email) {
+  if (!str(b.inbound_id) || !str(b.email)) {
     return res.status(400).json({
-      error:
-        "Inbound and email are required"
+      error: "Inbound and email are required"
     });
   }
 
-  const inbound = db
-    .prepare(
-      "SELECT * FROM inbounds WHERE id = ?"
-    )
-    .get(inboundId);
+  const inbound = db.prepare("SELECT id FROM inbounds WHERE id=?")
+    .get(str(b.inbound_id));
 
   if (!inbound) {
-    return res.status(404).json({
-      error: "Inbound not found"
-    });
+    return res.status(404).json({ error: "Inbound not found" });
   }
 
   const clientId = id();
-  const uuid =
-    clean(req.body.uuid) ||
-    crypto.randomUUID();
-
-  const password =
-    clean(req.body.password);
-
-  const flow =
-    clean(req.body.flow);
-
-  const totalGb =
-    Number(req.body.total_gb) || 0;
-
-  const expiryTime =
-    clean(req.body.expiry_time);
-
-  const createdAt = now();
 
   db.prepare(`
-    INSERT INTO clients (
-      id,
-      inbound_id,
-      email,
-      uuid,
-      password,
-      flow,
-      total_gb,
-      expiry_time,
-      enabled,
-      created_at
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO clients
+    (id,inbound_id,email,uuid,flow,total_gb,expiry_at,reset_days,
+     limit_ip,telegram_id,subscription_id,group_id,comment,enabled,
+     credential_json,created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     clientId,
-    inboundId,
-    email,
-    uuid,
-    password,
-    flow,
-    totalGb,
-    expiryTime,
-    1,
-    createdAt
+    str(b.inbound_id),
+    str(b.email),
+    str(b.uuid) || crypto.randomUUID(),
+    str(b.flow),
+    Number(b.total_gb) || 0,
+    str(b.expiry_at),
+    Number(b.reset_days) || 0,
+    Number(b.limit_ip) || 0,
+    str(b.telegram_id),
+    str(b.subscription_id),
+    str(b.group_id),
+    str(b.comment),
+    bool(b.enabled),
+    "{}",
+    now()
   );
 
-  res.status(201).json(
-    db
-      .prepare(
-        "SELECT * FROM clients WHERE id = ?"
-      )
-      .get(clientId)
-  );
+  res.status(201).json({ ok: true, id: clientId });
 });
 
-app.put(
-  "/api/clients/:id",
-  auth,
-  (req, res) => {
-    const existing = db
-      .prepare(
-        "SELECT * FROM clients WHERE id = ?"
-      )
-      .get(req.params.id);
+app.put("/api/clients/:id", auth, (req, res) => {
+  const b = req.body;
 
-    if (!existing) {
-      return res.status(404).json({
-        error: "Client not found"
-      });
-    }
+  const result = db.prepare(`
+    UPDATE clients SET
+      inbound_id=?,
+      email=?,
+      uuid=?,
+      flow=?,
+      total_gb=?,
+      expiry_at=?,
+      reset_days=?,
+      limit_ip=?,
+      telegram_id=?,
+      subscription_id=?,
+      group_id=?,
+      comment=?,
+      enabled=?
+    WHERE id=?
+  `).run(
+    str(b.inbound_id),
+    str(b.email),
+    str(b.uuid),
+    str(b.flow),
+    Number(b.total_gb) || 0,
+    str(b.expiry_at),
+    Number(b.reset_days) || 0,
+    Number(b.limit_ip) || 0,
+    str(b.telegram_id),
+    str(b.subscription_id),
+    str(b.group_id),
+    str(b.comment),
+    bool(b.enabled),
+    req.params.id
+  );
 
-    const inboundId =
-      req.body.inbound_id === undefined
-        ? existing.inbound_id
-        : clean(req.body.inbound_id);
-
-    const inbound = db
-      .prepare(
-        "SELECT * FROM inbounds WHERE id = ?"
-      )
-      .get(inboundId);
-
-    if (!inbound) {
-      return res.status(404).json({
-        error: "Inbound not found"
-      });
-    }
-
-    const email =
-      req.body.email === undefined
-        ? existing.email
-        : clean(req.body.email);
-
-    const uuid =
-      req.body.uuid === undefined
-        ? existing.uuid
-        : clean(req.body.uuid);
-
-    const password =
-      req.body.password === undefined
-        ? existing.password
-        : clean(req.body.password);
-
-    const flow =
-      req.body.flow === undefined
-        ? existing.flow
-        : clean(req.body.flow);
-
-    const totalGb =
-      req.body.total_gb === undefined
-        ? existing.total_gb
-        : Number(req.body.total_gb) || 0;
-
-    const expiryTime =
-      req.body.expiry_time === undefined
-        ? existing.expiry_time
-        : clean(req.body.expiry_time);
-
-    const enabled =
-      boolValue(
-        req.body.enabled,
-        existing.enabled
-      );
-
-    db.prepare(`
-      UPDATE clients
-      SET
-        inbound_id = ?,
-        email = ?,
-        uuid = ?,
-        password = ?,
-        flow = ?,
-        total_gb = ?,
-        expiry_time = ?,
-        enabled = ?
-      WHERE id = ?
-    `).run(
-      inboundId,
-      email,
-      uuid,
-      password,
-      flow,
-      totalGb,
-      expiryTime,
-      enabled,
-      req.params.id
-    );
-
-    res.json(
-      db
-        .prepare(
-          "SELECT * FROM clients WHERE id = ?"
-        )
-        .get(req.params.id)
-    );
+  if (!result.changes) {
+    return res.status(404).json({ error: "Client not found" });
   }
-);
 
-app.delete(
-  "/api/clients/:id",
-  auth,
-  (req, res) => {
-    const result = db
-      .prepare(
-        "DELETE FROM clients WHERE id = ?"
-      )
-      .run(req.params.id);
+  res.json({ ok: true });
+});
 
-    if (result.changes === 0) {
-      return res.status(404).json({
-        error: "Client not found"
-      });
-    }
+app.patch("/api/clients/:id/toggle", auth, (req, res) => {
+  const row = db.prepare("SELECT enabled FROM clients WHERE id=?").get(req.params.id);
 
-    res.json({
-      ok: true
-    });
+  if (!row) return res.status(404).json({ error: "Client not found" });
+
+  db.prepare("UPDATE clients SET enabled=? WHERE id=?")
+    .run(row.enabled ? 0 : 1, req.params.id);
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/clients/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM clients WHERE id=?").run(req.params.id);
+
+  if (!result.changes) {
+    return res.status(404).json({ error: "Client not found" });
   }
-);
 
-/* =========================================================
-   GENERIC CRUD FACTORY
-========================================================= */
-
-function createCrudRoutes({
-  route,
-  table,
-  fields,
-  required = []
-}) {
-  app.get(
-    `/api/${route}`,
-    auth,
-    (req, res) => {
-      const rows = db
-        .prepare(`
-          SELECT *
-          FROM ${table}
-          ORDER BY created_at DESC
-        `)
-        .all();
-
-      res.json(rows);
-    }
-  );
-
-  app.post(
-    `/api/${route}`,
-    auth,
-    (req, res) => {
-      for (const field of required) {
-        if (!clean(req.body[field])) {
-          return res.status(400).json({
-            error:
-              `${field} is required`
-          });
-        }
-      }
-
-      const newId = id();
-      const createdAt = now();
-
-      const columns = [
-        "id",
-        ...fields,
-        "created_at"
-      ];
-
-      const values = [
-        newId,
-        ...fields.map((field) => {
-          if (
-            field === "port"
-          ) {
-            return integerValue(
-              req.body[field],
-              0
-            );
-          }
-
-          if (
-            field === "enabled"
-          ) {
-            return boolValue(
-              req.body[field],
-              1
-            );
-          }
-
-          return clean(
-            req.body[field]
-          );
-        }),
-        createdAt
-      ];
-
-      const placeholders =
-        columns
-          .map(() => "?")
-          .join(", ");
-
-      db.prepare(`
-        INSERT INTO ${table}
-        (${columns.join(", ")})
-        VALUES (${placeholders})
-      `).run(...values);
-
-      const row = db
-        .prepare(
-          `SELECT * FROM ${table} WHERE id = ?`
-        )
-        .get(newId);
-
-      res.status(201).json(row);
-    }
-  );
-
-  app.put(
-    `/api/${route}/:id`,
-    auth,
-    (req, res) => {
-      const existing = db
-        .prepare(
-          `SELECT * FROM ${table} WHERE id = ?`
-        )
-        .get(req.params.id);
-
-      if (!existing) {
-        return res.status(404).json({
-          error:
-            `${route} item not found`
-        });
-      }
-
-      const setParts = [];
-      const values = [];
-
-      for (const field of fields) {
-        if (req.body[field] === undefined) {
-          continue;
-        }
-
-        let value;
-
-        if (field === "port") {
-          value =
-            integerValue(
-              req.body[field],
-              existing[field]
-            );
-        } else if (
-          field === "enabled"
-        ) {
-          value =
-            boolValue(
-              req.body[field],
-              existing[field]
-            );
-        } else {
-          value =
-            clean(req.body[field]);
-        }
-
-        setParts.push(
-          `${field} = ?`
-        );
-
-        values.push(value);
-      }
-
-      if (setParts.length === 0) {
-        return res.json(existing);
-      }
-
-      values.push(req.params.id);
-
-      db.prepare(`
-        UPDATE ${table}
-        SET ${setParts.join(", ")}
-        WHERE id = ?
-      `).run(...values);
-
-      const row = db
-        .prepare(
-          `SELECT * FROM ${table} WHERE id = ?`
-        )
-        .get(req.params.id);
-
-      res.json(row);
-    }
-  );
-
-  app.delete(
-    `/api/${route}/:id`,
-    auth,
-    (req, res) => {
-      const result = db
-        .prepare(
-          `DELETE FROM ${table} WHERE id = ?`
-        )
-        .run(req.params.id);
-
-      if (result.changes === 0) {
-        return res.status(404).json({
-          error:
-            `${route} item not found`
-        });
-      }
-
-      res.json({
-        ok: true
-      });
-    }
-  );
-}
-
-/* =========================================================
-   HOSTS
-========================================================= */
-
-createCrudRoutes({
-  route: "hosts",
-  table: "hosts",
-
-  fields: [
-    "name",
-    "address",
-    "port",
-    "protocol",
-    "path",
-    "sni",
-    "remark",
-    "enabled"
-  ],
-
-  required: [
-    "name",
-    "address"
-  ]
+  res.json({ ok: true });
 });
 
-/* =========================================================
-   NODES
-========================================================= */
-
-createCrudRoutes({
-  route: "nodes",
-  table: "nodes",
-
-  fields: [
-    "name",
-    "address",
-    "port",
-    "api_url",
-    "username",
-    "remark",
-    "enabled"
-  ],
-
-  required: [
-    "name",
-    "address"
-  ]
-});
-
-/* =========================================================
+/* -------------------------------------------------------
    GROUPS
-========================================================= */
+------------------------------------------------------- */
 
-createCrudRoutes({
-  route: "groups",
-  table: "groups",
-
-  fields: [
-    "name",
-    "description",
-    "enabled"
-  ],
-
-  required: [
-    "name"
-  ]
+app.get("/api/groups", auth, (req, res) => {
+  res.json(db.prepare("SELECT * FROM groups ORDER BY created_at DESC").all());
 });
 
-/* =========================================================
-   OUTBOUNDS
-========================================================= */
+app.post("/api/groups", auth, (req, res) => {
+  if (!str(req.body.name)) {
+    return res.status(400).json({ error: "Group name is required" });
+  }
 
-createCrudRoutes({
-  route: "outbounds",
-  table: "outbounds",
+  const groupId = id();
 
-  fields: [
-    "name",
-    "protocol",
-    "address",
-    "port",
-    "settings",
-    "remark",
-    "enabled"
-  ],
+  db.prepare(`
+    INSERT INTO groups(id,name,description,enabled,created_at)
+    VALUES(?,?,?,?,?)
+  `).run(
+    groupId,
+    str(req.body.name),
+    str(req.body.description),
+    bool(req.body.enabled),
+    now()
+  );
 
-  required: [
-    "name",
-    "protocol"
-  ]
+  res.status(201).json({ ok: true, id: groupId });
 });
 
-/* =========================================================
+app.put("/api/groups/:id", auth, (req, res) => {
+  const result = db.prepare(`
+    UPDATE groups
+    SET name=?,description=?,enabled=?
+    WHERE id=?
+  `).run(
+    str(req.body.name),
+    str(req.body.description),
+    bool(req.body.enabled),
+    req.params.id
+  );
+
+  if (!result.changes) return res.status(404).json({ error: "Group not found" });
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/groups/:id", auth, (req, res) => {
+  db.prepare("UPDATE clients SET group_id='' WHERE group_id=?").run(req.params.id);
+
+  const result = db.prepare("DELETE FROM groups WHERE id=?").run(req.params.id);
+
+  if (!result.changes) return res.status(404).json({ error: "Group not found" });
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
+   NODES
+------------------------------------------------------- */
+
+app.get("/api/nodes", auth, (req, res) => {
+  res.json(db.prepare("SELECT * FROM nodes ORDER BY created_at DESC").all());
+});
+
+app.post("/api/nodes", auth, (req, res) => {
+  const b = req.body;
+  const p = port(b.port) || 443;
+
+  if (!str(b.name) || !str(b.address)) {
+    return res.status(400).json({ error: "Name and address are required" });
+  }
+
+  const nodeId = id();
+
+  db.prepare(`
+    INSERT INTO nodes
+    (id,name,address,port,api_port,protocol,username,password,enabled,remark,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    nodeId,
+    str(b.name),
+    str(b.address),
+    p,
+    Number(b.api_port) || 0,
+    str(b.protocol) || "http",
+    str(b.username),
+    str(b.password),
+    bool(b.enabled),
+    str(b.remark),
+    now()
+  );
+
+  res.status(201).json({ ok: true, id: nodeId });
+});
+
+app.put("/api/nodes/:id", auth, (req, res) => {
+  const b = req.body;
+
+  const result = db.prepare(`
+    UPDATE nodes SET
+      name=?,address=?,port=?,api_port=?,protocol=?,
+      username=?,password=?,enabled=?,remark=?
+    WHERE id=?
+  `).run(
+    str(b.name),
+    str(b.address),
+    port(b.port) || 443,
+    Number(b.api_port) || 0,
+    str(b.protocol),
+    str(b.username),
+    str(b.password),
+    bool(b.enabled),
+    str(b.remark),
+    req.params.id
+  );
+
+  if (!result.changes) return res.status(404).json({ error: "Node not found" });
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/nodes/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM nodes WHERE id=?").run(req.params.id);
+
+  if (!result.changes) return res.status(404).json({ error: "Node not found" });
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
+   HOSTS
+------------------------------------------------------- */
+
+app.get("/api/hosts", auth, (req, res) => {
+  res.json(db.prepare("SELECT * FROM hosts ORDER BY created_at DESC").all());
+});
+
+app.post("/api/hosts", auth, (req, res) => {
+  const b = req.body;
+
+  if (!str(b.name) || !str(b.address)) {
+    return res.status(400).json({ error: "Name and address are required" });
+  }
+
+  const hostId = id();
+
+  db.prepare(`
+    INSERT INTO hosts
+    (id,name,address,port,sni,path,host_header,type,enabled,remark,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    hostId,
+    str(b.name),
+    str(b.address),
+    port(b.port) || 443,
+    str(b.sni),
+    str(b.path) || "/",
+    str(b.host_header),
+    str(b.type) || "WebSocket",
+    bool(b.enabled),
+    str(b.remark),
+    now()
+  );
+
+  res.status(201).json({ ok: true, id: hostId });
+});
+
+app.put("/api/hosts/:id", auth, (req, res) => {
+  const b = req.body;
+
+  const result = db.prepare(`
+    UPDATE hosts SET
+      name=?,address=?,port=?,sni=?,path=?,
+      host_header=?,type=?,enabled=?,remark=?
+    WHERE id=?
+  `).run(
+    str(b.name),
+    str(b.address),
+    port(b.port) || 443,
+    str(b.sni),
+    str(b.path) || "/",
+    str(b.host_header),
+    str(b.type),
+    bool(b.enabled),
+    str(b.remark),
+    req.params.id
+  );
+
+  if (!result.changes) return res.status(404).json({ error: "Host not found" });
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/hosts/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM hosts WHERE id=?").run(req.params.id);
+
+  if (!result.changes) return res.status(404).json({ error: "Host not found" });
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
+   OUTBOUND
+------------------------------------------------------- */
+
+app.get("/api/outbounds", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM outbounds ORDER BY created_at DESC").all();
+
+  res.json(rows.map((r) => ({
+    ...r,
+    settings: json(r.settings_json)
+  })));
+});
+
+app.post("/api/outbounds", auth, (req, res) => {
+  const b = req.body;
+
+  if (!str(b.name) || !str(b.protocol)) {
+    return res.status(400).json({ error: "Name and protocol are required" });
+  }
+
+  const outboundId = id();
+
+  db.prepare(`
+    INSERT INTO outbounds
+    (id,name,protocol,server,port,settings_json,enabled,remark,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?)
+  `).run(
+    outboundId,
+    str(b.name),
+    str(b.protocol),
+    str(b.server),
+    port(b.port) || 443,
+    JSON.stringify(json(b.settings)),
+    bool(b.enabled),
+    str(b.remark),
+    now()
+  );
+
+  res.status(201).json({ ok: true, id: outboundId });
+});
+
+app.put("/api/outbounds/:id", auth, (req, res) => {
+  const b = req.body;
+
+  const result = db.prepare(`
+    UPDATE outbounds SET
+      name=?,protocol=?,server=?,port=?,
+      settings_json=?,enabled=?,remark=?
+    WHERE id=?
+  `).run(
+    str(b.name),
+    str(b.protocol),
+    str(b.server),
+    port(b.port) || 443,
+    JSON.stringify(json(b.settings)),
+    bool(b.enabled),
+    str(b.remark),
+    req.params.id
+  );
+
+  if (!result.changes) return res.status(404).json({ error: "Outbound not found" });
+
+  res.json({ ok: true });
+});
+
+app.delete("/api/outbounds/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM outbounds WHERE id=?").run(req.params.id);
+
+  if (!result.changes) return res.status(404).json({ error: "Outbound not found" });
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
    ROUTING
-========================================================= */
+------------------------------------------------------- */
 
-createCrudRoutes({
-  route: "routing",
-  table: "routing_rules",
+app.get("/api/routing", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM routings ORDER BY created_at DESC").all();
 
-  fields: [
-    "name",
-    "domain",
-    "ip",
-    "port",
-    "protocol",
-    "source",
-    "outbound",
-    "enabled"
-  ],
-
-  required: [
-    "name",
-    "outbound"
-  ]
+  res.json(rows.map((r) => ({
+    ...r,
+    domains: json(r.domains_json, []),
+    ips: json(r.ips_json, []),
+    sources: json(r.sources_json, [])
+  })));
 });
 
-/* =========================================================
+app.post("/api/routing", auth, (req, res) => {
+  if (!str(req.body.name)) {
+    return res.status(400).json({ error: "Rule name is required" });
+  }
+
+  const ruleId = id();
+
+  const array = (v) =>
+    Array.isArray(v)
+      ? v
+      : str(v)
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean);
+
+  db.prepare(`
+    INSERT INTO routings
+    (id,name,domains_json,ips_json,sources_json,outbound_tag,enabled,remark,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?)
+  `).run(
+    ruleId,
+    str(req.body.name),
+    JSON.stringify(array(req.body.domains)),
+    JSON.stringify(array(req.body.ips)),
+    JSON.stringify(array(req.body.sources)),
+    str(req.body.outbound_tag),
+    bool(req.body.enabled),
+    str(req.body.remark),
+    now()
+  );
+
+  res.status(201).json({ ok: true, id: ruleId });
+});
+
+app.delete("/api/routing/:id", auth, (req, res) => {
+  const result = db.prepare("DELETE FROM routings WHERE id=?").run(req.params.id);
+
+  if (!result.changes) return res.status(404).json({ error: "Rule not found" });
+
+  res.json({ ok: true });
+});
+
+/* -------------------------------------------------------
    SETTINGS
-========================================================= */
+------------------------------------------------------- */
 
-app.get(
-  "/api/settings",
-  auth,
-  (req, res) => {
-    const rows = db
-      .prepare(`
-        SELECT key, value
-        FROM settings
-        ORDER BY key
-      `)
-      .all();
+app.get("/api/settings", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM settings ORDER BY key").all();
+  res.json(Object.fromEntries(rows.map((r) => [r.key, r.value])));
+});
 
-    const result = {};
+app.put("/api/settings", auth, (req, res) => {
+  const stmt = db.prepare(`
+    INSERT INTO settings(key,value)
+    VALUES(?,?)
+    ON CONFLICT(key) DO UPDATE SET value=excluded.value
+  `);
 
-    for (const row of rows) {
-      result[row.key] = row.value;
+  const tx = db.transaction((data) => {
+    for (const [key, value] of Object.entries(data || {})) {
+      stmt.run(str(key), typeof value === "string" ? value : JSON.stringify(value));
     }
+  });
 
-    res.json(result);
-  }
-);
+  tx(req.body);
 
-app.put(
-  "/api/settings",
-  auth,
-  (req, res) => {
-    const data =
-      req.body || {};
+  res.json({ ok: true });
+});
 
-    const transaction =
-      db.transaction(() => {
-        const statement =
-          db.prepare(`
-            INSERT INTO settings
-            (key, value)
-            VALUES (?, ?)
-            ON CONFLICT(key)
-            DO UPDATE SET value = excluded.value
-          `);
+/* -------------------------------------------------------
+   XRAY CONFIG
+------------------------------------------------------- */
 
-        for (const [key, value] of Object.entries(data)) {
-          statement.run(
-            clean(key),
-            typeof value === "object"
-              ? JSON.stringify(value)
-              : clean(value)
-          );
-        }
-      });
+app.get("/api/config", auth, (req, res) => {
+  const inbounds = db.prepare("SELECT * FROM inbounds").all();
+  const clients = db.prepare("SELECT * FROM clients WHERE enabled=1").all();
+  const outbounds = db.prepare("SELECT * FROM outbounds WHERE enabled=1").all();
+  const routing = db.prepare("SELECT * FROM routings WHERE enabled=1").all();
 
-    transaction();
+  res.json({
+    generated_at: now(),
+    xray_core_running: false,
+    note: "Panel configuration skeleton. Xray Core is not started by this MVP.",
+    inbounds,
+    clients,
+    outbounds,
+    routing
+  });
+});
 
-    const rows = db
-      .prepare(`
-        SELECT key, value
-        FROM settings
-        ORDER BY key
-      `)
-      .all();
+/* -------------------------------------------------------
+   API DOCS
+------------------------------------------------------- */
 
-    const result = {};
+app.get("/api/docs", auth, (req, res) => {
+  res.json([
+    "POST /api/login",
+    "GET /api/me",
+    "GET /api/stats",
+    "GET /api/inbounds",
+    "POST /api/inbounds",
+    "PUT /api/inbounds/:id",
+    "DELETE /api/inbounds/:id",
+    "GET /api/clients",
+    "POST /api/clients",
+    "PUT /api/clients/:id",
+    "DELETE /api/clients/:id",
+    "GET /api/groups",
+    "POST /api/groups",
+    "PUT /api/groups/:id",
+    "DELETE /api/groups/:id",
+    "GET /api/nodes",
+    "POST /api/nodes",
+    "PUT /api/nodes/:id",
+    "DELETE /api/nodes/:id",
+    "GET /api/hosts",
+    "POST /api/hosts",
+    "PUT /api/hosts/:id",
+    "DELETE /api/hosts/:id",
+    "GET /api/outbounds",
+    "POST /api/outbounds",
+    "PUT /api/outbounds/:id",
+    "DELETE /api/outbounds/:id",
+    "GET /api/routing",
+    "POST /api/routing",
+    "DELETE /api/routing/:id",
+    "GET /api/settings",
+    "PUT /api/settings",
+    "GET /api/config"
+  ]);
+});
 
-    for (const row of rows) {
-      result[row.key] = row.value;
-    }
-
-    res.json(result);
-  }
-);
-
-/* =========================================================
-   DASHBOARD STATS
-========================================================= */
-
-app.get(
-  "/api/stats",
-  auth,
-  (req, res) => {
-    const inbounds =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM inbounds"
-        )
-        .get().count;
-
-    const clients =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM clients"
-        )
-        .get().count;
-
-    const activeClients =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM clients WHERE enabled = 1"
-        )
-        .get().count;
-
-    const hosts =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM hosts"
-        )
-        .get().count;
-
-    const nodes =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM nodes"
-        )
-        .get().count;
-
-    const groups =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM groups"
-        )
-        .get().count;
-
-    const outbounds =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM outbounds"
-        )
-        .get().count;
-
-    const routingRules =
-      db
-        .prepare(
-          "SELECT COUNT(*) AS count FROM routing_rules"
-        )
-        .get().count;
-
-    res.json({
-      inbounds,
-      clients,
-      activeClients,
-      hosts,
-      nodes,
-      groups,
-      outbounds,
-      routingRules
-    });
-  }
-);
-
-/* =========================================================
-   XRAY CONFIG SKELETON
-========================================================= */
-
-app.get(
-  "/api/config",
-  auth,
-  (req, res) => {
-    const inbounds =
-      db
-        .prepare(
-          "SELECT * FROM inbounds ORDER BY created_at"
-        )
-        .all();
-
-    const clients =
-      db
-        .prepare(
-          "SELECT * FROM clients WHERE enabled = 1"
-        )
-        .all();
-
-    const outbounds =
-      db
-        .prepare(
-          "SELECT * FROM outbounds WHERE enabled = 1"
-        )
-        .all();
-
-    const routing =
-      db
-        .prepare(
-          "SELECT * FROM routing_rules WHERE enabled = 1"
-        )
-        .all();
-
-    res.json({
-      type:
-        "xray-config-skeleton",
-
-      note:
-        "This panel stores management data. Xray Core is not started by this MVP.",
-
-      inbounds,
-      clients,
-      outbounds,
-      routing
-    });
-  }
-);
-
-/* =========================================================
-   API SUMMARY
-========================================================= */
-
-app.get(
-  "/api",
-  auth,
-  (req, res) => {
-    res.json({
-      name: "Xray Panel API",
-
-      endpoints: {
-        auth: [
-          "POST /api/login",
-          "GET /api/me"
-        ],
-
-        dashboard: [
-          "GET /api/stats"
-        ],
-
-        inbounds: [
-          "GET /api/inbounds",
-          "POST /api/inbounds",
-          "PUT /api/inbounds/:id",
-          "DELETE /api/inbounds/:id"
-        ],
-
-        clients: [
-          "GET /api/clients",
-          "POST /api/clients",
-          "PUT /api/clients/:id",
-          "DELETE /api/clients/:id"
-        ],
-
-        hosts: [
-          "GET /api/hosts",
-          "POST /api/hosts",
-          "PUT /api/hosts/:id",
-          "DELETE /api/hosts/:id"
-        ],
-
-        nodes: [
-          "GET /api/nodes",
-          "POST /api/nodes",
-          "PUT /api/nodes/:id",
-          "DELETE /api/nodes/:id"
-        ],
-
-        groups: [
-          "GET /api/groups",
-          "POST /api/groups",
-          "PUT /api/groups/:id",
-          "DELETE /api/groups/:id"
-        ],
-
-        outbounds: [
-          "GET /api/outbounds",
-          "POST /api/outbounds",
-          "PUT /api/outbounds/:id",
-          "DELETE /api/outbounds/:id"
-        ],
-
-        routing: [
-          "GET /api/routing",
-          "POST /api/routing",
-          "PUT /api/routing/:id",
-          "DELETE /api/routing/:id"
-        ],
-
-        settings: [
-          "GET /api/settings",
-          "PUT /api/settings"
-        ],
-
-        config: [
-          "GET /api/config"
-        ]
-      }
-    });
-  }
-);
-
-/* =========================================================
-   FRONTEND FALLBACK
-========================================================= */
+/* -------------------------------------------------------
+   SPA
+------------------------------------------------------- */
 
 app.use((req, res) => {
-  res.sendFile(
-    path.join(
-      __dirname,
-      "../public/index.html"
-    )
-  );
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-/* =========================================================
-   SERVER
-========================================================= */
-
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-    console.log(
-      `Xray Panel running on port ${PORT}`
-    );
-  }
-);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Xray Panel running on port ${PORT}`);
+});
