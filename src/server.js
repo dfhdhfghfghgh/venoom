@@ -17,30 +17,30 @@ const DB_PATH = process.env.DB_PATH || "./data/panel.db";
 
 const dbDir = path.dirname(DB_PATH);
 
-if (dbDir && dbDir !== ".") {
+if (dbDir !== ".") {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
 const db = new Database(DB_PATH);
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS inbounds (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    protocol TEXT NOT NULL,
-    port INTEGER NOT NULL,
-    remark TEXT DEFAULT '',
-    created_at TEXT NOT NULL
-  );
+CREATE TABLE IF NOT EXISTS inbounds (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  protocol TEXT NOT NULL,
+  port INTEGER NOT NULL,
+  remark TEXT DEFAULT '',
+  created_at TEXT NOT NULL
+);
 
-  CREATE TABLE IF NOT EXISTS clients (
-    id TEXT PRIMARY KEY,
-    inbound_id TEXT NOT NULL,
-    email TEXT NOT NULL,
-    uuid TEXT NOT NULL,
-    enabled INTEGER DEFAULT 1,
-    created_at TEXT NOT NULL
-  );
+CREATE TABLE IF NOT EXISTS clients (
+  id TEXT PRIMARY KEY,
+  inbound_id TEXT NOT NULL,
+  email TEXT NOT NULL,
+  uuid TEXT NOT NULL,
+  enabled INTEGER DEFAULT 1,
+  created_at TEXT NOT NULL
+);
 `);
 
 app.use(express.json());
@@ -50,13 +50,9 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 function createToken() {
   return jwt.sign(
-    {
-      username: ADMIN_USER
-    },
+    { username: ADMIN_USER },
     JWT_SECRET,
-    {
-      expiresIn: "7d"
-    }
+    { expiresIn: "7d" }
   );
 }
 
@@ -69,7 +65,7 @@ function auth(req, res, next) {
     });
   }
 
-  const token = header.slice(7);
+  const token = header.substring(7);
 
   try {
     req.user = jwt.verify(token, JWT_SECRET);
@@ -89,7 +85,8 @@ app.get("/api/health", (req, res) => {
 });
 
 app.post("/api/login", (req, res) => {
-  const { username, password } = req.body;
+  const username = req.body.username;
+  const password = req.body.password;
 
   if (
     username !== ADMIN_USER ||
@@ -123,26 +120,18 @@ app.get("/api/inbounds", auth, (req, res) => {
 });
 
 app.post("/api/inbounds", auth, (req, res) => {
-  const {
-    name,
-    protocol,
-    port,
-    remark
-  } = req.body;
+  const name = req.body.name;
+  const protocol = req.body.protocol;
+  const port = Number(req.body.port);
+  const remark = req.body.remark || "";
 
-  if (!name || !protocol || !port) {
+  if (!name || !protocol || !Number.isInteger(port)) {
     return res.status(400).json({
-      error: "Name, protocol and port are required"
+      error: "Invalid inbound data"
     });
   }
 
-  const portNumber = Number(port);
-
-  if (
-    !Number.isInteger(portNumber) ||
-    portNumber < 1 ||
-    portNumber > 65535
-  ) {
+  if (port < 1 || port > 65535) {
     return res.status(400).json({
       error: "Invalid port"
     });
@@ -159,8 +148,8 @@ app.post("/api/inbounds", auth, (req, res) => {
     id,
     name,
     protocol,
-    portNumber,
-    remark || "",
+    port,
+    remark,
     createdAt
   );
 
@@ -168,8 +157,8 @@ app.post("/api/inbounds", auth, (req, res) => {
     id,
     name,
     protocol,
-    port: portNumber,
-    remark: remark || "",
+    port,
+    remark,
     created_at: createdAt
   });
 });
@@ -187,7 +176,7 @@ app.delete("/api/inbounds/:id", auth, (req, res) => {
     )
     .run(id);
 
-  if (!result.changes) {
+  if (result.changes === 0) {
     return res.status(404).json({
       error: "Inbound not found"
     });
@@ -215,12 +204,10 @@ app.get("/api/clients", auth, (req, res) => {
 });
 
 app.post("/api/clients", auth, (req, res) => {
-  const {
-    inbound_id,
-    email
-  } = req.body;
+  const inboundId = req.body.inbound_id;
+  const email = req.body.email;
 
-  if (!inbound_id || !email) {
+  if (!inboundId || !email) {
     return res.status(400).json({
       error: "Inbound and email are required"
     });
@@ -230,7 +217,7 @@ app.post("/api/clients", auth, (req, res) => {
     .prepare(
       "SELECT * FROM inbounds WHERE id = ?"
     )
-    .get(inbound_id);
+    .get(inboundId);
 
   if (!inbound) {
     return res.status(404).json({
@@ -248,7 +235,7 @@ app.post("/api/clients", auth, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(
     id,
-    inbound_id,
+    inboundId,
     email,
     uuid,
     1,
@@ -257,7 +244,7 @@ app.post("/api/clients", auth, (req, res) => {
 
   res.status(201).json({
     id,
-    inbound_id,
+    inbound_id: inboundId,
     email,
     uuid,
     enabled: 1,
@@ -272,7 +259,7 @@ app.delete("/api/clients/:id", auth, (req, res) => {
     )
     .run(req.params.id);
 
-  if (!result.changes) {
+  if (result.changes === 0) {
     return res.status(404).json({
       error: "Client not found"
     });
@@ -304,10 +291,6 @@ app.get("/api/config", auth, (req, res) => {
   });
 });
 
-/*
-  Express 5 compatible fallback route.
-  Do not change this to app.get("*", ...).
-*/
 app.use((req, res) => {
   res.sendFile(
     path.join(__dirname, "../public/index.html")
@@ -318,171 +301,4 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(
     `Xray Panel running on port ${PORT}`
   );
-});  const {
-    name,
-    protocol,
-    port,
-    remark
-  } = req.body;
-
-  if (!name || !protocol || !port) {
-    return res.status(400).json({
-      error: "name, protocol and port are required"
-    });
-  }
-
-  const id = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
-
-  db.prepare(`
-    INSERT INTO inbounds
-    (id, name, protocol, port, remark, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(
-    id,
-    name,
-    protocol,
-    Number(port),
-    remark || "",
-    createdAt
-  );
-
-  res.json({
-    id,
-    name,
-    protocol,
-    port: Number(port),
-    remark: remark || "",
-    created_at: createdAt
-  });
-});
-
-app.delete("/api/inbounds/:id", auth, (req, res) => {
-  const id = req.params.id;
-
-  db.prepare(
-    "DELETE FROM clients WHERE inbound_id = ?"
-  ).run(id);
-
-  const result = db
-    .prepare("DELETE FROM inbounds WHERE id = ?")
-    .run(id);
-
-  if (!result.changes) {
-    return res.status(404).json({
-      error: "Inbound not found"
-    });
-  }
-
-  res.json({
-    ok: true
-  });
-});
-
-app.get("/api/clients", auth, (req, res) => {
-  const rows = db
-    .prepare(`
-      SELECT
-        clients.*,
-        inbounds.name AS inbound_name
-      FROM clients
-      LEFT JOIN inbounds
-      ON clients.inbound_id = inbounds.id
-      ORDER BY clients.created_at DESC
-    `)
-    .all();
-
-  res.json(rows);
-});
-
-app.post("/api/clients", auth, (req, res) => {
-  const {
-    inbound_id,
-    email
-  } = req.body;
-
-  if (!inbound_id || !email) {
-    return res.status(400).json({
-      error: "inbound_id and email are required"
-    });
-  }
-
-  const inbound = db
-    .prepare("SELECT * FROM inbounds WHERE id = ?")
-    .get(inbound_id);
-
-  if (!inbound) {
-    return res.status(404).json({
-      error: "Inbound not found"
-    });
-  }
-
-  const id = crypto.randomUUID();
-  const uuid = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
-
-  db.prepare(`
-    INSERT INTO clients
-    (id, inbound_id, email, uuid, enabled, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(
-    id,
-    inbound_id,
-    email,
-    uuid,
-    1,
-    createdAt
-  );
-
-  res.json({
-    id,
-    inbound_id,
-    email,
-    uuid,
-    enabled: 1,
-    created_at: createdAt
-  });
-});
-
-app.delete("/api/clients/:id", auth, (req, res) => {
-  const result = db
-    .prepare("DELETE FROM clients WHERE id = ?")
-    .run(req.params.id);
-
-  if (!result.changes) {
-    return res.status(404).json({
-      error: "Client not found"
-    });
-  }
-
-  res.json({
-    ok: true
-  });
-});
-
-app.get("/api/config", auth, (req, res) => {
-  const inbounds = db
-    .prepare("SELECT * FROM inbounds ORDER BY created_at")
-    .all();
-
-  const clients = db
-    .prepare("SELECT * FROM clients WHERE enabled = 1")
-    .all();
-
-  res.json({
-    type: "xray-config-skeleton",
-    note: "This MVP does not install or run Xray Core.",
-    inbounds,
-    clients
-  });
-});
-
-app.get("*", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "../public/index.html")
-  );
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Xray Panel running on port ${PORT}`);
 });
