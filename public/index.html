@@ -1,48 +1,50 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Xray Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3X-UI Panel</title>
 
   <style>
-    :root {
-      --bg: #0b0f14;
-      --sidebar: #0d1218;
-      --card: #121820;
-      --card-hover: #171f29;
-      --border: #222c38;
-
-      --text: #f1f5f9;
-      --muted: #7f8b99;
-
-      --primary: #7c5cff;
-      --primary-hover: #8d70ff;
-
-      --success: #2bd795;
-      --danger: #ff5c72;
-      --warning: #f5bd52;
-
-      --radius: 12px;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    body {
-      font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --sidebar: #ffffff;
+      --text: #202938;
+      --muted: #7b8494;
+      --border: #e7eaf0;
+      --primary: #5667f6;
+      --primary-hover: #4657e7;
+      --success: #22a06b;
+      --danger: #e55353;
+      --warning: #e6a23c;
+      --shadow: 0 4px 18px rgba(35, 42, 60, .06);
+    }
 
+    body.dark {
+      --bg: #11151d;
+      --card: #191e28;
+      --sidebar: #151a23;
+      --text: #edf1f7;
+      --muted: #929bab;
+      --border: #29303c;
+      --primary: #6878ff;
+      --primary-hover: #7886ff;
+      --success: #32bd80;
+      --danger: #ef6464;
+      --warning: #e8ae50;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .18);
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -58,628 +60,601 @@
       cursor: pointer;
     }
 
-    /* =========================
-       LOGIN
-    ========================= */
+    .hidden {
+      display: none !important;
+    }
 
-    .login-page {
+    /* LOGIN */
+
+    #loginScreen {
       min-height: 100vh;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
-      background:
-        radial-gradient(
-          circle at top,
-          rgba(124, 92, 255, 0.18),
-          transparent 35%
-        ),
-        var(--bg);
-
       padding: 20px;
+      background:
+        radial-gradient(circle at top right, rgba(86,103,246,.15), transparent 35%),
+        var(--bg);
     }
 
     .login-box {
       width: 100%;
-      max-width: 410px;
-
+      max-width: 420px;
       background: var(--card);
-
       border: 1px solid var(--border);
-
-      border-radius: 16px;
-
-      padding: 34px;
-
-      box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.45);
+      border-radius: 14px;
+      padding: 38px;
+      box-shadow: var(--shadow);
     }
 
-    .login-logo {
-      width: 48px;
-      height: 48px;
-
-      margin: 0 auto 16px;
-
+    .logo {
       display: flex;
       align-items: center;
-      justify-content: center;
-
-      border-radius: 13px;
-
-      background:
-        linear-gradient(
-          135deg,
-          var(--primary),
-          #5a8cff
-        );
-
-      font-weight: 900;
-      font-size: 21px;
-    }
-
-    .login-title {
-      text-align: center;
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .login-subtitle {
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-
-      margin-top: 7px;
-      margin-bottom: 28px;
-    }
-
-    .login-error {
-      display: none;
-
-      background: rgba(255, 92, 114, 0.1);
-
-      border: 1px solid rgba(255, 92, 114, 0.25);
-
-      color: #ff7b8d;
-
-      padding: 11px;
-
-      border-radius: 8px;
-
-      margin-bottom: 15px;
-
-      font-size: 12px;
-    }
-
-    /* =========================
-       APP
-    ========================= */
-
-    .app {
-      min-height: 100vh;
-    }
-
-    /* =========================
-       SIDEBAR
-    ========================= */
-
-    .sidebar {
-      position: fixed;
-
-      left: 0;
-      top: 0;
-      bottom: 0;
-
-      width: 245px;
-
-      background: var(--sidebar);
-
-      border-right: 1px solid var(--border);
-
-      display: flex;
-      flex-direction: column;
-
-      z-index: 100;
-    }
-
-    .brand {
-      height: 76px;
-
-      display: flex;
-      align-items: center;
-
-      padding: 0 21px;
-
-      border-bottom: 1px solid var(--border);
-    }
-
-    .brand-logo {
-      width: 35px;
-      height: 35px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 9px;
-
-      background:
-        linear-gradient(
-          135deg,
-          var(--primary),
-          #5a8cff
-        );
-
-      font-weight: 900;
-
-      margin-right: 11px;
-    }
-
-    .brand-name {
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .brand-version {
-      color: var(--muted);
-      font-size: 10px;
-
-      margin-top: 2px;
-    }
-
-    .nav {
-      padding: 18px 12px;
-      flex: 1;
-    }
-
-    .nav-label {
-      color: #596574;
-
-      font-size: 10px;
-
-      font-weight: 600;
-
-      text-transform: uppercase;
-
-      letter-spacing: 1.2px;
-
-      padding: 0 11px 9px;
-    }
-
-    .nav-item {
-      width: 100%;
-
-      display: flex;
-      align-items: center;
-
       gap: 12px;
-
-      color: #8995a4;
-
-      background: transparent;
-
-      border: none;
-
-      text-align: left;
-
-      padding: 11px 12px;
-
-      border-radius: 8px;
-
-      margin-bottom: 3px;
-
-      transition: 0.15s;
-    }
-
-    .nav-item:hover {
-      background: #151c25;
-      color: #fff;
-    }
-
-    .nav-item.active {
-      background: rgba(124, 92, 255, 0.12);
-      color: #fff;
-
-      box-shadow:
-        inset 3px 0 0 var(--primary);
-    }
-
-    .nav-icon {
-      width: 20px;
-
-      text-align: center;
-
-      font-size: 15px;
-    }
-
-    .sidebar-footer {
-      padding: 15px;
-
-      border-top: 1px solid var(--border);
-    }
-
-    .server-status {
-      display: flex;
-      align-items: center;
-
-      gap: 9px;
-
-      background: #111820;
-
-      border: 1px solid var(--border);
-
-      border-radius: 9px;
-
-      padding: 10px 11px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-
-      border-radius: 50%;
-
-      background: var(--success);
-
-      box-shadow:
-        0 0 9px rgba(43, 215, 149, 0.65);
-    }
-
-    .status-title {
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .status-text {
-      color: var(--muted);
-      font-size: 9px;
-
-      margin-top: 2px;
-    }
-
-    /* =========================
-       MAIN
-    ========================= */
-
-    .main {
-      margin-left: 245px;
-
-      min-height: 100vh;
-
-      padding: 27px 30px;
-    }
-
-    .topbar {
-      display: flex;
-
-      align-items: center;
-      justify-content: space-between;
-
-      margin-bottom: 25px;
-    }
-
-    .page-title {
-      font-size: 24px;
+      font-size: 21px;
       font-weight: 700;
+      margin-bottom: 32px;
     }
 
-    .page-description {
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+    }
+
+    .login-box h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .login-box p {
       color: var(--muted);
-
-      font-size: 12px;
-
-      margin-top: 5px;
+      margin-bottom: 28px;
+      font-size: 14px;
     }
 
-    .top-actions {
-      display: flex;
-      gap: 8px;
+    .field {
+      margin-bottom: 17px;
     }
 
-    /* =========================
-       BUTTONS
-    ========================= */
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 7px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 43px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0 13px;
+      outline: none;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--primary);
+    }
 
     .btn {
-      border: 1px solid var(--border);
-
-      background: #151c25;
-
-      color: #e9eef4;
-
-      border-radius: 8px;
-
-      padding: 9px 13px;
-
-      transition: 0.15s;
-    }
-
-    .btn:hover {
-      background: #1c2530;
+      border: 0;
+      border-radius: 7px;
+      height: 40px;
+      padding: 0 16px;
+      font-weight: 600;
+      transition: .15s;
     }
 
     .btn-primary {
       background: var(--primary);
-      border-color: var(--primary);
-
-      color: #fff;
+      color: white;
     }
 
     .btn-primary:hover {
       background: var(--primary-hover);
     }
 
+    .btn-light {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
     .btn-danger {
-      color: #ff7588;
+      background: rgba(229,83,83,.1);
+      color: var(--danger);
     }
 
-    .btn-small {
-      padding: 6px 9px;
-      font-size: 11px;
+    .btn-success {
+      background: rgba(34,160,107,.1);
+      color: var(--success);
     }
 
-    /* =========================
-       STAT CARDS
-    ========================= */
+    .full {
+      width: 100%;
+    }
 
-    .stats {
+    .login-error {
+      margin-top: 14px;
+      padding: 10px;
+      background: rgba(229,83,83,.1);
+      color: var(--danger);
+      border-radius: 7px;
+      font-size: 13px;
+    }
+
+    /* APP */
+
+    #app {
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 245px;
+      flex-shrink: 0;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 20;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      height: 68px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .logo-icon {
+      width: 35px;
+      height: 35px;
+      font-size: 14px;
+    }
+
+    .sidebar-logo span {
+      margin-left: 10px;
+      font-weight: 700;
+      font-size: 17px;
+    }
+
+    .menu {
+      padding: 17px 12px;
+    }
+
+    .menu-title {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 11px 12px 7px;
+      letter-spacing: .8px;
+    }
+
+    .menu-item {
+      height: 42px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      color: var(--muted);
+      margin-bottom: 3px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: .15s;
+    }
+
+    .menu-item:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .menu-item.active {
+      background: rgba(86,103,246,.1);
+      color: var(--primary);
+      font-weight: 650;
+    }
+
+    .menu-icon {
+      width: 19px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .main {
+      margin-left: 245px;
+      width: calc(100% - 245px);
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 68px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 26px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .page-title {
+      font-size: 19px;
+      font-weight: 650;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 7px;
       display: grid;
+      place-items: center;
+    }
 
-      grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+    .content {
+      padding: 25px;
+      max-width: 1700px;
+      margin: auto;
+    }
 
-      gap: 14px;
+    /* DASHBOARD */
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
     }
 
     .stat-card {
       background: var(--card);
-
       border: 1px solid var(--border);
-
-      border-radius: var(--radius);
-
-      padding: 18px;
-
-      min-height: 125px;
-
-      position: relative;
+      border-radius: 9px;
+      padding: 20px;
+      box-shadow: var(--shadow);
     }
 
-    .stat-icon {
-      position: absolute;
-
-      right: 17px;
-      top: 17px;
-
-      width: 34px;
-      height: 34px;
-
-      border-radius: 9px;
-
-      background: #1b2130;
-
-      color: #a697ff;
-
+    .stat-top {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
+      margin-bottom: 14px;
     }
 
     .stat-label {
       color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
 
-      font-size: 11px;
-
-      text-transform: uppercase;
-
-      letter-spacing: 0.5px;
+    .stat-icon {
+      width: 35px;
+      height: 35px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(86,103,246,.1);
+      color: var(--primary);
     }
 
     .stat-value {
-      font-size: 27px;
-
-      font-weight: 750;
-
-      margin-top: 12px;
+      font-size: 25px;
+      font-weight: 700;
     }
 
     .stat-sub {
-      color: #687483;
-
-      font-size: 10px;
-
-      margin-top: 4px;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
     }
 
-    /* =========================
-       CARDS
-    ========================= */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
 
-    .panel {
+    .card {
       background: var(--card);
-
       border: 1px solid var(--border);
-
-      border-radius: var(--radius);
-
-      margin-top: 18px;
-
-      overflow: hidden;
+      border-radius: 9px;
+      box-shadow: var(--shadow);
     }
 
-    .panel-header {
-      min-height: 63px;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      padding: 14px 17px;
-
+    .card-header {
+      min-height: 56px;
+      padding: 0 18px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .panel-title {
+    .card-title {
       font-size: 14px;
       font-weight: 650;
     }
 
-    .panel-subtitle {
-      color: var(--muted);
-
-      font-size: 10px;
-
-      margin-top: 4px;
+    .card-body {
+      padding: 18px;
     }
 
-    /* =========================
-       TABLE
-    ========================= */
+    .chart {
+      height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
 
-    .table-container {
+    .chart-grid {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .chart-line {
+      border-top: 1px dashed var(--border);
+    }
+
+    .chart-bars {
+      position: absolute;
+      inset: 15px 0 10px 0;
+      display: flex;
+      align-items: end;
+      justify-content: space-around;
+      gap: 7px;
+    }
+
+    .bar-group {
+      flex: 1;
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      height: 100%;
+      gap: 3px;
+    }
+
+    .bar {
+      width: 7px;
+      border-radius: 4px 4px 0 0;
+      background: var(--primary);
+      opacity: .75;
+    }
+
+    .bar.secondary {
+      background: var(--success);
+      opacity: .65;
+    }
+
+    .server-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .server-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .server-name {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .server-value {
+      font-weight: 650;
+      font-size: 13px;
+    }
+
+    .progress {
+      height: 6px;
+      border-radius: 10px;
+      background: var(--bg);
+      overflow: hidden;
+      margin-top: 7px;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 42%;
+      background: var(--primary);
+      border-radius: inherit;
+    }
+
+    .status-online {
+      color: var(--success);
+    }
+
+    /* TOOLBAR */
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 17px;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search {
+      height: 40px;
+      width: 260px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--card);
+      color: var(--text);
+      padding: 0 12px;
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: var(--primary);
+    }
+
+    /* TABLE */
+
+    .table-wrap {
       overflow-x: auto;
     }
 
     table {
       width: 100%;
-
       border-collapse: collapse;
-
-      min-width: 720px;
+      min-width: 850px;
     }
 
     th {
-      background: #0f141b;
-
-      color: #697584;
-
       text-align: left;
-
-      font-size: 10px;
-
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
       text-transform: uppercase;
-
-      letter-spacing: 0.7px;
-
-      font-weight: 600;
-
-      padding: 12px 16px;
+      padding: 13px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
 
     td {
-      border-top: 1px solid #1d2530;
-
-      padding: 13px 16px;
-
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
       font-size: 12px;
-
-      color: #dce2e8;
+      white-space: nowrap;
     }
 
-    tr:hover td {
-      background: var(--card-hover);
-    }
-
-    .primary-text {
-      font-weight: 600;
-    }
-
-    .secondary-text {
-      color: var(--muted);
-
-      font-size: 10px;
-
-      margin-top: 3px;
+    tr:last-child td {
+      border-bottom: 0;
     }
 
     .badge {
       display: inline-flex;
-
       align-items: center;
-
-      border: 1px solid var(--border);
-
       border-radius: 20px;
-
-      padding: 4px 8px;
-
+      padding: 4px 9px;
       font-size: 10px;
-
-      font-weight: 600;
+      font-weight: 650;
     }
 
-    .badge-success {
+    .badge.green {
+      background: rgba(34,160,107,.1);
       color: var(--success);
-
-      background: rgba(43, 215, 149, 0.08);
-
-      border-color: rgba(43, 215, 149, 0.2);
     }
 
-    .badge-protocol {
-      color: #b7aaff;
-
-      background: rgba(124, 92, 255, 0.08);
-
-      border-color: rgba(124, 92, 255, 0.2);
+    .badge.red {
+      background: rgba(229,83,83,.1);
+      color: var(--danger);
     }
 
-    .mono {
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        monospace;
+    .badge.blue {
+      background: rgba(86,103,246,.1);
+      color: var(--primary);
+    }
 
+    .badge.orange {
+      background: rgba(230,162,60,.12);
+      color: var(--warning);
+    }
+
+    .protocol {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .action-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .small-btn {
+      height: 30px;
+      min-width: 30px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 5px;
       font-size: 11px;
     }
 
-    /* =========================
-       EMPTY
-    ========================= */
+    .small-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* EMPTY */
 
     .empty {
-      padding: 45px 20px;
-
+      padding: 60px 20px;
       text-align: center;
-
       color: var(--muted);
-
-      font-size: 12px;
     }
 
     .empty-icon {
-      font-size: 25px;
-
-      margin-bottom: 9px;
-
-      opacity: 0.45;
+      font-size: 35px;
+      margin-bottom: 10px;
+      opacity: .5;
     }
 
-    /* =========================
-       MODAL
-    ========================= */
+    /* MODAL */
 
     .modal-overlay {
       position: fixed;
-
       inset: 0;
-
-      background: rgba(0, 0, 0, 0.68);
-
-      backdrop-filter: blur(5px);
-
+      background: rgba(0,0,0,.48);
       display: none;
-
       align-items: center;
       justify-content: center;
-
-      padding: 18px;
-
-      z-index: 500;
+      padding: 20px;
+      z-index: 100;
     }
 
     .modal-overlay.show {
@@ -688,143 +663,186 @@
 
     .modal {
       width: 100%;
-
-      max-width: 530px;
-
+      max-width: 850px;
+      max-height: 90vh;
+      overflow-y: auto;
       background: var(--card);
-
+      border-radius: 10px;
       border: 1px solid var(--border);
-
-      border-radius: 14px;
-
-      box-shadow:
-        0 30px 90px rgba(0, 0, 0, 0.55);
-
-      overflow: hidden;
+      box-shadow: 0 20px 70px rgba(0,0,0,.25);
     }
 
     .modal-header {
+      height: 58px;
+      padding: 0 20px;
       display: flex;
-
       align-items: center;
       justify-content: space-between;
-
-      padding: 17px 20px;
-
       border-bottom: 1px solid var(--border);
     }
 
     .modal-title {
-      font-weight: 650;
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 700;
     }
 
-    .close-btn {
-      border: none;
-
-      background: none;
-
-      color: #7e8997;
-
-      font-size: 21px;
+    .modal-close {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 23px;
     }
 
-    .form {
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 18px 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 13px;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .modal-content {
       padding: 20px;
     }
 
-    .form-row {
-      display: grid;
-
-      grid-template-columns:
-        1fr 1fr;
-
-      gap: 12px;
-    }
-
-    .form-group {
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
       margin-bottom: 14px;
+      color: var(--text);
     }
 
-    .form-label {
-      display: block;
-
-      color: #98a3b1;
-
-      font-size: 10px;
-
-      font-weight: 600;
-
-      margin-bottom: 7px;
-
-      letter-spacing: 0.5px;
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
     }
 
-    .form-input,
-    .form-select {
-      width: 100%;
-
-      background: #0c1117;
-
-      color: #edf2f7;
-
-      border: 1px solid #29323e;
-
-      border-radius: 8px;
-
-      padding: 10px 11px;
-
-      outline: none;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      border-color: var(--primary);
+    .form-grid .full-field {
+      grid-column: 1 / -1;
     }
 
     .modal-footer {
+      padding: 14px 20px;
       display: flex;
-
       justify-content: flex-end;
-
       gap: 8px;
-
-      padding: 0 20px 20px;
+      border-top: 1px solid var(--border);
     }
 
-    /* =========================
-       MOBILE
-    ========================= */
+    /* SETTINGS */
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 18px;
+    }
+
+    .settings-menu {
+      padding: 10px;
+    }
+
+    .settings-menu-item {
+      padding: 11px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .settings-menu-item.active {
+      color: var(--primary);
+      background: rgba(86,103,246,.1);
+    }
+
+    .setting-row {
+      min-height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      gap: 20px;
+    }
+
+    .setting-row:last-child {
+      border-bottom: 0;
+    }
+
+    .setting-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .setting-description {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .switch {
+      width: 42px;
+      height: 23px;
+      border-radius: 20px;
+      background: var(--border);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .switch.active {
+      background: var(--primary);
+    }
+
+    .switch:after {
+      content: "";
+      position: absolute;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: white;
+      top: 3px;
+      left: 3px;
+      transition: .15s;
+    }
+
+    .switch.active:after {
+      left: 22px;
+    }
+
+    /* MOBILE */
 
     .mobile-menu {
       display: none;
-
-      border: 1px solid var(--border);
-
-      background: #151c25;
-
-      color: white;
-
-      border-radius: 8px;
-
-      padding: 8px 11px;
     }
 
-    @media (max-width: 1000px) {
-
-      .stats {
-        grid-template-columns:
-          repeat(2, 1fr);
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    @media (max-width: 760px) {
-
+    @media (max-width: 800px) {
       .sidebar {
         transform: translateX(-100%);
-
-        transition: transform 0.2s;
+        transition: .2s;
       }
 
       .sidebar.open {
@@ -833,259 +851,2222 @@
 
       .main {
         margin-left: 0;
-
-        padding: 20px 15px;
+        width: 100%;
       }
 
       .mobile-menu {
-        display: block;
+        display: grid;
+      }
+
+      .content {
+        padding: 16px;
       }
 
       .topbar {
-        align-items: flex-start;
+        padding: 0 15px;
       }
 
-      .page-title {
-        font-size: 20px;
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
       }
 
-      .top-actions {
-        display: none;
+      .settings-grid {
+        grid-template-columns: 1fr;
       }
 
+      .toolbar {
+        flex-wrap: wrap;
+      }
+
+      .search {
+        width: 100%;
+      }
     }
 
     @media (max-width: 520px) {
-
-      .stats {
+      .stats-grid {
         grid-template-columns: 1fr;
       }
 
-      .form-row {
+      .form-grid {
         grid-template-columns: 1fr;
+      }
+
+      .form-grid .full-field {
+        grid-column: auto;
       }
 
       .login-box {
-        padding: 25px 20px;
+        padding: 27px;
       }
-
     }
   </style>
 </head>
 
 <body>
 
-<div id="root"></div>
+  <!-- LOGIN -->
 
-<div id="toast"></div>
+  <section id="loginScreen">
+    <div class="login-box">
+      <div class="logo">
+        <div class="logo-icon">3X</div>
+        <span>Xray Panel</span>
+      </div>
 
-<script>
+      <h1>Welcome back</h1>
+      <p>Sign in to manage your Xray server.</p>
 
-  /* =====================================================
-     EXISTING BACKEND CONNECTION
-     ===================================================== */
+      <form id="loginForm">
+        <div class="field">
+          <label>Username</label>
+          <input
+            id="username"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+            required
+          />
+        </div>
 
-  let token =
-    localStorage.getItem("xray_token") || "";
+        <div class="field">
+          <label>Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
 
-  let inbounds = [];
-  let clients = [];
+        <button class="btn btn-primary full" type="submit">
+          Sign In
+        </button>
 
-  const root =
-    document.getElementById("root");
-
-
-  /* =====================================================
-     HELPERS
-     ===================================================== */
-
-  function escapeHtml(value) {
-
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  function showToast(message) {
-
-    const toast =
-      document.getElementById("toast");
-
-    toast.textContent = message;
-
-    toast.style.position = "fixed";
-    toast.style.right = "20px";
-    toast.style.bottom = "20px";
-    toast.style.background = "#151c25";
-    toast.style.border = "1px solid #29323e";
-    toast.style.color = "#fff";
-    toast.style.padding = "11px 15px";
-    toast.style.borderRadius = "8px";
-    toast.style.fontSize = "12px";
-    toast.style.zIndex = "9999";
-
-    setTimeout(() => {
-
-      toast.textContent = "";
-
-    }, 2200);
-
-  }
+        <div id="loginError" class="login-error hidden"></div>
+      </form>
+    </div>
+  </section>
 
 
-  async function api(
-    url,
-    options = {}
-  ) {
+  <!-- APPLICATION -->
 
-    options.headers = {
+  <section id="app" class="hidden">
 
-      ...(options.headers || {}),
+    <div class="layout">
 
-      "Content-Type":
-        "application/json",
+      <!-- SIDEBAR -->
 
-      ...(token
-        ? {
-            Authorization:
-              "Bearer " + token
-          }
-        : {})
+      <aside id="sidebar" class="sidebar">
 
-    };
+        <div class="sidebar-logo">
+          <div class="logo-icon">3X</div>
+          <span>Xray Panel</span>
+        </div>
 
+        <nav class="menu">
 
-    const response =
-      await fetch(url, options);
+          <div class="menu-title">Main</div>
 
-
-    if (
-      response.status === 401
-    ) {
-
-      token = "";
-
-      localStorage.removeItem(
-        "xray_token"
-      );
-
-      showLogin();
-
-      throw new Error(
-        "Unauthorized"
-      );
-
-    }
-
-
-    const data =
-      await response
-        .json()
-        .catch(() => ({}));
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.error ||
-        "Request failed"
-      );
-
-    }
-
-
-    return data;
-
-  }
-
-
-  /* =====================================================
-     LOGIN
-     ===================================================== */
-
-  function showLogin() {
-
-    root.innerHTML = `
-
-      <div class="login-page">
-
-        <div class="login-box">
-
-          <div class="login-logo">
-            X
+          <div class="menu-item active" data-page="dashboard">
+            <span class="menu-icon">▦</span>
+            Dashboard
           </div>
 
-          <div class="login-title">
-            Xray Control Panel
+          <div class="menu-item" data-page="inbounds">
+            <span class="menu-icon">⇄</span>
+            Inbounds
           </div>
 
-          <div class="login-subtitle">
-            Secure administration console
+          <div class="menu-item" data-page="clients">
+            <span class="menu-icon">♙</span>
+            Clients
+          </div>
+
+          <div class="menu-title">Management</div>
+
+          <div class="menu-item" data-page="groups">
+            <span class="menu-icon">◫</span>
+            Groups
+          </div>
+
+          <div class="menu-item" data-page="nodes">
+            <span class="menu-icon">⌁</span>
+            Nodes
+          </div>
+
+          <div class="menu-item" data-page="hosts">
+            <span class="menu-icon">◉</span>
+            Hosts
+          </div>
+
+          <div class="menu-title">Xray</div>
+
+          <div class="menu-item" data-page="xray">
+            <span class="menu-icon">◇</span>
+            Xray
+          </div>
+
+          <div class="menu-item" data-page="outbound">
+            <span class="menu-icon">→</span>
+            Outbound
+          </div>
+
+          <div class="menu-item" data-page="routing">
+            <span class="menu-icon">⌘</span>
+            Routing
+          </div>
+
+          <div class="menu-title">System</div>
+
+          <div class="menu-item" data-page="settings">
+            <span class="menu-icon">⚙</span>
+            Settings
+          </div>
+
+          <div class="menu-item" data-page="api">
+            <span class="menu-icon">{ }</span>
+            API Docs
+          </div>
+
+        </nav>
+
+      </aside>
+
+
+      <!-- MAIN -->
+
+      <main class="main">
+
+        <header class="topbar">
+
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button
+              id="mobileMenu"
+              class="icon-btn mobile-menu"
+              onclick="toggleSidebar()"
+            >
+              ☰
+            </button>
+
+            <div id="pageTitle" class="page-title">
+              Dashboard
+            </div>
+          </div>
+
+          <div class="top-actions">
+
+            <button
+              class="icon-btn"
+              title="Toggle theme"
+              onclick="toggleTheme()"
+            >
+              ◐
+            </button>
+
+            <button
+              class="icon-btn"
+              title="Logout"
+              onclick="logout()"
+            >
+              ↪
+            </button>
+
+          </div>
+
+        </header>
+
+
+        <div class="content">
+
+          <!-- DASHBOARD -->
+
+          <section id="page-dashboard" class="page active">
+
+            <div class="stats-grid">
+
+              <div class="stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">CPU</span>
+                  <div class="stat-icon">◉</div>
+                </div>
+                <div class="stat-value">--%</div>
+                <div class="stat-sub">System CPU usage</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">RAM</span>
+                  <div class="stat-icon">▥</div>
+                </div>
+                <div class="stat-value">--%</div>
+                <div class="stat-sub">Memory usage</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">Inbounds</span>
+                  <div class="stat-icon">⇄</div>
+                </div>
+                <div id="dashboardInboundCount" class="stat-value">0</div>
+                <div class="stat-sub">Configured inbounds</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-top">
+                  <span class="stat-label">Clients</span>
+                  <div class="stat-icon">♙</div>
+                </div>
+                <div id="dashboardClientCount" class="stat-value">0</div>
+                <div class="stat-sub">Configured clients</div>
+              </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+              <div class="card">
+
+                <div class="card-header">
+                  <span class="card-title">
+                    Network Traffic
+                  </span>
+
+                  <span class="badge blue">
+                    Live
+                  </span>
+                </div>
+
+                <div class="card-body">
+
+                  <div class="chart">
+
+                    <div class="chart-grid">
+                      <div class="chart-line"></div>
+                      <div class="chart-line"></div>
+                      <div class="chart-line"></div>
+                      <div class="chart-line"></div>
+                      <div class="chart-line"></div>
+                    </div>
+
+                    <div class="chart-bars">
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:35%"></div>
+                        <div class="bar secondary" style="height:20%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:48%"></div>
+                        <div class="bar secondary" style="height:27%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:42%"></div>
+                        <div class="bar secondary" style="height:31%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:65%"></div>
+                        <div class="bar secondary" style="height:42%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:52%"></div>
+                        <div class="bar secondary" style="height:34%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:76%"></div>
+                        <div class="bar secondary" style="height:44%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:58%"></div>
+                        <div class="bar secondary" style="height:38%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:69%"></div>
+                        <div class="bar secondary" style="height:48%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:45%"></div>
+                        <div class="bar secondary" style="height:30%"></div>
+                      </div>
+
+                      <div class="bar-group">
+                        <div class="bar" style="height:62%"></div>
+                        <div class="bar secondary" style="height:41%"></div>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="card">
+
+                <div class="card-header">
+                  <span class="card-title">
+                    Server Status
+                  </span>
+
+                  <span class="badge green">
+                    Online
+                  </span>
+                </div>
+
+                <div class="card-body">
+
+                  <div class="server-list">
+
+                    <div>
+                      <div class="server-row">
+                        <span class="server-name">Xray Core</span>
+                        <span class="server-value status-online">
+                          Ready
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="server-row">
+                        <span class="server-name">Database</span>
+                        <span class="server-value status-online">
+                          Connected
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="server-row">
+                        <span class="server-name">Panel</span>
+                        <span class="server-value status-online">
+                          Online
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="server-row">
+                        <span class="server-name">Uptime</span>
+                        <span class="server-value">
+                          Running
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="card">
+
+              <div class="card-header">
+                <span class="card-title">
+                  Recent Inbounds
+                </span>
+
+                <button
+                  class="btn btn-light"
+                  onclick="showPage('inbounds')"
+                >
+                  View All
+                </button>
+              </div>
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Remark</th>
+                      <th>Protocol</th>
+                      <th>Port</th>
+                      <th>Clients</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="recentInbounds"></tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- INBOUNDS -->
+
+          <section id="page-inbounds" class="page">
+
+            <div class="toolbar">
+
+              <div class="toolbar-left">
+
+                <button
+                  class="btn btn-primary"
+                  onclick="openInboundModal()"
+                >
+                  + Add Inbound
+                </button>
+
+                <button
+                  class="btn btn-light"
+                  onclick="loadData()"
+                >
+                  ↻ Refresh
+                </button>
+
+              </div>
+
+              <div class="toolbar-right">
+                <input
+                  id="inboundSearch"
+                  class="search"
+                  type="search"
+                  placeholder="Search inbounds..."
+                  oninput="renderInbounds()"
+                />
+              </div>
+
+            </div>
+
+
+            <div class="card">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+                    <tr>
+                      <th>Remark</th>
+                      <th>Protocol</th>
+                      <th>Port</th>
+                      <th>Transport</th>
+                      <th>Security</th>
+                      <th>Clients</th>
+                      <th>Traffic</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="inboundsTable"></tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- CLIENTS -->
+
+          <section id="page-clients" class="page">
+
+            <div class="toolbar">
+
+              <div class="toolbar-left">
+
+                <button
+                  class="btn btn-primary"
+                  onclick="showPage('inbounds')"
+                >
+                  + Add Client
+                </button>
+
+                <button
+                  class="btn btn-light"
+                  onclick="loadData()"
+                >
+                  ↻ Refresh
+                </button>
+
+              </div>
+
+              <div class="toolbar-right">
+
+                <input
+                  id="clientSearch"
+                  class="search"
+                  type="search"
+                  placeholder="Search clients..."
+                  oninput="renderClients()"
+                />
+
+              </div>
+
+            </div>
+
+
+            <div class="card">
+
+              <div class="table-wrap">
+
+                <table>
+
+                  <thead>
+
+                    <tr>
+                      <th>Email</th>
+                      <th>Inbound</th>
+                      <th>UUID</th>
+                      <th>Traffic</th>
+                      <th>Expiry</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+
+                  </thead>
+
+                  <tbody id="clientsTable"></tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- GROUPS -->
+
+          <section id="page-groups" class="page">
+
+            <div class="toolbar">
+
+              <div>
+                <button class="btn btn-primary">
+                  + Add Group
+                </button>
+              </div>
+
+            </div>
+
+            <div class="card">
+
+              <div class="empty">
+                <div class="empty-icon">◫</div>
+                <div>No groups configured</div>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- NODES -->
+
+          <section id="page-nodes" class="page">
+
+            <div class="toolbar">
+
+              <button class="btn btn-primary">
+                + Add Node
+              </button>
+
+            </div>
+
+            <div class="card">
+
+              <div class="empty">
+                <div class="empty-icon">⌁</div>
+                <div>No nodes configured</div>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- HOSTS -->
+
+          <section id="page-hosts" class="page">
+
+            <div class="toolbar">
+
+              <button class="btn btn-primary">
+                + Add Host
+              </button>
+
+            </div>
+
+            <div class="card">
+
+              <div class="empty">
+                <div class="empty-icon">◉</div>
+                <div>No hosts configured</div>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- XRAY -->
+
+          <section id="page-xray" class="page">
+
+            <div class="card">
+
+              <div class="card-header">
+                <span class="card-title">Xray Core</span>
+                <span class="badge green">Ready</span>
+              </div>
+
+              <div class="card-body">
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Xray Core Status
+                    </div>
+                    <div class="setting-description">
+                      Current Xray service state
+                    </div>
+                  </div>
+
+                  <span class="badge green">
+                    Ready
+                  </span>
+                </div>
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Configuration
+                    </div>
+                    <div class="setting-description">
+                      View generated configuration skeleton
+                    </div>
+                  </div>
+
+                  <button
+                    class="btn btn-light"
+                    onclick="loadConfig()"
+                  >
+                    View Config
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- OUTBOUND -->
+
+          <section id="page-outbound" class="page">
+
+            <div class="toolbar">
+
+              <button class="btn btn-primary">
+                + Add Outbound
+              </button>
+
+            </div>
+
+            <div class="card">
+
+              <div class="empty">
+                <div class="empty-icon">→</div>
+                <div>No outbound rules configured</div>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ROUTING -->
+
+          <section id="page-routing" class="page">
+
+            <div class="toolbar">
+
+              <button class="btn btn-primary">
+                + Add Rule
+              </button>
+
+            </div>
+
+            <div class="card">
+
+              <div class="empty">
+                <div class="empty-icon">⌘</div>
+                <div>No routing rules configured</div>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- SETTINGS -->
+
+          <section id="page-settings" class="page">
+
+            <div class="settings-grid">
+
+              <div class="card">
+
+                <div class="settings-menu">
+
+                  <div class="settings-menu-item active">
+                    General
+                  </div>
+
+                  <div class="settings-menu-item">
+                    Panel
+                  </div>
+
+                  <div class="settings-menu-item">
+                    Security
+                  </div>
+
+                  <div class="settings-menu-item">
+                    Database
+                  </div>
+
+                  <div class="settings-menu-item">
+                    Telegram
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="card">
+
+                <div class="card-header">
+                  <span class="card-title">
+                    General Settings
+                  </span>
+                </div>
+
+                <div class="card-body">
+
+                  <div class="setting-row">
+
+                    <div>
+                      <div class="setting-name">
+                        Dark Mode
+                      </div>
+
+                      <div class="setting-description">
+                        Use dark interface theme
+                      </div>
+                    </div>
+
+                    <div
+                      id="themeSwitch"
+                      class="switch"
+                      onclick="toggleTheme()"
+                    ></div>
+
+                  </div>
+
+
+                  <div class="setting-row">
+
+                    <div>
+                      <div class="setting-name">
+                        Auto Refresh
+                      </div>
+
+                      <div class="setting-description">
+                        Automatically refresh panel data
+                      </div>
+                    </div>
+
+                    <div class="switch active"></div>
+
+                  </div>
+
+
+                  <div class="setting-row">
+
+                    <div>
+                      <div class="setting-name">
+                        Panel Language
+                      </div>
+
+                      <div class="setting-description">
+                        Interface language
+                      </div>
+                    </div>
+
+                    <select
+                      style="
+                        width:140px;
+                        height:36px;
+                        border:1px solid var(--border);
+                        border-radius:6px;
+                        background:var(--card);
+                        color:var(--text);
+                        padding:0 8px;
+                      "
+                    >
+                      <option>English</option>
+                    </select>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- API -->
+
+          <section id="page-api" class="page">
+
+            <div class="card">
+
+              <div class="card-header">
+                <span class="card-title">
+                  API Documentation
+                </span>
+              </div>
+
+              <div class="card-body">
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Authentication
+                    </div>
+                    <div class="setting-description">
+                      Bearer JWT authentication
+                    </div>
+                  </div>
+
+                  <span class="badge blue">
+                    JWT
+                  </span>
+                </div>
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Health
+                    </div>
+                    <div class="setting-description">
+                      GET /api/health
+                    </div>
+                  </div>
+
+                  <span class="badge green">
+                    GET
+                  </span>
+                </div>
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Inbounds
+                    </div>
+                    <div class="setting-description">
+                      GET /api/inbounds
+                    </div>
+                  </div>
+
+                  <span class="badge green">
+                    GET
+                  </span>
+                </div>
+
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-name">
+                      Clients
+                    </div>
+                    <div class="setting-description">
+                      GET /api/clients
+                    </div>
+                  </div>
+
+                  <span class="badge green">
+                    GET
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </section>
+
+
+  <!-- ADD INBOUND MODAL -->
+
+  <div id="inboundModal" class="modal-overlay">
+
+    <div class="modal">
+
+      <div class="modal-header">
+
+        <div class="modal-title">
+          Add Inbound
+        </div>
+
+        <button
+          class="modal-close"
+          onclick="closeInboundModal()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div class="tabs">
+
+        <button class="tab active">
+          General
+        </button>
+
+        <button class="tab">
+          Transport
+        </button>
+
+        <button class="tab">
+          Security
+        </button>
+
+        <button class="tab">
+          Clients
+        </button>
+
+        <button class="tab">
+          Advanced
+        </button>
+
+      </div>
+
+
+      <form id="inboundForm">
+
+        <div class="modal-content">
+
+          <div class="section-title">
+            Inbound Settings
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field">
+              <label>Remark</label>
+              <input
+                id="inboundName"
+                type="text"
+                placeholder="My VLESS Server"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label>Protocol</label>
+
+              <select id="inboundProtocol">
+
+                <option value="vless">VLESS</option>
+                <option value="vmess">VMess</option>
+                <option value="trojan">Trojan</option>
+                <option value="shadowsocks">Shadowsocks</option>
+                <option value="wireguard">WireGuard</option>
+                <option value="socks">SOCKS</option>
+                <option value="http">HTTP</option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+              <label>Port</label>
+
+              <input
+                id="inboundPort"
+                type="number"
+                min="1"
+                max="65535"
+                placeholder="443"
+                required
+              />
+
+            </div>
+
+
+            <div class="field">
+              <label>Listen IP</label>
+
+              <input
+                type="text"
+                value="0.0.0.0"
+              />
+
+            </div>
+
+
+            <div class="field">
+              <label>Transport</label>
+
+              <select>
+
+                <option>TCP</option>
+                <option>WebSocket</option>
+                <option>gRPC</option>
+                <option>HTTP</option>
+                <option>HTTPUpgrade</option>
+                <option>QUIC</option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field">
+              <label>Security</label>
+
+              <select>
+
+                <option>None</option>
+                <option>TLS</option>
+                <option>REALITY</option>
+
+              </select>
+
+            </div>
+
+
+            <div class="field full-field">
+
+              <label>Remark / Description</label>
+
+              <input
+                id="inboundRemark"
+                type="text"
+                placeholder="Optional description"
+              />
+
+            </div>
+
           </div>
 
 
           <div
-            id="loginError"
-            class="login-error">
+            style="
+              margin-top:22px;
+              padding:13px;
+              border:1px solid var(--border);
+              border-radius:7px;
+              background:var(--bg);
+              font-size:11px;
+              color:var(--muted);
+            "
+          >
+            Advanced transport, TLS, REALITY and client options are
+            prepared in this interface and will be connected to the
+            Xray backend in the next stage.
           </div>
-
-
-          <form id="loginForm">
-
-            <div class="form-group">
-
-              <label class="form-label">
-                USERNAME
-              </label>
-
-              <input
-                id="username"
-                class="form-input"
-                value="admin"
-                autocomplete="username"
-                required>
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                PASSWORD
-              </label>
-
-              <input
-                id="password"
-                class="form-input"
-                type="password"
-                autocomplete="current-password"
-                required>
-
-            </div>
-
-
-            <button
-              type="submit"
-              class="btn btn-primary"
-              style="width:100%;padding:11px">
-
-              Sign in
-
-            </button>
-
-          </form>
 
         </div>
 
-      </div>
 
-    `;
+        <div class="modal-footer">
 
+          <button
+            type="button"
+            class="btn btn-light"
+            onclick="closeInboundModal()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Create Inbound
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- JAVASCRIPT -->
+
+  <script>
+
+    let token = localStorage.getItem("xray_panel_token") || "";
+    let inbounds = [];
+    let clients = [];
+
+
+    /* AUTH */
+
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      };
+    }
+
+
+    async function login(username, password) {
+
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          username,
+          password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      token = data.token;
+
+      localStorage.setItem(
+        "xray_panel_token",
+        token
+      );
+
+      showApp();
+
+    }
+
+
+    function logout() {
+
+      localStorage.removeItem(
+        "xray_panel_token"
+      );
+
+      token = "";
+
+      document
+        .getElementById("app")
+        .classList.add("hidden");
+
+      document
+        .getElementById("loginScreen")
+        .classList.remove("hidden");
+
+    }
+
+
+    async function verifyToken() {
+
+      if (!token) {
+        return false;
+      }
+
+      try {
+
+        const response = await fetch(
+          "/api/me",
+          {
+            headers: authHeaders()
+          }
+        );
+
+        return response.ok;
+
+      } catch (error) {
+
+        return false;
+
+      }
+
+    }
+
+
+    async function showApp() {
+
+      document
+        .getElementById("loginScreen")
+        .classList.add("hidden");
+
+      document
+        .getElementById("app")
+        .classList.remove("hidden");
+
+      await loadData();
+
+    }
+
+
+    /* DATA */
+
+    async function loadData() {
+
+      try {
+
+        const inboundResponse = await fetch(
+          "/api/inbounds",
+          {
+            headers: authHeaders()
+          }
+        );
+
+        if (
+          inboundResponse.status === 401
+        ) {
+          logout();
+          return;
+        }
+
+        inbounds =
+          await inboundResponse.json();
+
+
+        const clientResponse = await fetch(
+          "/api/clients",
+          {
+            headers: authHeaders()
+          }
+        );
+
+        if (
+          clientResponse.status === 401
+        ) {
+          logout();
+          return;
+        }
+
+        clients =
+          await clientResponse.json();
+
+
+        renderInbounds();
+        renderClients();
+        updateDashboard();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+
+    function updateDashboard() {
+
+      document
+        .getElementById("dashboardInboundCount")
+        .textContent = inbounds.length;
+
+      document
+        .getElementById("dashboardClientCount")
+        .textContent = clients.length;
+
+
+      const recent =
+        document.getElementById(
+          "recentInbounds"
+        );
+
+      if (!inbounds.length) {
+
+        recent.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty">
+                No inbounds configured
+              </div>
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
+
+
+      recent.innerHTML =
+        inbounds
+          .slice(0, 5)
+          .map(inbound => {
+
+            const count =
+              clients.filter(
+                c =>
+                  c.inbound_id === inbound.id
+              ).length;
+
+            return `
+              <tr>
+
+                <td>
+                  <strong>
+                    ${escapeHtml(inbound.name)}
+                  </strong>
+                </td>
+
+                <td>
+                  <span class="protocol">
+                    ${escapeHtml(inbound.protocol)}
+                  </span>
+                </td>
+
+                <td>
+                  ${inbound.port}
+                </td>
+
+                <td>
+                  ${count}
+                </td>
+
+                <td>
+                  <span class="badge green">
+                    Active
+                  </span>
+                </td>
+
+              </tr>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    /* INBOUNDS */
+
+    function renderInbounds() {
+
+      const table =
+        document.getElementById(
+          "inboundsTable"
+        );
+
+      const search =
+        (
+          document.getElementById(
+            "inboundSearch"
+          )?.value || ""
+        ).toLowerCase();
+
+
+      const filtered =
+        inbounds.filter(inbound =>
+          String(inbound.name || "")
+            .toLowerCase()
+            .includes(search) ||
+
+          String(inbound.protocol || "")
+            .toLowerCase()
+            .includes(search) ||
+
+          String(inbound.port || "")
+            .includes(search)
+        );
+
+
+      if (!filtered.length) {
+
+        table.innerHTML = `
+          <tr>
+            <td colspan="9">
+              <div class="empty">
+                <div class="empty-icon">
+                  ⇄
+                </div>
+                No inbounds found
+              </div>
+            </td>
+          </tr>
+        `;
+
+        return;
+
+      }
+
+
+      table.innerHTML =
+        filtered
+          .map(inbound => {
+
+            const count =
+              clients.filter(
+                client =>
+                  client.inbound_id === inbound.id
+              ).length;
+
+
+            return `
+              <tr>
+
+                <td>
+                  <strong>
+                    ${escapeHtml(inbound.name)}
+                  </strong>
+
+                  ${
+                    inbound.remark
+                      ? `<div style="color:var(--muted);font-size:10px;margin-top:3px;">
+                           ${escapeHtml(inbound.remark)}
+                         </div>`
+                      : ""
+                  }
+
+                </td>
+
+                <td>
+                  <span class="protocol">
+                    ${escapeHtml(inbound.protocol)}
+                  </span>
+                </td>
+
+                <td>
+                  <strong>
+                    ${inbound.port}
+                  </strong>
+                </td>
+
+                <td>
+                  TCP
+                </td>
+
+                <td>
+                  <span class="badge blue">
+                    None
+                  </span>
+                </td>
+
+                <td>
+                  ${count}
+                </td>
+
+                <td>
+                  0 B
+                </td>
+
+                <td>
+                  <span class="badge green">
+                    Enabled
+                  </span>
+                </td>
+
+                <td>
+
+                  <div class="action-group">
+
+                    <button
+                      class="small-btn"
+                      title="Clients"
+                      onclick="showClientsFor('${inbound.id}')"
+                    >
+                      ♙
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      title="Edit"
+                    >
+                      ✎
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      title="QR"
+                    >
+                      QR
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      title="Delete"
+                      onclick="deleteInbound('${inbound.id}')"
+                    >
+                      ×
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    async function deleteInbound(id) {
+
+      if (
+        !confirm(
+          "Delete this inbound and its clients?"
+        )
+      ) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/inbounds/" + id,
+            {
+              method: "DELETE",
+              headers: authHeaders()
+            }
+          );
+
+
+        if (!response.ok) {
+
+          const data =
+            await response.json();
+
+          alert(
+            data.error ||
+            "Failed to delete inbound"
+          );
+
+          return;
+
+        }
+
+
+        await loadData();
+
+      } catch (error) {
+
+        alert(
+          "Connection error"
+        );
+
+      }
+
+    }
+
+
+    /* CLIENTS */
+
+    function renderClients() {
+
+      const table =
+        document.getElementById(
+          "clientsTable"
+        );
+
+      const search =
+        (
+          document.getElementById(
+            "clientSearch"
+          )?.value || ""
+        ).toLowerCase();
+
+
+      const filtered =
+        clients.filter(client =>
+          String(client.email || "")
+            .toLowerCase()
+            .includes(search) ||
+
+          String(client.inbound_name || "")
+            .toLowerCase()
+            .includes(search) ||
+
+          String(client.uuid || "")
+            .toLowerCase()
+            .includes(search)
+        );
+
+
+      if (!filtered.length) {
+
+        table.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty">
+                <div class="empty-icon">
+                  ♙
+                </div>
+                No clients found
+              </div>
+            </td>
+          </tr>
+        `;
+
+        return;
+
+      }
+
+
+      table.innerHTML =
+        filtered
+          .map(client => {
+
+            const shortUuid =
+              client.uuid
+                ? client.uuid.substring(0, 18) + "..."
+                : "-";
+
+
+            return `
+              <tr>
+
+                <td>
+                  <strong>
+                    ${escapeHtml(client.email)}
+                  </strong>
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    client.inbound_name || "-"
+                  )}
+                </td>
+
+                <td>
+                  <code>
+                    ${escapeHtml(shortUuid)}
+                  </code>
+                </td>
+
+                <td>
+                  0 B
+                </td>
+
+                <td>
+                  Unlimited
+                </td>
+
+                <td>
+
+                  ${
+                    client.enabled
+                      ? `<span class="badge green">Enabled</span>`
+                      : `<span class="badge red">Disabled</span>`
+                  }
+
+                </td>
+
+                <td>
+
+                  <div class="action-group">
+
+                    <button
+                      class="small-btn"
+                    >
+                      QR
+                    </button>
+
+                    <button
+                      class="small-btn"
+                    >
+                      Share
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      onclick="deleteClient('${client.id}')"
+                    >
+                      ×
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+    async function deleteClient(id) {
+
+      if (
+        !confirm(
+          "Delete this client?"
+        )
+      ) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/clients/" + id,
+            {
+              method: "DELETE",
+              headers: authHeaders()
+            }
+          );
+
+
+        if (!response.ok) {
+
+          const data =
+            await response.json();
+
+          alert(
+            data.error ||
+            "Failed to delete client"
+          );
+
+          return;
+
+        }
+
+
+        await loadData();
+
+      } catch (error) {
+
+        alert(
+          "Connection error"
+        );
+
+      }
+
+    }
+
+
+    function showClientsFor(inboundId) {
+
+      showPage("clients");
+
+      const inbound =
+        inbounds.find(
+          x => x.id === inboundId
+        );
+
+      if (!inbound) {
+        return;
+      }
+
+      const input =
+        document.getElementById(
+          "clientSearch"
+        );
+
+      input.value =
+        inbound.name;
+
+      renderClients();
+
+    }
+
+
+    /* INBOUND MODAL */
+
+    function openInboundModal() {
+
+      document
+        .getElementById(
+          "inboundModal"
+        )
+        .classList.add("show");
+
+    }
+
+
+    function closeInboundModal() {
+
+      document
+        .getElementById(
+          "inboundModal"
+        )
+        .classList.remove("show");
+
+    }
+
+
+    document
+      .getElementById("inboundForm")
+      .addEventListener(
+        "submit",
+        async function(event) {
+
+          event.preventDefault();
+
+
+          const name =
+            document.getElementById(
+              "inboundName"
+            ).value.trim();
+
+
+          const protocol =
+            document.getElementById(
+              "inboundProtocol"
+            ).value;
+
+
+          const port =
+            Number(
+              document.getElementById(
+                "inboundPort"
+              ).value
+            );
+
+
+          const remark =
+            document.getElementById(
+              "inboundRemark"
+            ).value.trim();
+
+
+          try {
+
+            const response =
+              await fetch(
+                "/api/inbounds",
+                {
+                  method: "POST",
+                  headers: authHeaders(),
+                  body: JSON.stringify({
+                    name,
+                    protocol,
+                    port,
+                    remark
+                  })
+                }
+              );
+
+
+            const data =
+              await response.json();
+
+
+            if (!response.ok) {
+
+              alert(
+                data.error ||
+                "Failed to create inbound"
+              );
+
+              return;
+
+            }
+
+
+            closeInboundModal();
+
+            document
+              .getElementById(
+                "inboundForm"
+              )
+              .reset();
+
+
+            await loadData();
+
+          } catch (error) {
+
+            alert(
+              "Connection error"
+            );
+
+          }
+
+        }
+      );
+
+
+    /* CONFIG */
+
+    async function loadConfig() {
+
+      try {
+
+        const response =
+          await fetch(
+            "/api/config",
+            {
+              headers: authHeaders()
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        alert(
+          JSON.stringify(
+            data,
+            null,
+            2
+          )
+        );
+
+      } catch (error) {
+
+        alert(
+          "Failed to load configuration"
+        );
+
+      }
+
+    }
+
+
+    /* NAVIGATION */
+
+    const menuItems =
+      document.querySelectorAll(
+        ".menu-item"
+      );
+
+
+    menuItems.forEach(item => {
+
+      item.addEventListener(
+        "click",
+        function() {
+
+          const page =
+            this.dataset.page;
+
+          showPage(page);
+
+        }
+      );
+
+    });
+
+
+    function showPage(page) {
+
+      document
+        .querySelectorAll(".page")
+        .forEach(element => {
+
+          element.classList.remove(
+            "active"
+          );
+
+        });
+
+
+      const target =
+        document.getElementById(
+          "page-" + page
+        );
+
+
+      if (target) {
+
+        target.classList.add(
+          "active"
+        );
+
+      }
+
+
+      menuItems.forEach(item => {
+
+        item.classList.toggle(
+          "active",
+          item.dataset.page === page
+        );
+
+      });
+
+
+      const titles = {
+
+        dashboard: "Dashboard",
+        inbounds: "Inbounds",
+        clients: "Clients",
+        groups: "Groups",
+        nodes: "Nodes",
+        hosts: "Hosts",
+        xray: "Xray",
+        outbound: "Outbound",
+        routing: "Routing",
+        settings: "Settings",
+        api: "API Docs"
+
+      };
+
+
+      document
+        .getElementById(
+          "pageTitle"
+        )
+        .textContent =
+        titles[page] || "Dashboard";
+
+
+      document
+        .getElementById(
+          "sidebar"
+        )
+        .classList.remove("open");
+
+    }
+
+
+    /* THEME */
+
+    function toggleTheme() {
+
+      document
+        .body
+        .classList.toggle("dark");
+
+
+      const dark =
+        document.body.classList.contains(
+          "dark"
+        );
+
+
+      localStorage.setItem(
+        "xray_panel_theme",
+        dark
+          ? "dark"
+          : "light"
+      );
+
+
+      updateThemeSwitch();
+
+    }
+
+
+    function updateThemeSwitch() {
+
+      const sw =
+        document.getElementById(
+          "themeSwitch"
+        );
+
+
+      if (!sw) {
+        return;
+      }
+
+
+      sw.classList.toggle(
+        "active",
+        document.body.classList.contains(
+          "dark"
+        )
+      );
+
+    }
+
+
+    function loadTheme() {
+
+      const theme =
+        localStorage.getItem(
+          "xray_panel_theme"
+        );
+
+
+      if (theme === "dark") {
+
+        document
+          .body
+          .classList.add("dark");
+
+      }
+
+
+      updateThemeSwitch();
+
+    }
+
+
+    /* MOBILE */
+
+    function toggleSidebar() {
+
+      document
+        .getElementById(
+          "sidebar"
+        )
+        .classList.toggle(
+          "open"
+        );
+
+    }
+
+
+    /* SECURITY */
+
+    function escapeHtml(value) {
+
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+    /* LOGIN FORM */
 
     document
       .getElementById("loginForm")
@@ -1108,1844 +3089,64 @@
             ).value;
 
 
-          try {
-
-            const data =
-              await api(
-                "/api/login",
-                {
-                  method: "POST",
-
-                  body:
-                    JSON.stringify({
-                      username,
-                      password
-                    })
-                }
-              );
-
-
-            token = data.token;
-
-
-            localStorage.setItem(
-              "xray_token",
-              token
+          const errorBox =
+            document.getElementById(
+              "loginError"
             );
 
 
-            showApp();
+          errorBox.classList.add(
+            "hidden"
+          );
 
+
+          try {
+
+            await login(
+              username,
+              password
+            );
 
           } catch (error) {
 
-            const box =
-              document.getElementById(
-                "loginError"
-              );
-
-
-            box.textContent =
+            errorBox.textContent =
               error.message;
 
-
-            box.style.display =
-              "block";
-
-          }
-
-        }
-      );
-
-  }
-
-
-  /* =====================================================
-     MAIN APPLICATION
-     ===================================================== */
-
-  function showApp() {
-
-    root.innerHTML = `
-
-      <div class="app">
-
-        <aside
-          class="sidebar"
-          id="sidebar">
-
-
-          <div class="brand">
-
-            <div class="brand-logo">
-              X
-            </div>
-
-            <div>
-
-              <div class="brand-name">
-                Xray Panel
-              </div>
-
-              <div class="brand-version">
-                Control Center
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="nav">
-
-
-            <div class="nav-label">
-              Management
-            </div>
-
-
-            <button
-              class="nav-item active"
-              data-page="dashboard">
-
-              <span class="nav-icon">
-                ▦
-              </span>
-
-              Dashboard
-
-            </button>
-
-
-            <button
-              class="nav-item"
-              data-page="inbounds">
-
-              <span class="nav-icon">
-                ⇄
-              </span>
-
-              Inbounds
-
-            </button>
-
-
-            <button
-              class="nav-item"
-              data-page="clients">
-
-              <span class="nav-icon">
-                ♙
-              </span>
-
-              Clients
-
-            </button>
-
-
-            <br>
-
-
-            <div class="nav-label">
-              System
-            </div>
-
-
-            <button
-              class="nav-item"
-              data-page="settings">
-
-              <span class="nav-icon">
-                ⚙
-              </span>
-
-              Settings
-
-            </button>
-
-
-            <button
-              class="nav-item"
-              id="logoutButton">
-
-              <span class="nav-icon">
-                ↪
-              </span>
-
-              Logout
-
-            </button>
-
-
-          </div>
-
-
-          <div class="sidebar-footer">
-
-            <div class="server-status">
-
-              <span class="status-dot"></span>
-
-              <div>
-
-                <div class="status-title">
-                  Panel online
-                </div>
-
-                <div class="status-text">
-                  API connection active
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-        </aside>
-
-
-        <main class="main">
-
-
-          <div class="topbar">
-
-
-            <div
-              style="
-                display:flex;
-                gap:11px;
-                align-items:center;
-              ">
-
-              <button
-                class="mobile-menu"
-                id="mobileMenu">
-
-                ☰
-
-              </button>
-
-
-              <div>
-
-                <div
-                  class="page-title"
-                  id="pageTitle">
-
-                  Dashboard
-
-                </div>
-
-                <div
-                  class="page-description"
-                  id="pageDescription">
-
-                  Server overview and traffic summary
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div class="top-actions">
-
-              <button
-                class="btn"
-                id="refreshButton">
-
-                ↻ Refresh
-
-              </button>
-
-
-              <button
-                class="btn btn-primary"
-                id="topAddButton">
-
-                ＋ Add inbound
-
-              </button>
-
-            </div>
-
-
-          </div>
-
-
-          <div id="content"></div>
-
-
-        </main>
-
-      </div>
-
-    `;
-
-
-    document
-      .querySelectorAll(".nav-item[data-page]")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            navigate(
-              button.dataset.page
+            errorBox.classList.remove(
+              "hidden"
             );
 
           }
-        );
-
-      });
-
-
-    document
-      .getElementById(
-        "logoutButton"
-      )
-      .addEventListener(
-        "click",
-        () => {
-
-          token = "";
-
-          localStorage.removeItem(
-            "xray_token"
-          );
-
-          showLogin();
 
         }
       );
 
 
-    document
-      .getElementById(
-        "refreshButton"
-      )
-      .addEventListener(
-        "click",
-        loadData
-      );
+    /* START */
+
+    async function start() {
+
+      loadTheme();
 
 
-    document
-      .getElementById(
-        "topAddButton"
-      )
-      .addEventListener(
-        "click",
-        openInboundModal
-      );
+      if (
+        await verifyToken()
+      ) {
 
+        await showApp();
 
-    document
-      .getElementById(
-        "mobileMenu"
-      )
-      .addEventListener(
-        "click",
-        () => {
+      } else {
 
-          document
-            .getElementById(
-              "sidebar"
-            )
-            .classList.toggle(
-              "open"
-            );
+        logout();
 
-        }
-      );
-
-
-    loadData();
-
-  }
-
-
-  /* =====================================================
-     DATA
-     ===================================================== */
-
-  async function loadData() {
-
-    try {
-
-      const result =
-        await Promise.all([
-
-          api("/api/inbounds"),
-
-          api("/api/clients")
-
-        ]);
-
-
-      inbounds = result[0];
-
-      clients = result[1];
-
-
-      renderDashboard();
-
-
-    } catch (error) {
-
-      showToast(
-        error.message
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     NAVIGATION
-     ===================================================== */
-
-  function navigate(page) {
-
-    document
-      .querySelectorAll(
-        ".nav-item[data-page]"
-      )
-      .forEach(item => {
-
-        item.classList.toggle(
-          "active",
-          item.dataset.page === page
-        );
-
-      });
-
-
-    const titles = {
-
-      dashboard: [
-        "Dashboard",
-        "Server overview and traffic summary"
-      ],
-
-      inbounds: [
-        "Inbounds",
-        "Manage listeners, protocols and ports"
-      ],
-
-      clients: [
-        "Clients",
-        "Manage connected users and credentials"
-      ],
-
-      settings: [
-        "Settings",
-        "Panel configuration"
-      ]
-
-    };
-
-
-    document
-      .getElementById(
-        "pageTitle"
-      )
-      .textContent =
-      titles[page][0];
-
-
-    document
-      .getElementById(
-        "pageDescription"
-      )
-      .textContent =
-      titles[page][1];
-
-
-    document
-      .getElementById(
-        "topAddButton"
-      )
-      .style.display =
-      page === "inbounds"
-        ? "block"
-        : "none";
-
-
-    if (page === "dashboard") {
-
-      renderDashboard();
-
-    } else if (page === "inbounds") {
-
-      renderInbounds();
-
-    } else if (page === "clients") {
-
-      renderClients();
-
-    } else {
-
-      renderSettings();
+      }
 
     }
 
 
-    document
-      .getElementById(
-        "sidebar"
-      )
-      .classList.remove(
-        "open"
-      );
+    start();
 
-  }
-
-
-  /* =====================================================
-     DASHBOARD
-     ===================================================== */
-
-  function renderDashboard() {
-
-    const activeClients =
-      clients.filter(
-        client =>
-          Number(client.enabled) === 1
-      ).length;
-
-
-    document
-      .getElementById(
-        "content"
-      )
-      .innerHTML = `
-
-
-        <div class="stats">
-
-
-          <div class="stat-card">
-
-            <div class="stat-icon">
-              ◈
-            </div>
-
-            <div class="stat-label">
-              Inbounds
-            </div>
-
-            <div class="stat-value">
-              ${inbounds.length}
-            </div>
-
-            <div class="stat-sub">
-              Configured listeners
-            </div>
-
-          </div>
-
-
-          <div class="stat-card">
-
-            <div class="stat-icon">
-              ♙
-            </div>
-
-            <div class="stat-label">
-              Clients
-            </div>
-
-            <div class="stat-value">
-              ${clients.length}
-            </div>
-
-            <div class="stat-sub">
-              Registered clients
-            </div>
-
-          </div>
-
-
-          <div class="stat-card">
-
-            <div class="stat-icon">
-              ●
-            </div>
-
-            <div class="stat-label">
-              Active
-            </div>
-
-            <div class="stat-value">
-              ${activeClients}
-            </div>
-
-            <div class="stat-sub">
-              Enabled clients
-            </div>
-
-          </div>
-
-
-          <div class="stat-card">
-
-            <div class="stat-icon">
-              ⌁
-            </div>
-
-            <div class="stat-label">
-              API
-            </div>
-
-            <div class="stat-value">
-              OK
-            </div>
-
-            <div class="stat-sub">
-              Backend connected
-            </div>
-
-          </div>
-
-
-        </div>
-
-
-        <div class="panel">
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Recent Inbounds
-              </div>
-
-              <div class="panel-subtitle">
-                Latest configured listeners
-              </div>
-
-            </div>
-
-
-            <button
-              class="btn btn-small"
-              onclick="navigate('inbounds')">
-
-              View all
-
-            </button>
-
-          </div>
-
-
-          ${renderInboundTable(
-            inbounds.slice(0, 8)
-          )}
-
-        </div>
-
-      `;
-
-  }
-
-
-  /* =====================================================
-     INBOUND TABLE
-     ===================================================== */
-
-  function renderInboundTable(
-    rows
-  ) {
-
-    if (!rows.length) {
-
-      return `
-
-        <div class="empty">
-
-          <div class="empty-icon">
-            ◇
-          </div>
-
-          No inbounds configured yet.
-
-        </div>
-
-      `;
-
-    }
-
-
-    return `
-
-      <div class="table-container">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>
-                Name
-              </th>
-
-              <th>
-                Protocol
-              </th>
-
-              <th>
-                Port
-              </th>
-
-              <th>
-                Clients
-              </th>
-
-              <th>
-                Status
-              </th>
-
-              <th>
-                Created
-              </th>
-
-              <th>
-                Action
-              </th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            ${rows.map(
-              inbound => `
-
-                <tr>
-
-                  <td>
-
-                    <div class="primary-text">
-                      ${escapeHtml(
-                        inbound.name
-                      )}
-                    </div>
-
-                    <div class="secondary-text">
-                      ${escapeHtml(
-                        inbound.remark ||
-                        "No remark"
-                      )}
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span
-                      class="badge badge-protocol">
-
-                      ${escapeHtml(
-                        inbound.protocol
-                          .toUpperCase()
-                      )}
-
-                    </span>
-
-                  </td>
-
-
-                  <td class="mono">
-
-                    ${escapeHtml(
-                      inbound.port
-                    )}
-
-                  </td>
-
-
-                  <td>
-
-                    ${
-                      clients.filter(
-                        client =>
-                          client.inbound_id ===
-                          inbound.id
-                      ).length
-                    }
-
-                  </td>
-
-
-                  <td>
-
-                    <span
-                      class="badge badge-success">
-
-                      ● Enabled
-
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    ${new Date(
-                      inbound.created_at
-                    ).toLocaleDateString()}
-
-                  </td>
-
-
-                  <td>
-
-                    <button
-                      class="btn btn-danger btn-small"
-                      onclick="deleteInbound('${inbound.id}')">
-
-                      Delete
-
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              `
-            ).join("")}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    `;
-
-  }
-
-
-  /* =====================================================
-     INBOUNDS PAGE
-     ===================================================== */
-
-  function renderInbounds() {
-
-    document
-      .getElementById(
-        "content"
-      )
-      .innerHTML = `
-
-        <div
-          class="panel"
-          style="margin-top:0">
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Inbound list
-              </div>
-
-              <div class="panel-subtitle">
-
-                ${inbounds.length}
-                configured listener${
-                  inbounds.length === 1
-                    ? ""
-                    : "s"
-                }
-
-              </div>
-
-            </div>
-
-
-            <button
-              class="btn btn-primary btn-small"
-              onclick="openInboundModal()">
-
-              ＋ Add inbound
-
-            </button>
-
-          </div>
-
-
-          ${renderInboundTable(
-            inbounds
-          )}
-
-        </div>
-
-      `;
-
-  }
-
-
-  /* =====================================================
-     CLIENTS PAGE
-     ===================================================== */
-
-  function renderClients() {
-
-    document
-      .getElementById(
-        "content"
-      )
-      .innerHTML = `
-
-        <div
-          class="panel"
-          style="margin-top:0">
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Client list
-              </div>
-
-              <div class="panel-subtitle">
-
-                ${clients.length}
-                client${
-                  clients.length === 1
-                    ? ""
-                    : "s"
-                }
-
-              </div>
-
-            </div>
-
-
-            <button
-              class="btn btn-primary btn-small"
-              onclick="openClientModal()">
-
-              ＋ Add client
-
-            </button>
-
-          </div>
-
-
-          ${
-            clients.length
-              ? `
-
-                <div class="table-container">
-
-                  <table>
-
-                    <thead>
-
-                      <tr>
-
-                        <th>
-                          Email
-                        </th>
-
-                        <th>
-                          Inbound
-                        </th>
-
-                        <th>
-                          UUID
-                        </th>
-
-                        <th>
-                          Status
-                        </th>
-
-                        <th>
-                          Created
-                        </th>
-
-                        <th>
-                          Action
-                        </th>
-
-                      </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                      ${clients.map(
-                        client => `
-
-                          <tr>
-
-                            <td>
-
-                              <div class="primary-text">
-
-                                ${escapeHtml(
-                                  client.email
-                                )}
-
-                              </div>
-
-                            </td>
-
-
-                            <td>
-
-                              ${escapeHtml(
-                                client.inbound_name ||
-                                "—"
-                              )}
-
-                            </td>
-
-
-                            <td
-                              class="mono">
-
-                              ${escapeHtml(
-                                client.uuid
-                              )}
-
-                            </td>
-
-
-                            <td>
-
-                              ${
-                                Number(
-                                  client.enabled
-                                ) === 1
-
-                                  ? `
-                                    <span
-                                      class="badge badge-success">
-                                      Enabled
-                                    </span>
-                                  `
-
-                                  : `
-                                    <span class="badge">
-                                      Disabled
-                                    </span>
-                                  `
-                              }
-
-                            </td>
-
-
-                            <td>
-
-                              ${new Date(
-                                client.created_at
-                              ).toLocaleDateString()}
-
-                            </td>
-
-
-                            <td>
-
-                              <button
-                                class="btn btn-danger btn-small"
-                                onclick="deleteClient('${client.id}')">
-
-                                Delete
-
-                              </button>
-
-                            </td>
-
-                          </tr>
-
-                        `
-                      ).join("")}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-
-              `
-
-              : `
-
-                <div class="empty">
-
-                  <div class="empty-icon">
-                    ♙
-                  </div>
-
-                  No clients configured yet.
-
-                </div>
-
-              `
-          }
-
-        </div>
-
-      `;
-
-  }
-
-
-  /* =====================================================
-     SETTINGS
-     ===================================================== */
-
-  function renderSettings() {
-
-    document
-      .getElementById(
-        "content"
-      )
-      .innerHTML = `
-
-        <div
-          class="panel"
-          style="margin-top:0">
-
-          <div class="panel-header">
-
-            <div>
-
-              <div class="panel-title">
-                Panel settings
-              </div>
-
-              <div class="panel-subtitle">
-                Application information
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="form">
-
-            <div class="form-row">
-
-              <div class="form-group">
-
-                <label class="form-label">
-                  PANEL
-                </label>
-
-                <input
-                  class="form-input"
-                  value="Xray Control Panel"
-                  disabled>
-
-              </div>
-
-
-              <div class="form-group">
-
-                <label class="form-label">
-                  DATABASE
-                </label>
-
-                <input
-                  class="form-input"
-                  value="SQLite"
-                  disabled>
-
-              </div>
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                CORE STATUS
-              </label>
-
-              <input
-                class="form-input"
-                value="Management skeleton / Core integration pending"
-                disabled>
-
-            </div>
-
-
-            <div
-              style="
-                color:#7f8b99;
-                font-size:11px;
-                line-height:1.7;
-              ">
-
-              The current backend and API remain
-              unchanged. This update modifies the
-              presentation layer only.
-
-            </div>
-
-          </div>
-
-        </div>
-
-      `;
-
-  }
-
-
-  /* =====================================================
-     INBOUND MODAL
-     ===================================================== */
-
-  function openInboundModal() {
-
-    const overlay =
-      document.createElement(
-        "div"
-      );
-
-    overlay.className =
-      "modal-overlay show";
-
-
-    overlay.innerHTML = `
-
-      <div class="modal">
-
-
-        <div class="modal-header">
-
-          <div class="modal-title">
-            Add inbound
-          </div>
-
-          <button
-            class="close-btn"
-            id="closeModal">
-
-            ×
-
-          </button>
-
-        </div>
-
-
-        <div class="form">
-
-
-          <div class="form-row">
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                NAME
-              </label>
-
-              <input
-                id="inboundName"
-                class="form-input"
-                placeholder="VLESS Main">
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                PROTOCOL
-              </label>
-
-              <select
-                id="inboundProtocol"
-                class="form-select">
-
-                <option value="vless">
-                  VLESS
-                </option>
-
-                <option value="vmess">
-                  VMess
-                </option>
-
-                <option value="trojan">
-                  Trojan
-                </option>
-
-                <option value="shadowsocks">
-                  Shadowsocks
-                </option>
-
-              </select>
-
-            </div>
-
-
-          </div>
-
-
-          <div class="form-row">
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                PORT
-              </label>
-
-              <input
-                id="inboundPort"
-                class="form-input"
-                type="number"
-                min="1"
-                max="65535"
-                placeholder="443">
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                REMARK
-              </label>
-
-              <input
-                id="inboundRemark"
-                class="form-input"
-                placeholder="Production">
-
-            </div>
-
-
-          </div>
-
-
-        </div>
-
-
-        <div class="modal-footer">
-
-          <button
-            class="btn"
-            id="cancelModal">
-
-            Cancel
-
-          </button>
-
-
-          <button
-            class="btn btn-primary"
-            id="saveInbound">
-
-            Create inbound
-
-          </button>
-
-        </div>
-
-
-      </div>
-
-    `;
-
-
-    document.body.appendChild(
-      overlay
-    );
-
-
-    function close() {
-
-      overlay.remove();
-
-    }
-
-
-    overlay
-      .querySelector(
-        "#closeModal"
-      )
-      .onclick = close;
-
-
-    overlay
-      .querySelector(
-        "#cancelModal"
-      )
-      .onclick = close;
-
-
-    overlay.onclick =
-      event => {
-
-        if (
-          event.target === overlay
-        ) {
-
-          close();
-
-        }
-
-      };
-
-
-    overlay
-      .querySelector(
-        "#saveInbound"
-      )
-      .onclick =
-      async () => {
-
-        try {
-
-          const name =
-            overlay.querySelector(
-              "#inboundName"
-            ).value;
-
-
-          const protocol =
-            overlay.querySelector(
-              "#inboundProtocol"
-            ).value;
-
-
-          const port =
-            Number(
-              overlay.querySelector(
-                "#inboundPort"
-              ).value
-            );
-
-
-          const remark =
-            overlay.querySelector(
-              "#inboundRemark"
-            ).value;
-
-
-          await api(
-            "/api/inbounds",
-            {
-              method: "POST",
-
-              body:
-                JSON.stringify({
-
-                  name,
-
-                  protocol,
-
-                  port,
-
-                  remark
-
-                })
-
-            }
-          );
-
-
-          close();
-
-
-          await loadData();
-
-
-          navigate(
-            "inbounds"
-          );
-
-
-          showToast(
-            "Inbound created"
-          );
-
-
-        } catch (error) {
-
-          showToast(
-            error.message
-          );
-
-        }
-
-      };
-
-  }
-
-
-  /* =====================================================
-     CLIENT MODAL
-     ===================================================== */
-
-  function openClientModal() {
-
-    if (!inbounds.length) {
-
-      showToast(
-        "Create an inbound first"
-      );
-
-      return;
-
-    }
-
-
-    const overlay =
-      document.createElement(
-        "div"
-      );
-
-
-    overlay.className =
-      "modal-overlay show";
-
-
-    overlay.innerHTML = `
-
-      <div class="modal">
-
-
-        <div class="modal-header">
-
-          <div class="modal-title">
-            Add client
-          </div>
-
-          <button
-            class="close-btn"
-            id="closeClientModal">
-
-            ×
-
-          </button>
-
-        </div>
-
-
-        <div class="form">
-
-
-          <div class="form-group">
-
-            <label class="form-label">
-              INBOUND
-            </label>
-
-            <select
-              id="clientInbound"
-              class="form-select">
-
-              ${inbounds.map(
-                inbound => `
-
-                  <option
-                    value="${inbound.id}">
-
-                    ${escapeHtml(
-                      inbound.name
-                    )}
-                    ·
-                    ${escapeHtml(
-                      inbound.port
-                    )}
-
-                  </option>
-
-                `
-              ).join("")}
-
-            </select>
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label class="form-label">
-              EMAIL / IDENTIFIER
-            </label>
-
-            <input
-              id="clientEmail"
-              class="form-input"
-              placeholder="user@example.com">
-
-          </div>
-
-
-        </div>
-
-
-        <div class="modal-footer">
-
-          <button
-            class="btn"
-            id="cancelClient">
-
-            Cancel
-
-          </button>
-
-
-          <button
-            class="btn btn-primary"
-            id="saveClient">
-
-            Create client
-
-          </button>
-
-        </div>
-
-
-      </div>
-
-    `;
-
-
-    document.body.appendChild(
-      overlay
-    );
-
-
-    function close() {
-
-      overlay.remove();
-
-    }
-
-
-    overlay
-      .querySelector(
-        "#closeClientModal"
-      )
-      .onclick = close;
-
-
-    overlay
-      .querySelector(
-        "#cancelClient"
-      )
-      .onclick = close;
-
-
-    overlay.onclick =
-      event => {
-
-        if (
-          event.target === overlay
-        ) {
-
-          close();
-
-        }
-
-      };
-
-
-    overlay
-      .querySelector(
-        "#saveClient"
-      )
-      .onclick =
-      async () => {
-
-        try {
-
-          const inbound_id =
-            overlay.querySelector(
-              "#clientInbound"
-            ).value;
-
-
-          const email =
-            overlay.querySelector(
-              "#clientEmail"
-            ).value;
-
-
-          await api(
-            "/api/clients",
-            {
-              method: "POST",
-
-              body:
-                JSON.stringify({
-                  inbound_id,
-                  email
-                })
-
-            }
-          );
-
-
-          close();
-
-
-          await loadData();
-
-
-          navigate(
-            "clients"
-          );
-
-
-          showToast(
-            "Client created"
-          );
-
-
-        } catch (error) {
-
-          showToast(
-            error.message
-          );
-
-        }
-
-      };
-
-  }
-
-
-  /* =====================================================
-     DELETE
-     ===================================================== */
-
-  async function deleteInbound(
-    id
-  ) {
-
-    if (
-      !confirm(
-        "Delete this inbound and its clients?"
-      )
-    ) {
-
-      return;
-
-    }
-
-
-    try {
-
-      await api(
-        "/api/inbounds/" + id,
-        {
-          method: "DELETE"
-        }
-      );
-
-
-      await loadData();
-
-
-      navigate(
-        "inbounds"
-      );
-
-
-      showToast(
-        "Inbound deleted"
-      );
-
-
-    } catch (error) {
-
-      showToast(
-        error.message
-      );
-
-    }
-
-  }
-
-
-  async function deleteClient(
-    id
-  ) {
-
-    if (
-      !confirm(
-        "Delete this client?"
-      )
-    ) {
-
-      return;
-
-    }
-
-
-    try {
-
-      await api(
-        "/api/clients/" + id,
-        {
-          method: "DELETE"
-        }
-      );
-
-
-      await loadData();
-
-
-      navigate(
-        "clients"
-      );
-
-
-      showToast(
-        "Client deleted"
-      );
-
-
-    } catch (error) {
-
-      showToast(
-        error.message
-      );
-
-    }
-
-  }
-
-
-  /* =====================================================
-     START
-     ===================================================== */
-
-  if (token) {
-
-    showApp();
-
-  } else {
-
-    showLogin();
-
-  }
-
-</script>
+  </script>
 
 </body>
 </html>
