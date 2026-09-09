@@ -1,3030 +1,1947 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Xray Panel</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #020202;
-      --bg2: #060606;
-      --panel: #0a0a0a;
-      --panel2: #101010;
-      --panel3: #151515;
-      --border: #202020;
-      --border2: #303030;
-
-      --text: #f5f5f5;
-      --muted: #888;
-      --muted2: #555;
-
-      --green: #35d07f;
-      --red: #ff4d5e;
-      --yellow: #f5c451;
-      --blue: #4c9fff;
-      --purple: #a875ff;
-
-      --sidebar: 245px;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    /* =========================
-       LOGIN
-    ========================= */
-
-    #loginScreen {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background:
-        radial-gradient(
-          circle at 50% 45%,
-          rgba(255,255,255,.045),
-          transparent 32%
-        ),
-        #020202;
-    }
-
-    .login-grid {
-      position: absolute;
-      inset: 0;
-      opacity: .18;
-      background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-      background-size: 45px 45px;
-      mask-image: radial-gradient(circle, black 20%, transparent 75%);
-      animation: gridMove 18s linear infinite;
-    }
-
-    .login-glow {
-      position: absolute;
-      width: 480px;
-      height: 480px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.035);
-      filter: blur(80px);
-      animation: glowMove 7s ease-in-out infinite alternate;
-    }
-
-    .login-orbit {
-      position: absolute;
-      width: 620px;
-      height: 620px;
-      border: 1px solid rgba(255,255,255,.035);
-      border-radius: 50%;
-      animation: orbitRotate 25s linear infinite;
-    }
-
-    .login-orbit::before,
-    .login-orbit::after {
-      content: "";
-      position: absolute;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 20px rgba(255,255,255,.7);
-    }
-
-    .login-orbit::before {
-      top: 8%;
-      left: 50%;
-    }
-
-    .login-orbit::after {
-      bottom: 18%;
-      right: 12%;
-    }
-
-    .login-card {
-      position: relative;
-      width: min(420px, calc(100% - 32px));
-      padding: 34px;
-      border: 1px solid #252525;
-      border-radius: 18px;
-      background: rgba(8,8,8,.92);
-      box-shadow:
-        0 30px 100px rgba(0,0,0,.8),
-        inset 0 1px 0 rgba(255,255,255,.035);
-      backdrop-filter: blur(20px);
-      animation: loginCardIn .75s cubic-bezier(.16,1,.3,1) both;
-    }
-
-    .login-card.shake {
-      animation: loginShake .42s ease;
-    }
-
-    .login-brand {
-      text-align: center;
-      margin-bottom: 30px;
-      animation: fadeUp .8s .12s both;
-    }
-
-    .login-logo {
-      width: 68px;
-      height: 68px;
-      margin: 0 auto 18px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #333;
-      background:
-        linear-gradient(145deg, #151515, #050505);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,.025),
-        0 15px 40px rgba(0,0,0,.7);
-      font-size: 27px;
-      font-weight: 800;
-      letter-spacing: -2px;
-      animation:
-        logoFloat 4s ease-in-out infinite,
-        logoAppear .8s .2s both;
-    }
-
-    .login-brand h1 {
-      font-size: 25px;
-      font-weight: 700;
-      letter-spacing: -.7px;
-    }
-
-    .login-brand p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 7px;
-    }
-
-    .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 17px;
-    }
-
-    .login-field {
-      animation: fieldIn .6s both;
-    }
-
-    .login-field:nth-child(1) {
-      animation-delay: .2s;
-    }
-
-    .login-field:nth-child(2) {
-      animation-delay: .3s;
-    }
-
-    .login-label {
-      display: block;
-      margin-bottom: 8px;
-      color: #aaa;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #666;
-      font-size: 14px;
-      transition: .25s;
-      pointer-events: none;
-    }
-
-    .login-input {
-      width: 100%;
-      height: 48px;
-      padding: 0 14px 0 40px;
-      border: 1px solid #292929;
-      border-radius: 10px;
-      outline: none;
-      color: #fff;
-      background: #0d0d0d;
-      transition:
-        border-color .25s,
-        background .25s,
-        box-shadow .25s,
-        transform .25s;
-    }
-
-    .login-input:hover {
-      border-color: #3a3a3a;
-    }
-
-    .login-input:focus {
-      border-color: #555;
-      background: #111;
-      box-shadow:
-        0 0 0 3px rgba(255,255,255,.035),
-        0 10px 30px rgba(0,0,0,.35);
-      transform: translateY(-1px);
-    }
-
-    .login-input:focus + .input-icon {
-      color: #ddd;
-    }
-
-    .password-toggle {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      border: 0;
-      color: #666;
-      background: transparent;
-      transition: .2s;
-    }
-
-    .password-toggle:hover {
-      color: #fff;
-    }
-
-    #loginBtn {
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      height: 48px;
-      margin-top: 5px;
-      border: 1px solid #444;
-      border-radius: 10px;
-      color: #fff;
-      background: linear-gradient(180deg, #1c1c1c, #101010);
-      box-shadow:
-        0 10px 30px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.06);
-      transition:
-        transform .2s,
-        border-color .2s,
-        box-shadow .25s;
-      animation: buttonIn .7s .4s both;
-    }
-
-    #loginBtn::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -120%;
-      width: 70%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.12),
-        transparent
-      );
-      transform: skewX(-20deg);
-      transition: .7s;
-    }
-
-    #loginBtn:hover {
-      border-color: #666;
-      transform: translateY(-2px);
-      box-shadow:
-        0 14px 40px rgba(0,0,0,.55),
-        0 0 25px rgba(255,255,255,.035);
-    }
-
-    #loginBtn:hover::before {
-      left: 150%;
-    }
-
-    #loginBtn:active {
-      transform: translateY(1px) scale(.99);
-    }
-
-    #loginBtn.loading {
-      pointer-events: none;
-      color: transparent;
-    }
-
-    #loginBtn.loading::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 17px;
-      height: 17px;
-      margin: -9px 0 0 -9px;
-      border: 2px solid rgba(255,255,255,.25);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-
-    .login-error {
-      min-height: 18px;
-      text-align: center;
-      color: var(--red);
-      font-size: 12px;
-      opacity: 0;
-      transform: translateY(-4px);
-      transition: .25s;
-    }
-
-    .login-error.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .login-footer {
-      margin-top: 24px;
-      text-align: center;
-      color: #444;
-      font-size: 11px;
-      animation: fadeUp .7s .5s both;
-    }
-
-    /* =========================
-       APP
-    ========================= */
-
-    #app {
-      display: none;
-      width: 100%;
-      height: 100%;
-    }
-
-    #app.visible {
-      display: flex;
-    }
-
-    .sidebar {
-      width: var(--sidebar);
-      height: 100%;
-      flex-shrink: 0;
-      padding: 18px 12px;
-      border-right: 1px solid var(--border);
-      background: #050505;
-      overflow-y: auto;
-      animation: sidebarIn .55s cubic-bezier(.16,1,.3,1);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 10px 12px 20px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-    }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      border: 1px solid #333;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-      font-weight: 800;
-      animation: logoFloat 4s ease-in-out infinite;
-    }
-
-    .brand-title {
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .brand-subtitle {
-      color: #555;
-      font-size: 10px;
-      margin-top: 2px;
-    }
-
-    .menu-title {
-      color: #444;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 12px 13px 7px;
-    }
-
-    .nav-item {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      width: 100%;
-      height: 40px;
-      margin: 3px 0;
-      padding: 0 12px;
-      border: 0;
-      border-radius: 9px;
-      color: #858585;
-      background: transparent;
-      text-align: left;
-      transition:
-        color .2s,
-        background .2s,
-        transform .2s;
-    }
-
-    .nav-item:hover {
-      color: #eee;
-      background: #0f0f0f;
-      transform: translateX(3px);
-    }
-
-    .nav-item.active {
-      color: #fff;
-      background: #151515;
-      box-shadow: inset 0 0 0 1px #242424;
-    }
-
-    .nav-icon {
-      width: 20px;
-      text-align: center;
-      color: #666;
-    }
-
-    .nav-item.active .nav-icon {
-      color: #fff;
-    }
-
-    .main {
-      min-width: 0;
-      flex: 1;
-      height: 100%;
-      overflow-y: auto;
-      background:
-        radial-gradient(circle at 85% 0%, rgba(255,255,255,.025), transparent 25%),
-        var(--bg);
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 68px;
-      padding: 0 25px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(3,3,3,.88);
-      backdrop-filter: blur(15px);
-    }
-
-    .page-title {
-      font-size: 19px;
-      font-weight: 700;
-    }
-
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .icon-btn {
-      width: 37px;
-      height: 37px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      color: #aaa;
-      background: #0b0b0b;
-      transition: .2s;
-    }
-
-    .icon-btn:hover {
-      color: #fff;
-      border-color: #444;
-      transform: translateY(-1px);
-    }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 5px;
-      padding: 7px 10px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      color: #bbb;
-      font-size: 12px;
-      background: #0b0b0b;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 10px rgba(53,208,127,.6);
-      animation: statusPulse 2s infinite;
-    }
-
-    .content {
-      padding: 25px;
-      animation: contentIn .5s ease;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-      animation: pageIn .35s ease;
-    }
-
-    /* =========================
-       CARDS
-    ========================= */
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .stat-card {
-      padding: 19px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--panel);
-      transition: .25s;
-    }
-
-    .stat-card:hover {
-      border-color: #333;
-      transform: translateY(-3px);
-      box-shadow: 0 15px 35px rgba(0,0,0,.25);
-    }
-
-    .stat-label {
-      color: #666;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .7px;
-    }
-
-    .stat-value {
-      margin-top: 10px;
-      font-size: 28px;
-      font-weight: 750;
-    }
-
-    .stat-meta {
-      margin-top: 6px;
-      color: #555;
-      font-size: 11px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .panel {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--panel);
-      overflow: hidden;
-    }
-
-    .panel-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 57px;
-      padding: 0 17px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .panel-title {
-      font-size: 13px;
-      font-weight: 650;
-    }
-
-    .panel-body {
-      padding: 17px;
-    }
-
-    /* =========================
-       TABLE
-    ========================= */
-
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .search {
-      width: 270px;
-      height: 40px;
-      padding: 0 13px;
-      outline: none;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      color: #eee;
-      background: #090909;
-      transition: .2s;
-    }
-
-    .search:focus {
-      border-color: #444;
-      box-shadow: 0 0 0 3px rgba(255,255,255,.025);
-    }
-
-    .btn {
-      height: 40px;
-      padding: 0 15px;
-      border: 1px solid var(--border2);
-      border-radius: 9px;
-      color: #eee;
-      background: #111;
-      transition: .2s;
-    }
-
-    .btn:hover {
-      border-color: #555;
-      background: #171717;
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      border-color: #444;
-      background: #171717;
-    }
-
-    .btn-danger {
-      color: #ff7a86;
-      border-color: rgba(255,77,94,.2);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      color: #555;
-      font-size: 10px;
-      text-align: left;
-      text-transform: uppercase;
-      letter-spacing: .7px;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 13px 14px;
-      border-bottom: 1px solid #141414;
-      color: #bbb;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    tr {
-      transition: background .18s;
-    }
-
-    tbody tr:hover {
-      background: #0e0e0e;
-    }
-
-    .empty {
-      padding: 50px 20px;
-      color: #555;
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 8px;
-      border: 1px solid #2b2b2b;
-      border-radius: 6px;
-      font-size: 10px;
-      background: #101010;
-    }
-
-    .badge.green {
-      color: var(--green);
-      border-color: rgba(53,208,127,.15);
-    }
-
-    .badge.red {
-      color: var(--red);
-      border-color: rgba(255,77,94,.15);
-    }
-
-    .action-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .small-btn {
-      height: 29px;
-      padding: 0 9px;
-      border: 1px solid #292929;
-      border-radius: 6px;
-      color: #999;
-      background: #0d0d0d;
-      font-size: 10px;
-      transition: .2s;
-    }
-
-    .small-btn:hover {
-      color: #fff;
-      border-color: #444;
-    }
-
-    /* =========================
-       MODAL
-    ========================= */
-
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 5000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(0,0,0,.72);
-      backdrop-filter: blur(8px);
-    }
-
-    .modal-overlay.show {
-      display: flex;
-      animation: overlayIn .2s ease;
-    }
-
-    .modal {
-      width: min(650px, 100%);
-      max-height: 90vh;
-      overflow-y: auto;
-      border: 1px solid #2a2a2a;
-      border-radius: 14px;
-      background: #0a0a0a;
-      box-shadow: 0 30px 100px rgba(0,0,0,.8);
-      animation: modalIn .35s cubic-bezier(.16,1,.3,1);
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .modal-title {
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .modal-close {
-      width: 30px;
-      height: 30px;
-      border: 0;
-      border-radius: 7px;
-      color: #777;
-      background: transparent;
-      font-size: 20px;
-    }
-
-    .modal-close:hover {
-      color: #fff;
-      background: #151515;
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .form-group.full {
-      grid-column: 1 / -1;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 7px;
-      color: #888;
-      font-size: 11px;
-    }
-
-    .form-input,
-    .form-select {
-      width: 100%;
-      height: 42px;
-      padding: 0 11px;
-      outline: none;
-      border: 1px solid #282828;
-      border-radius: 8px;
-      color: #eee;
-      background: #101010;
-      transition: .2s;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      border-color: #4a4a4a;
-      box-shadow: 0 0 0 3px rgba(255,255,255,.025);
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 9px;
-      padding: 15px 20px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* =========================
-       PLACEHOLDER PAGES
-    ========================= */
-
-    .placeholder {
-      min-height: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 1px dashed #222;
-      border-radius: 13px;
-      color: #555;
-      text-align: center;
-      background: #070707;
-    }
-
-    .placeholder-icon {
-      margin-bottom: 15px;
-      font-size: 30px;
-      opacity: .45;
-    }
-
-    .placeholder h3 {
-      color: #aaa;
-      font-size: 15px;
-      margin-bottom: 7px;
-    }
-
-    .placeholder p {
-      font-size: 12px;
-    }
-
-    /* =========================
-       MOBILE
-    ========================= */
-
-    .mobile-menu {
-      display: none;
-    }
-
-    @media (max-width: 950px) {
-      :root {
-        --sidebar: 220px;
-      }
-
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 700px) {
-      body {
-        overflow: auto;
-      }
-
-      #app.visible {
-        display: block;
-      }
-
-      .sidebar {
-        position: fixed;
-        left: -250px;
-        top: 0;
-        z-index: 3000;
-        height: 100%;
-        transition: left .3s cubic-bezier(.16,1,.3,1);
-        box-shadow: 20px 0 60px rgba(0,0,0,.5);
-      }
-
-      .sidebar.open {
-        left: 0;
-      }
-
-      .main {
-        min-height: 100vh;
-      }
-
-      .mobile-menu {
-        display: block;
-      }
-
-      .topbar {
-        padding: 0 15px;
-      }
-
-      .content {
-        padding: 15px;
-      }
-
-      .stats {
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
-      }
-
-      .stat-card {
-        padding: 14px;
-      }
-
-      .stat-value {
-        font-size: 22px;
-      }
-
-      .toolbar {
-        flex-direction: column;
-      }
-
-      .search {
-        width: 100%;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .form-group.full {
-        grid-column: auto;
-      }
-
-      .login-card {
-        padding: 28px 22px;
-      }
-    }
-
-    /* =========================
-       ANIMATIONS
-    ========================= */
-
-    @keyframes loginCardIn {
-      from {
-        opacity: 0;
-        transform: translateY(35px) scale(.96);
-        filter: blur(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-      }
-    }
-
-    @keyframes logoAppear {
-      from {
-        opacity: 0;
-        transform: scale(.55) rotate(-12deg);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) rotate(0);
-      }
-    }
-
-    @keyframes logoFloat {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-4px);
-      }
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fieldIn {
-      from {
-        opacity: 0;
-        transform: translateX(-15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes buttonIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes loginShake {
-      0%, 100% {
-        transform: translateX(0);
-      }
-      20% {
-        transform: translateX(-8px);
-      }
-      40% {
-        transform: translateX(8px);
-      }
-      60% {
-        transform: translateX(-6px);
-      }
-      80% {
-        transform: translateX(5px);
-      }
-    }
-
-    @keyframes glowMove {
-      from {
-        transform: translate(-80px, -20px) scale(.85);
-        opacity: .5;
-      }
-      to {
-        transform: translate(80px, 30px) scale(1.15);
-        opacity: 1;
-      }
-    }
-
-    @keyframes orbitRotate {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes gridMove {
-      from {
-        transform: translateY(0);
-      }
-      to {
-        transform: translateY(45px);
-      }
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes sidebarIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes contentIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes pageIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes overlayIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: translateY(25px) scale(.97);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes statusPulse {
-      0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 8px rgba(53,208,127,.4);
-      }
-      50% {
-        opacity: .55;
-        box-shadow: 0 0 18px rgba(53,208,127,.8);
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Xray Panel</title>
+
+<style>
+:root{
+  --bg:#050505;
+  --panel:#0b0b0b;
+  --panel2:#101010;
+  --line:#1d1d1d;
+  --text:#f3f3f3;
+  --muted:#858585;
+  --green:#00ff88;
+  --red:#ff4757;
+  --yellow:#ffc857;
+  --blue:#4da3ff;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(0,255,136,.08),transparent 30%),
+    radial-gradient(circle at 90% 90%,rgba(0,160,255,.05),transparent 30%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,Arial,sans-serif;
+  min-height:100vh;
+}
+
+button,input,select,textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{display:none!important}
+
+.login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.login-card{
+  width:390px;
+  background:rgba(10,10,10,.94);
+  border:1px solid #252525;
+  border-radius:20px;
+  padding:35px;
+  box-shadow:0 0 80px rgba(0,255,136,.08);
+  animation:up .6s ease;
+}
+
+@keyframes up{
+  from{opacity:0;transform:translateY(25px)}
+  to{opacity:1;transform:none}
+}
+
+.logo{
+  color:var(--green);
+  font-size:28px;
+  font-weight:800;
+  text-align:center;
+  letter-spacing:2px;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  margin-bottom:30px;
+}
+
+.field{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-size:12px;
+  color:#aaa;
+  margin-bottom:7px;
+}
+
+input,select,textarea{
+  width:100%;
+  background:#080808;
+  color:white;
+  border:1px solid #292929;
+  border-radius:9px;
+  padding:11px 12px;
+  outline:none;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 2px rgba(0,255,136,.08);
+}
+
+.primary{
+  width:100%;
+  border:0;
+  background:var(--green);
+  color:#00170c;
+  padding:12px;
+  border-radius:9px;
+  font-weight:800;
+}
+
+.primary:hover{
+  box-shadow:0 0 20px rgba(0,255,136,.2);
+}
+
+.error{
+  color:var(--red);
+  font-size:13px;
+  margin-top:12px;
+  text-align:center;
+}
+
+.app{
+  min-height:100vh;
+  display:flex;
+}
+
+.sidebar{
+  width:235px;
+  border-right:1px solid var(--line);
+  background:rgba(6,6,6,.95);
+  padding:20px 12px;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  z-index:10;
+}
+
+.brand{
+  font-size:21px;
+  font-weight:900;
+  color:var(--green);
+  padding:10px 12px 25px;
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.nav button{
+  text-align:left;
+  border:0;
+  background:transparent;
+  color:#929292;
+  padding:11px 13px;
+  border-radius:8px;
+}
+
+.nav button:hover,
+.nav button.active{
+  background:#121212;
+  color:white;
+}
+
+.nav button.active{
+  box-shadow:inset 2px 0 var(--green);
+}
+
+.main{
+  margin-left:235px;
+  width:calc(100% - 235px);
+  padding:25px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.title{
+  font-size:25px;
+  font-weight:800;
+}
+
+.logout{
+  background:#151515;
+  border:1px solid #292929;
+  color:#aaa;
+  padding:8px 13px;
+  border-radius:8px;
+}
+
+.content{
+  animation:fade .25s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:linear-gradient(145deg,#0e0e0e,#090909);
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:20px;
+}
+
+.card-label{
+  color:#777;
+  font-size:12px;
+}
+
+.card-value{
+  font-size:30px;
+  margin-top:9px;
+  font-weight:800;
+}
+
+.card-value.green{color:var(--green)}
+
+.panel{
+  background:#0b0b0b;
+  border:1px solid var(--line);
+  border-radius:13px;
+  overflow:hidden;
+}
+
+.panel-head{
+  padding:17px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.panel-title{
+  font-weight:800;
+}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.search{
+  max-width:300px;
+}
+
+.add{
+  background:var(--green);
+  border:0;
+  color:#00170c;
+  padding:10px 15px;
+  border-radius:8px;
+  font-weight:800;
+}
+
+.table-wrap{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  color:#777;
+  font-size:11px;
+  text-align:left;
+  text-transform:uppercase;
+}
+
+th,td{
+  padding:14px 16px;
+  border-bottom:1px solid #181818;
+  white-space:nowrap;
+}
+
+td{
+  font-size:13px;
+}
+
+.empty{
+  text-align:center;
+  padding:45px;
+  color:#666;
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:11px;
+}
+
+.badge.green{
+  color:var(--green);
+  background:rgba(0,255,136,.08);
+}
+
+.badge.red{
+  color:var(--red);
+  background:rgba(255,71,87,.08);
+}
+
+.actions{
+  display:flex;
+  gap:6px;
+}
+
+.action{
+  border:1px solid #292929;
+  background:#111;
+  color:#aaa;
+  border-radius:6px;
+  padding:6px 9px;
+}
+
+.action:hover{
+  color:white;
+  border-color:#444;
+}
+
+.action.delete:hover{
+  color:var(--red);
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.78);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:720px;
+  max-width:100%;
+  max-height:92vh;
+  overflow:auto;
+  background:#0b0b0b;
+  border:1px solid #292929;
+  border-radius:15px;
+  box-shadow:0 30px 100px #000;
+}
+
+.modal-head{
+  padding:17px 20px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.close{
+  background:none;
+  color:#888;
+  border:0;
+  font-size:22px;
+}
+
+.modal-body{
+  padding:20px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.form-grid.three{
+  grid-template-columns:repeat(3,1fr);
+}
+
+.full{
+  grid-column:1/-1;
+}
+
+.section{
+  margin-top:22px;
+  margin-bottom:12px;
+  color:var(--green);
+  font-weight:800;
+  font-size:13px;
+  text-transform:uppercase;
+}
+
+.checkbox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#aaa;
+}
+
+.checkbox input{
+  width:auto;
+}
+
+.modal-foot{
+  padding:15px 20px;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.secondary{
+  background:#151515;
+  color:#bbb;
+  border:1px solid #292929;
+  padding:10px 15px;
+  border-radius:8px;
+}
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#101010;
+  border:1px solid #292929;
+  padding:12px 16px;
+  border-radius:9px;
+  display:none;
+  z-index:200;
+}
+
+.toast.show{
+  display:block;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:70px;
+  }
+
+  .brand{
+    font-size:0;
+  }
+
+  .brand:first-letter{
+    font-size:20px;
+  }
+
+  .nav button{
+    font-size:0;
+    text-align:center;
+  }
+
+  .nav button::first-letter{
+    font-size:18px;
+  }
+
+  .main{
+    margin-left:70px;
+    width:calc(100% - 70px);
+  }
+
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:600px){
+  .main{
+    padding:15px;
+  }
+
+  .cards{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .form-grid,
+  .form-grid.three{
+    grid-template-columns:1fr;
+  }
+
+  .toolbar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .search{
+    max-width:none;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- =========================
-       LOGIN SCREEN
-  ========================== -->
+<!-- LOGIN -->
 
-  <section id="loginScreen">
+<div id="loginScreen" class="login">
+  <div class="login-card">
+    <div class="logo">XRAY PANEL</div>
+    <div class="subtitle">Secure Management Console</div>
 
-    <div class="login-grid"></div>
-    <div class="login-glow"></div>
-    <div class="login-orbit"></div>
-
-    <div class="login-card" id="loginCard">
-
-      <div class="login-brand">
-        <div class="login-logo">X</div>
-
-        <h1>Xray Panel</h1>
-
-        <p>Secure management interface</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>Username</label>
+        <input id="username" value="admin" autocomplete="username">
       </div>
 
-      <form id="loginForm" class="login-form">
-
-        <div class="login-field">
-          <label class="login-label">Username</label>
-
-          <div class="input-wrap">
-            <input
-              id="username"
-              class="login-input"
-              type="text"
-              autocomplete="username"
-              placeholder="Enter username"
-              required
-            />
-
-            <span class="input-icon">◉</span>
-          </div>
-        </div>
-
-        <div class="login-field">
-          <label class="login-label">Password</label>
-
-          <div class="input-wrap">
-            <input
-              id="password"
-              class="login-input"
-              type="password"
-              autocomplete="current-password"
-              placeholder="Enter password"
-              required
-            />
-
-            <span class="input-icon">◆</span>
-
-            <button
-              type="button"
-              class="password-toggle"
-              id="passwordToggle"
-              aria-label="Show password"
-            >
-              ◉
-            </button>
-          </div>
-        </div>
-
-        <div
-          id="loginError"
-          class="login-error"
-        ></div>
-
-        <button
-          id="loginBtn"
-          type="submit"
-        >
-          Sign in
-        </button>
-
-      </form>
-
-      <div class="login-footer">
-        Xray Management Panel
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password">
       </div>
 
-    </div>
-  </section>
+      <button class="primary">Sign In</button>
 
-
-  <!-- =========================
-       APP
-  ========================== -->
-
-  <section id="app">
-
-    <aside class="sidebar" id="sidebar">
-
-      <div class="brand">
-        <div class="brand-logo">X</div>
-
-        <div>
-          <div class="brand-title">Xray Panel</div>
-          <div class="brand-subtitle">Management Console</div>
-        </div>
-      </div>
-
-      <div class="menu-title">Overview</div>
-
-      <button class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">⌂</span>
-        Dashboard
-      </button>
-
-      <div class="menu-title">Management</div>
-
-      <button class="nav-item" data-page="inbounds">
-        <span class="nav-icon">⇄</span>
-        Inbounds
-      </button>
-
-      <button class="nav-item" data-page="clients">
-        <span class="nav-icon">♙</span>
-        Clients
-      </button>
-
-      <button class="nav-item" data-page="groups">
-        <span class="nav-icon">◎</span>
-        Groups
-      </button>
-
-      <button class="nav-item" data-page="nodes">
-        <span class="nav-icon">◇</span>
-        Nodes
-      </button>
-
-      <button class="nav-item" data-page="hosts">
-        <span class="nav-icon">◈</span>
-        Hosts
-      </button>
-
-      <div class="menu-title">Xray</div>
-
-      <button class="nav-item" data-page="xray">
-        <span class="nav-icon">⚙</span>
-        Xray
-      </button>
-
-      <button class="nav-item" data-page="outbound">
-        <span class="nav-icon">↗</span>
-        Outbound
-      </button>
-
-      <button class="nav-item" data-page="routing">
-        <span class="nav-icon">⌁</span>
-        Routing
-      </button>
-
-      <div class="menu-title">System</div>
-
-      <button class="nav-item" data-page="settings">
-        <span class="nav-icon">⚙</span>
-        Settings
-      </button>
-
-      <button class="nav-item" data-page="api">
-        <span class="nav-icon">{ }</span>
-        API Docs
-      </button>
-
-      <div style="margin-top:20px;padding:12px;border-top:1px solid #171717;">
-        <button
-          class="nav-item"
-          id="logoutBtn"
-          style="color:#777;"
-        >
-          <span class="nav-icon">↪</span>
-          Logout
-        </button>
-      </div>
-
-    </aside>
-
-
-    <main class="main">
-
-      <header class="topbar">
-
-        <div style="display:flex;align-items:center;gap:12px;">
-
-          <button
-            class="icon-btn mobile-menu"
-            id="mobileMenu"
-          >
-            ☰
-          </button>
-
-          <div
-            class="page-title"
-            id="pageTitle"
-          >
-            Dashboard
-          </div>
-
-        </div>
-
-        <div class="top-actions">
-
-          <button
-            class="icon-btn"
-            id="refreshBtn"
-            title="Refresh"
-          >
-            ↻
-          </button>
-
-          <div class="user-badge">
-            <span class="status-dot"></span>
-            <span id="currentUser">admin</span>
-          </div>
-
-        </div>
-
-      </header>
-
-
-      <div class="content">
-
-        <!-- DASHBOARD -->
-
-        <section
-          class="page active"
-          id="page-dashboard"
-        >
-
-          <div class="stats">
-
-            <div class="stat-card">
-              <div class="stat-label">Inbounds</div>
-              <div
-                class="stat-value"
-                id="statInbounds"
-              >
-                0
-              </div>
-              <div class="stat-meta">
-                Active configurations
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-label">Clients</div>
-              <div
-                class="stat-value"
-                id="statClients"
-              >
-                0
-              </div>
-              <div class="stat-meta">
-                Registered users
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-label">CPU</div>
-              <div class="stat-value">
-                —
-              </div>
-              <div class="stat-meta">
-                Core monitoring
-              </div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-label">RAM</div>
-              <div class="stat-value">
-                —
-              </div>
-              <div class="stat-meta">
-                Memory monitoring
-              </div>
-            </div>
-
-          </div>
-
-
-          <div class="grid-2">
-
-            <div class="panel">
-
-              <div class="panel-head">
-                <div class="panel-title">
-                  System Status
-                </div>
-
-                <span class="badge green">
-                  Online
-                </span>
-              </div>
-
-              <div class="panel-body">
-
-                <div style="display:flex;flex-direction:column;gap:13px;">
-
-                  <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#666;font-size:12px;">
-                      Panel
-                    </span>
-                    <span style="font-size:12px;">
-                      Running
-                    </span>
-                  </div>
-
-                  <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#666;font-size:12px;">
-                      Database
-                    </span>
-                    <span style="font-size:12px;">
-                      SQLite
-                    </span>
-                  </div>
-
-                  <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#666;font-size:12px;">
-                      Authentication
-                    </span>
-                    <span style="font-size:12px;">
-                      JWT
-                    </span>
-                  </div>
-
-                  <div style="display:flex;justify-content:space-between;">
-                    <span style="color:#666;font-size:12px;">
-                      Xray Core
-                    </span>
-                    <span class="badge">
-                      Not installed
-                    </span>
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div class="panel">
-
-              <div class="panel-head">
-                <div class="panel-title">
-                  Traffic
-                </div>
-              </div>
-
-              <div class="panel-body">
-
-                <div class="placeholder" style="min-height:190px;">
-                  <div class="placeholder-icon">
-                    ◌
-                  </div>
-
-                  <h3>
-                    Traffic monitoring
-                  </h3>
-
-                  <p>
-                    Real-time traffic metrics will appear here.
-                  </p>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- INBOUNDS -->
-
-        <section
-          class="page"
-          id="page-inbounds"
-        >
-
-          <div class="toolbar">
-
-            <input
-              id="inboundSearch"
-              class="search"
-              placeholder="Search inbounds..."
-            />
-
-            <button
-              class="btn btn-primary"
-              id="addInboundBtn"
-            >
-              + Add Inbound
-            </button>
-
-          </div>
-
-          <div class="panel">
-
-            <div class="panel-head">
-              <div class="panel-title">
-                Inbounds
-              </div>
-            </div>
-
-            <div class="table-wrap">
-
-              <table>
-
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Protocol</th>
-                    <th>Port</th>
-                    <th>Remark</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody id="inboundsTable"></tbody>
-
-              </table>
-
-              <div
-                class="empty"
-                id="inboundsEmpty"
-              >
-                No inbounds found.
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- CLIENTS -->
-
-        <section
-          class="page"
-          id="page-clients"
-        >
-
-          <div class="toolbar">
-
-            <input
-              id="clientSearch"
-              class="search"
-              placeholder="Search clients..."
-            />
-
-          </div>
-
-          <div class="panel">
-
-            <div class="panel-head">
-              <div class="panel-title">
-                Clients
-              </div>
-            </div>
-
-            <div class="table-wrap">
-
-              <table>
-
-                <thead>
-                  <tr>
-                    <th>Email</th>
-                    <th>Inbound</th>
-                    <th>UUID</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody id="clientsTable"></tbody>
-
-              </table>
-
-              <div
-                class="empty"
-                id="clientsEmpty"
-              >
-                No clients found.
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- PLACEHOLDER PAGES -->
-
-        <section
-          class="page"
-          id="page-groups"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">◎</div>
-            <h3>Groups</h3>
-            <p>Group management interface</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-nodes"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">◇</div>
-            <h3>Nodes</h3>
-            <p>Node management interface</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-hosts"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">◈</div>
-            <h3>Hosts</h3>
-            <p>Host management interface</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-xray"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">⚙</div>
-            <h3>Xray</h3>
-            <p>Xray core management interface</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-outbound"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">↗</div>
-            <h3>Outbound</h3>
-            <p>Outbound configuration</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-routing"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">⌁</div>
-            <h3>Routing</h3>
-            <p>Routing configuration</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-settings"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">⚙</div>
-            <h3>Settings</h3>
-            <p>Panel settings</p>
-          </div>
-        </section>
-
-
-        <section
-          class="page"
-          id="page-api"
-        >
-          <div class="placeholder">
-            <div class="placeholder-icon">{ }</div>
-            <h3>API Documentation</h3>
-            <p>REST API documentation</p>
-          </div>
-        </section>
-
-      </div>
-
-    </main>
-
-  </section>
-
-
-  <!-- =========================
-       ADD INBOUND MODAL
-  ========================== -->
-
-  <div
-    class="modal-overlay"
-    id="inboundModal"
-  >
-
-    <div class="modal">
-
-      <div class="modal-head">
-
-        <div class="modal-title">
-          Add Inbound
-        </div>
-
-        <button
-          class="modal-close"
-          id="closeInboundModal"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <form id="inboundForm">
-
-        <div class="modal-body">
-
-          <div class="form-grid">
-
-            <div class="form-group">
-              <label class="form-label">
-                Name
-              </label>
-
-              <input
-                class="form-input"
-                id="inboundName"
-                placeholder="Example: VLESS Main"
-                required
-              />
-            </div>
-
-
-            <div class="form-group">
-              <label class="form-label">
-                Protocol
-              </label>
-
-              <select
-                class="form-select"
-                id="inboundProtocol"
-              >
-                <option value="vless">
-                  VLESS
-                </option>
-
-                <option value="vmess">
-                  VMess
-                </option>
-
-                <option value="trojan">
-                  Trojan
-                </option>
-
-                <option value="shadowsocks">
-                  Shadowsocks
-                </option>
-
-                <option value="socks">
-                  SOCKS
-                </option>
-
-                <option value="http">
-                  HTTP
-                </option>
-              </select>
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                Port
-              </label>
-
-              <input
-                class="form-input"
-                id="inboundPort"
-                type="number"
-                min="1"
-                max="65535"
-                placeholder="443"
-                required
-              />
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label class="form-label">
-                Remark
-              </label>
-
-              <input
-                class="form-input"
-                id="inboundRemark"
-                placeholder="Optional remark"
-              />
-
-            </div>
-
-
-            <div class="form-group full">
-
-              <div
-                style="
-                  padding:13px;
-                  border:1px solid #202020;
-                  border-radius:9px;
-                  color:#666;
-                  background:#080808;
-                  font-size:11px;
-                "
-              >
-                Advanced transport, security and client
-                configuration can be added in future versions.
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="modal-footer">
-
-          <button
-            type="button"
-            class="btn"
-            id="cancelInbound"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            Create Inbound
-          </button>
-
-        </div>
-
-      </form>
-
-    </div>
-
+      <div id="loginError" class="error"></div>
+    </form>
   </div>
+</div>
 
+<!-- APP -->
 
-  <script>
+<div id="app" class="app hidden">
 
-    /* =========================
-       GLOBAL STATE
-    ========================== */
+  <aside class="sidebar">
+    <div class="brand">XRAY PANEL</div>
 
-    let token = localStorage.getItem("xray_panel_token") || "";
+    <nav class="nav">
+      <button data-page="dashboard">◉ Dashboard</button>
+      <button data-page="inbounds">◈ Inbounds</button>
+      <button data-page="clients">◎ Clients</button>
+      <button data-page="groups">▣ Groups</button>
+      <button data-page="nodes">◆ Nodes</button>
+      <button data-page="hosts">◇ Hosts</button>
+      <button data-page="xray">⚡ Xray</button>
+      <button data-page="outbound">↗ Outbound</button>
+      <button data-page="routing">⇄ Routing</button>
+      <button data-page="settings">⚙ Settings</button>
+      <button data-page="api">⌘ API Docs</button>
+    </nav>
+  </aside>
 
-    let inbounds = [];
-    let clients = [];
+  <main class="main">
+    <div class="topbar">
+      <div id="pageTitle" class="title">Dashboard</div>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
 
+    <div id="content" class="content"></div>
+  </main>
 
-    /* =========================
-       HELPERS
-    ========================== */
+</div>
 
-    function apiHeaders() {
+<!-- MODAL -->
 
-      return {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      };
+<div id="modal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <strong id="modalTitle">Create</strong>
+      <button class="close" onclick="closeModal()">×</button>
+    </div>
 
+    <div id="modalBody" class="modal-body"></div>
+
+    <div class="modal-foot">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button id="modalSave" class="add">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let token = localStorage.getItem("xray_token");
+let currentPage = "dashboard";
+let editingId = null;
+
+const api = async (url, options={}) => {
+  options.headers = {
+    ...(options.body ? {"Content-Type":"application/json"} : {}),
+    ...(options.headers || {}),
+    Authorization: `Bearer ${token}`
+  };
+
+  const r = await fetch(url, options);
+  const data = await r.json().catch(()=>({}));
+
+  if(!r.ok) throw new Error(data.error || "Request failed");
+
+  return data;
+};
+
+function toast(text){
+  $("toast").textContent = text;
+  $("toast").classList.add("show");
+
+  setTimeout(()=>$("toast").classList.remove("show"),2500);
+}
+
+function escapeHtml(v){
+  return String(v ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function modal(title, html, save){
+  $("modalTitle").textContent = title;
+  $("modalBody").innerHTML = html;
+  $("modalSave").onclick = save;
+  $("modal").classList.add("show");
+}
+
+function closeModal(){
+  $("modal").classList.remove("show");
+  editingId = null;
+}
+
+function nav(page){
+  currentPage = page;
+
+  document.querySelectorAll(".nav button")
+    .forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+
+  const titles={
+    dashboard:"Dashboard",
+    inbounds:"Inbounds",
+    clients:"Clients",
+    groups:"Groups",
+    nodes:"Nodes",
+    hosts:"Hosts",
+    xray:"Xray",
+    outbound:"Outbound",
+    routing:"Routing",
+    settings:"Settings",
+    api:"API Docs"
+  };
+
+  $("pageTitle").textContent=titles[page] || page;
+
+  loadPage();
+}
+
+document.querySelectorAll(".nav button").forEach(btn=>{
+  btn.onclick=()=>nav(btn.dataset.page);
+});
+
+/* LOGIN */
+
+$("loginForm").onsubmit=async e=>{
+  e.preventDefault();
+
+  $("loginError").textContent="";
+
+  try{
+    const data=await fetch("/api/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        username:$("username").value,
+        password:$("password").value
+      })
+    }).then(r=>r.json());
+
+    if(!data.token){
+      throw new Error(data.error || "Login failed");
     }
 
+    token=data.token;
+    localStorage.setItem("xray_token",token);
 
-    async function api(url, options = {}) {
+    $("loginScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
 
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...apiHeaders(),
-          ...(options.headers || {})
-        }
-      });
+    nav("dashboard");
 
-      if (response.status === 401) {
-        logout();
-        throw new Error("Unauthorized");
-      }
+  }catch(e){
+    $("loginError").textContent=e.message;
+  }
+};
 
-      const data = await response.json();
+function logout(){
+  localStorage.removeItem("xray_token");
+  location.reload();
+}
 
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Request failed"
-        );
-      }
+/* DASHBOARD */
 
-      return data;
+async function dashboard(){
+  const s=await api("/api/stats");
 
+  $("content").innerHTML=`
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">INBOUNDS</div>
+        <div class="card-value green">${s.inbounds}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">CLIENTS</div>
+        <div class="card-value">${s.clients}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">GROUPS</div>
+        <div class="card-value">${s.groups}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">NODES</div>
+        <div class="card-value">${s.nodes}</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">System Status</span>
+      </div>
+
+      <div style="padding:20px">
+        <span class="badge green">PANEL ONLINE</span>
+        <span style="margin-left:10px;color:#777">
+          Xray Core: ${s.xray ? "Running" : "Not Running"}
+        </span>
+      </div>
+    </div>
+  `;
+}
+
+/* INBOUNDS */
+
+async function inbounds(){
+  const rows=await api("/api/inbounds");
+
+  $("content").innerHTML=`
+    <div class="toolbar">
+      <input class="search" id="search" placeholder="Search inbounds...">
+      <button class="add" onclick="createInbound()">+ Add Inbound</button>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Protocol</th>
+              <th>Port</th>
+              <th>Network</th>
+              <th>Security</th>
+              <th>Clients</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+          ${rows.length ? rows.map(r=>`
+            <tr>
+              <td>${escapeHtml(r.name)}</td>
+              <td>${escapeHtml(r.protocol)}</td>
+              <td>${r.port}</td>
+              <td>${escapeHtml(r.network)}</td>
+              <td>${escapeHtml(r.security)}</td>
+              <td>${r.client_count}</td>
+              <td>
+                <span class="badge ${r.enabled?'green':'red'}">
+                  ${r.enabled?'Enabled':'Disabled'}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button class="action" onclick='editInbound(${JSON.stringify(r)})'>Edit</button>
+                  <button class="action" onclick="toggleInbound('${r.id}')">Toggle</button>
+                  <button class="action delete" onclick="deleteItem('/api/inbounds/${r.id}')">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `).join("") : `
+            <tr><td colspan="8" class="empty">No inbounds yet</td></tr>
+          `}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  $("search").oninput=e=>{
+    const q=e.target.value.toLowerCase();
+
+    document.querySelectorAll("#rows tr").forEach(tr=>{
+      tr.style.display=tr.textContent.toLowerCase().includes(q)?"":"none";
+    });
+  };
+}
+
+function inboundForm(r={}){
+  const s=r.settings || {};
+  const reality=s.reality || {};
+  const tls=s.tls || {};
+  const stream=r.stream_settings || {};
+
+  return `
+    <div class="section">Basic</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Name / Remark</label>
+        <input id="f_name" value="${escapeHtml(r.name||"")}">
+      </div>
+
+      <div class="field">
+        <label>Protocol</label>
+        <select id="f_protocol">
+          ${["vless","vmess","trojan","shadowsocks","socks","http","wireguard","hysteria2","dokodemo-door","tun"]
+          .map(x=>`<option ${r.protocol===x?"selected":""}>${x}</option>`).join("")}
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Listen IP</label>
+        <input id="f_listen" value="${escapeHtml(r.listen||"")}">
+      </div>
+
+      <div class="field">
+        <label>Port</label>
+        <input id="f_port" type="number" value="${r.port||443}">
+      </div>
+
+      <div class="field">
+        <label>Network / Transport</label>
+        <select id="f_network">
+          ${["tcp","ws","grpc","httpupgrade","xhttp"]
+          .map(x=>`<option ${r.network===x?"selected":""}>${x}</option>`).join("")}
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Security</label>
+        <select id="f_security">
+          ${["none","tls","reality"]
+          .map(x=>`<option ${r.security===x?"selected":""}>${x}</option>`).join("")}
+        </select>
+      </div>
+
+      <div class="field full">
+        <label>Remark</label>
+        <input id="f_remark" value="${escapeHtml(r.remark||"")}">
+      </div>
+
+      <label class="checkbox">
+        <input id="f_enabled" type="checkbox" ${r.enabled!==0?"checked":""}>
+        Enabled
+      </label>
+
+      <label class="checkbox">
+        <input id="f_sniffing" type="checkbox" ${s.sniffing?"checked":""}>
+        Sniffing
+      </label>
+    </div>
+
+    <div class="section">TLS</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Server Name / SNI</label>
+        <input id="f_tlsServerName" value="${escapeHtml(tls.serverName||"")}">
+      </div>
+
+      <div class="field">
+        <label>Certificate Path</label>
+        <input id="f_tlsCert" value="${escapeHtml(tls.certPath||"")}">
+      </div>
+
+      <div class="field">
+        <label>Private Key Path</label>
+        <input id="f_tlsKey" value="${escapeHtml(tls.keyPath||"")}">
+      </div>
+    </div>
+
+    <div class="section">REALITY</div>
+
+    <div class="form-grid">
+      <div class="field full">
+        <label>Destination</label>
+        <input id="f_realityDest" value="${escapeHtml(reality.dest||"")}">
+      </div>
+
+      <div class="field">
+        <label>Server Names</label>
+        <input id="f_realityServerNames" value="${escapeHtml(reality.serverNames||"")}">
+      </div>
+
+      <div class="field">
+        <label>Private Key</label>
+        <input id="f_realityPrivateKey" value="${escapeHtml(reality.privateKey||"")}">
+      </div>
+
+      <div class="field">
+        <label>Short IDs</label>
+        <input id="f_realityShortIds" value="${escapeHtml(reality.shortIds||"")}">
+      </div>
+
+      <div class="field">
+        <label>Fingerprint</label>
+        <input id="f_realityFingerprint" value="${escapeHtml(reality.fingerprint||"chrome")}">
+      </div>
+    </div>
+
+    <div class="section">WebSocket</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Path</label>
+        <input id="f_wsPath" value="${escapeHtml(stream.ws?.path||"/")}">
+      </div>
+
+      <div class="field">
+        <label>Host</label>
+        <input id="f_wsHost" value="${escapeHtml(stream.ws?.host||"")}">
+      </div>
+    </div>
+
+    <div class="section">gRPC</div>
+
+    <div class="field">
+      <label>Service Name</label>
+      <input id="f_grpcServiceName" value="${escapeHtml(stream.grpc?.serviceName||"")}">
+    </div>
+
+    <div class="section">XHTTP</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Path</label>
+        <input id="f_xhttpPath" value="${escapeHtml(stream.xhttp?.path||"/")}">
+      </div>
+
+      <div class="field">
+        <label>Host</label>
+        <input id="f_xhttpHost" value="${escapeHtml(stream.xhttp?.host||"")}">
+      </div>
+    </div>
+
+    <div class="section">Client</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Email</label>
+        <input id="f_clientEmail" placeholder="client@example.com">
+      </div>
+
+      <div class="field">
+        <label>UUID</label>
+        <input id="f_clientUuid" placeholder="Auto generate">
+      </div>
+
+      <div class="field">
+        <label>Flow</label>
+        <input id="f_clientFlow" placeholder="xtls-rprx-vision">
+      </div>
+
+      <div class="field">
+        <label>Total Traffic (GB)</label>
+        <input id="f_clientTotalGb" type="number" value="0">
+      </div>
+
+      <div class="field">
+        <label>Expiry</label>
+        <input id="f_clientExpiry" type="date">
+      </div>
+
+      <div class="field">
+        <label>Reset Days</label>
+        <input id="f_clientResetDays" type="number" value="0">
+      </div>
+
+      <div class="field">
+        <label>Limit IP</label>
+        <input id="f_clientLimitIp" type="number" value="0">
+      </div>
+
+      <div class="field">
+        <label>Subscription ID</label>
+        <input id="f_clientSubscriptionId">
+      </div>
+
+      <div class="field full">
+        <label>Comment</label>
+        <textarea id="f_clientComment"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function createInbound(){
+  modal(
+    "Add Inbound",
+    inboundForm(),
+    saveInbound
+  );
+}
+
+function editInbound(r){
+  editingId=r.id;
+
+  modal(
+    "Edit Inbound",
+    inboundForm(r),
+    saveInbound
+  );
+}
+
+async function saveInbound(){
+  const body={
+    name:$("f_name").value,
+    protocol:$("f_protocol").value,
+    listen:$("f_listen").value,
+    port:Number($("f_port").value),
+    network:$("f_network").value,
+    security:$("f_security").value,
+    remark:$("f_remark").value,
+    enabled:$("f_enabled").checked,
+    sniffing:$("f_sniffing").checked,
+
+    tlsServerName:$("f_tlsServerName").value,
+    tlsCert:$("f_tlsCert").value,
+    tlsKey:$("f_tlsKey").value,
+
+    realityDest:$("f_realityDest").value,
+    realityServerNames:$("f_realityServerNames").value,
+    realityPrivateKey:$("f_realityPrivateKey").value,
+    realityShortIds:$("f_realityShortIds").value,
+    realityFingerprint:$("f_realityFingerprint").value,
+
+    wsPath:$("f_wsPath").value,
+    wsHost:$("f_wsHost").value,
+
+    grpcServiceName:$("f_grpcServiceName").value,
+
+    xhttpPath:$("f_xhttpPath").value,
+    xhttpHost:$("f_xhttpHost").value,
+
+    clientEmail:$("f_clientEmail").value,
+    clientUuid:$("f_clientUuid").value,
+    clientFlow:$("f_clientFlow").value,
+    clientTotalGb:Number($("f_clientTotalGb").value)||0,
+    clientExpiry:$("f_clientExpiry").value,
+    clientResetDays:Number($("f_clientResetDays").value)||0,
+    clientLimitIp:Number($("f_clientLimitIp").value)||0,
+    clientSubscriptionId:$("f_clientSubscriptionId").value,
+    clientComment:$("f_clientComment").value
+  };
+
+  await api(
+    editingId ? `/api/inbounds/${editingId}` : "/api/inbounds",
+    {
+      method:editingId?"PUT":"POST",
+      body:JSON.stringify(body)
+    }
+  );
+
+  closeModal();
+  toast(editingId?"Inbound updated":"Inbound created");
+  inbounds();
+}
+
+async function toggleInbound(id){
+  await api(`/api/inbounds/${id}/toggle`,{method:"PATCH"});
+  inbounds();
+}
+
+/* CLIENTS */
+
+async function clients(){
+  const rows=await api("/api/clients");
+
+  $("content").innerHTML=`
+    <div class="toolbar">
+      <input class="search" id="search" placeholder="Search clients...">
+      <button class="add" onclick="createClient()">+ Add Client</button>
+    </div>
+
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Inbound</th>
+              <th>UUID</th>
+              <th>Traffic</th>
+              <th>Expiry</th>
+              <th>Group</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+          ${rows.length?rows.map(r=>`
+            <tr>
+              <td>${escapeHtml(r.email)}</td>
+              <td>${escapeHtml(r.inbound_name||"-")}</td>
+              <td>${escapeHtml(r.uuid)}</td>
+              <td>${r.total_gb||0} GB</td>
+              <td>${escapeHtml(r.expiry_at||"Unlimited")}</td>
+              <td>${escapeHtml(r.group_name||"-")}</td>
+              <td>
+                <span class="badge ${r.enabled?'green':'red'}">
+                  ${r.enabled?'Enabled':'Disabled'}
+                </span>
+              </td>
+              <td>
+                <div class="actions">
+                  <button class="action" onclick='editClient(${JSON.stringify(r)})'>Edit</button>
+                  <button class="action" onclick="toggleClient('${r.id}')">Toggle</button>
+                  <button class="action delete" onclick="deleteItem('/api/clients/${r.id}')">Delete</button>
+                </div>
+              </td>
+            </tr>
+          `).join(""):`
+            <tr><td colspan="8" class="empty">No clients yet</td></tr>
+          `}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function clientForm(r={}){
+  const [inbounds,groups]=await Promise.all([
+    api("/api/inbounds"),
+    api("/api/groups")
+  ]);
+
+  return `
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Inbound</label>
+        <select id="c_inbound">
+          ${inbounds.map(x=>`
+            <option value="${x.id}" ${r.inbound_id===x.id?"selected":""}>
+              ${escapeHtml(x.name)}
+            </option>
+          `).join("")}
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input id="c_email" value="${escapeHtml(r.email||"")}">
+      </div>
+
+      <div class="field">
+        <label>UUID</label>
+        <input id="c_uuid" value="${escapeHtml(r.uuid||"")}" placeholder="Auto generate">
+      </div>
+
+      <div class="field">
+        <label>Flow</label>
+        <input id="c_flow" value="${escapeHtml(r.flow||"")}">
+      </div>
+
+      <div class="field">
+        <label>Total GB</label>
+        <input id="c_total" type="number" value="${r.total_gb||0}">
+      </div>
+
+      <div class="field">
+        <label>Expiry</label>
+        <input id="c_expiry" type="date" value="${escapeHtml(r.expiry_at||"")}">
+      </div>
+
+      <div class="field">
+        <label>Reset Days</label>
+        <input id="c_reset" type="number" value="${r.reset_days||0}">
+      </div>
+
+      <div class="field">
+        <label>Limit IP</label>
+        <input id="c_limit" type="number" value="${r.limit_ip||0}">
+      </div>
+
+      <div class="field">
+        <label>Group</label>
+        <select id="c_group">
+          <option value="">No Group</option>
+          ${groups.map(g=>`
+            <option value="${g.id}" ${r.group_id===g.id?"selected":""}>
+              ${escapeHtml(g.name)}
+            </option>
+          `).join("")}
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Telegram ID</label>
+        <input id="c_telegram" value="${escapeHtml(r.telegram_id||"")}">
+      </div>
+
+      <div class="field">
+        <label>Subscription ID</label>
+        <input id="c_subscription" value="${escapeHtml(r.subscription_id||"")}">
+      </div>
+
+      <div class="field full">
+        <label>Comment</label>
+        <textarea id="c_comment">${escapeHtml(r.comment||"")}</textarea>
+      </div>
+
+      <label class="checkbox">
+        <input id="c_enabled" type="checkbox" ${r.enabled!==0?"checked":""}>
+        Enabled
+      </label>
+
+    </div>
+  `;
+}
+
+async function createClient(){
+  modal("Add Client",await clientForm(),saveClient);
+}
+
+async function editClient(r){
+  editingId=r.id;
+  modal("Edit Client",await clientForm(r),saveClient);
+}
+
+async function saveClient(){
+  const body={
+    inbound_id:$("c_inbound").value,
+    email:$("c_email").value,
+    uuid:$("c_uuid").value,
+    flow:$("c_flow").value,
+    total_gb:Number($("c_total").value)||0,
+    expiry_at:$("c_expiry").value,
+    reset_days:Number($("c_reset").value)||0,
+    limit_ip:Number($("c_limit").value)||0,
+    group_id:$("c_group").value,
+    telegram_id:$("c_telegram").value,
+    subscription_id:$("c_subscription").value,
+    comment:$("c_comment").value,
+    enabled:$("c_enabled").checked
+  };
+
+  await api(
+    editingId?`/api/clients/${editingId}`:"/api/clients",
+    {
+      method:editingId?"PUT":"POST",
+      body:JSON.stringify(body)
+    }
+  );
+
+  closeModal();
+  toast(editingId?"Client updated":"Client created");
+  clients();
+}
+
+async function toggleClient(id){
+  await api(`/api/clients/${id}/toggle`,{method:"PATCH"});
+  clients();
+}
+
+/* GENERIC */
+
+async function deleteItem(url){
+  if(!confirm("Delete this item?")) return;
+
+  await api(url,{method:"DELETE"});
+  toast("Deleted");
+  loadPage();
+}
+
+/* GROUPS */
+
+async function groups(){
+  const rows=await api("/api/groups");
+
+  $("content").innerHTML=genericTable(
+    "Groups",
+    "+ Create Group",
+    "createGroup()",
+    ["Name","Description","Status","Actions"],
+    rows.map(r=>[
+      escapeHtml(r.name),
+      escapeHtml(r.description),
+      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
+      `<button class="action delete" onclick="deleteItem('/api/groups/${r.id}')">Delete</button>`
+    ])
+  );
+}
+
+function createGroup(){
+  modal("Create Group",`
+    <div class="field">
+      <label>Name</label>
+      <input id="g_name">
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea id="g_description"></textarea>
+    </div>
+
+    <label class="checkbox">
+      <input id="g_enabled" type="checkbox" checked>
+      Enabled
+    </label>
+  `,async()=>{
+    await api("/api/groups",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("g_name").value,
+        description:$("g_description").value,
+        enabled:$("g_enabled").checked
+      })
+    });
+
+    closeModal();
+    toast("Group created");
+    groups();
+  });
+}
+
+/* NODES */
+
+async function nodes(){
+  const rows=await api("/api/nodes");
+
+  $("content").innerHTML=genericTable(
+    "Nodes",
+    "+ Add Node",
+    "createNode()",
+    ["Name","Address","Port","Protocol","Status","Actions"],
+    rows.map(r=>[
+      escapeHtml(r.name),
+      escapeHtml(r.address),
+      r.port,
+      escapeHtml(r.protocol),
+      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
+      `<button class="action delete" onclick="deleteItem('/api/nodes/${r.id}')">Delete</button>`
+    ])
+  );
+}
+
+function createNode(){
+  modal("Add Node",`
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Name</label>
+        <input id="n_name">
+      </div>
+
+      <div class="field">
+        <label>Address</label>
+        <input id="n_address" placeholder="server.example.com">
+      </div>
+
+      <div class="field">
+        <label>Port</label>
+        <input id="n_port" type="number" value="443">
+      </div>
+
+      <div class="field">
+        <label>API Port</label>
+        <input id="n_api" type="number" value="0">
+      </div>
+
+      <div class="field">
+        <label>Protocol</label>
+        <select id="n_protocol">
+          <option>http</option>
+          <option>https</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Username</label>
+        <input id="n_user">
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input id="n_pass" type="password">
+      </div>
+
+      <div class="field">
+        <label>Remark</label>
+        <input id="n_remark">
+      </div>
+
+    </div>
+
+    <label class="checkbox">
+      <input id="n_enabled" type="checkbox" checked>
+      Enabled
+    </label>
+  `,async()=>{
+    await api("/api/nodes",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("n_name").value,
+        address:$("n_address").value,
+        port:$("n_port").value,
+        api_port:$("n_api").value,
+        protocol:$("n_protocol").value,
+        username:$("n_user").value,
+        password:$("n_pass").value,
+        remark:$("n_remark").value,
+        enabled:$("n_enabled").checked
+      })
+    });
+
+    closeModal();
+    toast("Node created");
+    nodes();
+  });
+}
+
+/* HOSTS */
+
+async function hosts(){
+  const rows=await api("/api/hosts");
+
+  $("content").innerHTML=genericTable(
+    "Hosts",
+    "+ Add Host",
+    "createHost()",
+    ["Name","Address","Port","SNI","Type","Status","Actions"],
+    rows.map(r=>[
+      escapeHtml(r.name),
+      escapeHtml(r.address),
+      r.port,
+      escapeHtml(r.sni||"-"),
+      escapeHtml(r.type),
+      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
+      `<button class="action delete" onclick="deleteItem('/api/hosts/${r.id}')">Delete</button>`
+    ])
+  );
+}
+
+function createHost(){
+  modal("Add Host",`
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Name</label>
+        <input id="h_name" placeholder="Main CDN">
+      </div>
+
+      <div class="field">
+        <label>Address</label>
+        <input id="h_address" placeholder="example.com">
+      </div>
+
+      <div class="field">
+        <label>Port</label>
+        <input id="h_port" type="number" value="443">
+      </div>
+
+      <div class="field">
+        <label>SNI</label>
+        <input id="h_sni">
+      </div>
+
+      <div class="field">
+        <label>Type</label>
+        <select id="h_type">
+          <option>WebSocket</option>
+          <option>gRPC</option>
+          <option>XHTTP</option>
+          <option>TCP</option>
+          <option>REALITY</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Path</label>
+        <input id="h_path" value="/">
+      </div>
+
+      <div class="field full">
+        <label>Host Header</label>
+        <input id="h_header">
+      </div>
+
+      <div class="field full">
+        <label>Remark</label>
+        <input id="h_remark">
+      </div>
+
+    </div>
+
+    <label class="checkbox">
+      <input id="h_enabled" type="checkbox" checked>
+      Enabled
+    </label>
+  `,async()=>{
+    await api("/api/hosts",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("h_name").value,
+        address:$("h_address").value,
+        port:$("h_port").value,
+        sni:$("h_sni").value,
+        type:$("h_type").value,
+        path:$("h_path").value,
+        host_header:$("h_header").value,
+        remark:$("h_remark").value,
+        enabled:$("h_enabled").checked
+      })
+    });
+
+    closeModal();
+    toast("Host created");
+    hosts();
+  });
+}
+
+/* OUTBOUND */
+
+async function outbound(){
+  const rows=await api("/api/outbounds");
+
+  $("content").innerHTML=genericTable(
+    "Outbound",
+    "+ Add Outbound",
+    "createOutbound()",
+    ["Name","Protocol","Server","Port","Status","Actions"],
+    rows.map(r=>[
+      escapeHtml(r.name),
+      escapeHtml(r.protocol),
+      escapeHtml(r.server||"-"),
+      r.port,
+      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
+      `<button class="action delete" onclick="deleteItem('/api/outbounds/${r.id}')">Delete</button>`
+    ])
+  );
+}
+
+function createOutbound(){
+  modal("Add Outbound",`
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Name</label>
+        <input id="o_name">
+      </div>
+
+      <div class="field">
+        <label>Protocol</label>
+        <select id="o_protocol">
+          <option>freedom</option>
+          <option>blackhole</option>
+          <option>http</option>
+          <option>socks</option>
+          <option>vmess</option>
+          <option>vless</option>
+          <option>trojan</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Server</label>
+        <input id="o_server">
+      </div>
+
+      <div class="field">
+        <label>Port</label>
+        <input id="o_port" type="number" value="443">
+      </div>
+
+      <div class="field full">
+        <label>Settings JSON</label>
+        <textarea id="o_settings">{}</textarea>
+      </div>
+
+      <div class="field full">
+        <label>Remark</label>
+        <input id="o_remark">
+      </div>
+
+    </div>
+
+    <label class="checkbox">
+      <input id="o_enabled" type="checkbox" checked>
+      Enabled
+    </label>
+  `,async()=>{
+    let settings={};
+
+    try{
+      settings=JSON.parse($("o_settings").value||"{}");
+    }catch{
+      return alert("Invalid JSON");
     }
 
-
-    function escapeHtml(value) {
-
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    }
-
-
-    /* =========================
-       LOGIN
-    ========================== */
-
-    const loginScreen =
-      document.getElementById("loginScreen");
-
-    const loginForm =
-      document.getElementById("loginForm");
-
-    const loginCard =
-      document.getElementById("loginCard");
-
-    const loginBtn =
-      document.getElementById("loginBtn");
-
-    const loginError =
-      document.getElementById("loginError");
-
-    const passwordInput =
-      document.getElementById("password");
-
-    const passwordToggle =
-      document.getElementById("passwordToggle");
-
-
-    passwordToggle.addEventListener(
-      "click",
-      () => {
-
-        const visible =
-          passwordInput.type === "text";
-
-        passwordInput.type =
-          visible ? "password" : "text";
-
-        passwordToggle.textContent =
-          visible ? "◉" : "●";
-
-      }
-    );
-
-
-    function showLoginError(message) {
-
-      loginError.textContent = message;
-      loginError.classList.add("show");
-
-      loginCard.classList.remove("shake");
-
-      void loginCard.offsetWidth;
-
-      loginCard.classList.add("shake");
-
-    }
-
-
-    function hideLoginError() {
-
-      loginError.textContent = "";
-      loginError.classList.remove("show");
-
-    }
-
-
-    loginForm.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        hideLoginError();
-
-        const username =
-          document.getElementById("username")
-            .value
-            .trim();
-
-        const password =
-          document.getElementById("password")
-            .value;
-
-        loginBtn.classList.add("loading");
-
-        try {
-
-          const response =
-            await fetch("/api/login", {
-
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
-
-              body: JSON.stringify({
-                username,
-                password
-              })
-
-            });
-
-
-          const data =
-            await response.json();
-
-
-          if (!response.ok) {
-
-            throw new Error(
-              data.error ||
-              "Invalid username or password"
-            );
-
-          }
-
-
-          token = data.token;
-
-          localStorage.setItem(
-            "xray_panel_token",
-            token
-          );
-
-
-          document.getElementById(
-            "currentUser"
-          ).textContent =
-            data.username || username;
-
-
-          /*
-            Smooth transition from login
-            to dashboard.
-          */
-
-          loginCard.style.transition =
-            "opacity .35s, transform .35s, filter .35s";
-
-          loginCard.style.opacity = "0";
-          loginCard.style.transform =
-            "translateY(-15px) scale(.97)";
-          loginCard.style.filter = "blur(5px)";
-
-          setTimeout(() => {
-
-            loginScreen.style.transition =
-              "opacity .35s";
-
-            loginScreen.style.opacity = "0";
-
-            setTimeout(() => {
-
-              loginScreen.style.display = "none";
-
-              document.getElementById("app")
-                .classList.add("visible");
-
-              loadDashboard();
-
-            }, 350);
-
-          }, 300);
-
-
-        } catch (error) {
-
-          showLoginError(
-            error.message ||
-            "Login failed"
-          );
-
-        } finally {
-
-          setTimeout(() => {
-            loginBtn.classList.remove("loading");
-          }, 400);
-
-        }
-
-      }
-    );
-
-
-    /* =========================
-       LOGOUT
-    ========================== */
-
-    function logout() {
-
-      token = "";
-
-      localStorage.removeItem(
-        "xray_panel_token"
-      );
-
-      document.getElementById("app")
-        .classList.remove("visible");
-
-      loginScreen.style.display = "flex";
-      loginScreen.style.opacity = "1";
-
-      loginCard.style.opacity = "1";
-      loginCard.style.transform =
-        "translateY(0) scale(1)";
-      loginCard.style.filter = "blur(0)";
-
-      loginForm.reset();
-
-      hideLoginError();
-
-    }
-
-
-    document.getElementById(
-      "logoutBtn"
-    ).addEventListener(
-      "click",
-      logout
-    );
-
-
-    /* =========================
-       NAVIGATION
-    ========================== */
-
-    const pageTitles = {
-
-      dashboard: "Dashboard",
-      inbounds: "Inbounds",
-      clients: "Clients",
-      groups: "Groups",
-      nodes: "Nodes",
-      hosts: "Hosts",
-      xray: "Xray",
-      outbound: "Outbound",
-      routing: "Routing",
-      settings: "Settings",
-      api: "API Docs"
-
-    };
-
-
-    document
-      .querySelectorAll(".nav-item[data-page]")
-      .forEach(item => {
-
-        item.addEventListener(
-          "click",
-          () => {
-
-            const page =
-              item.dataset.page;
-
-
-            document
-              .querySelectorAll(".nav-item[data-page]")
-              .forEach(nav => {
-
-                nav.classList.toggle(
-                  "active",
-                  nav === item
-                );
-
-              });
-
-
-            document
-              .querySelectorAll(".page")
-              .forEach(section => {
-
-                section.classList.toggle(
-                  "active",
-                  section.id ===
-                  "page-" + page
-                );
-
-              });
-
-
-            document.getElementById(
-              "pageTitle"
-            ).textContent =
-              pageTitles[page] || page;
-
-
-            if (page === "dashboard") {
-              loadDashboard();
+    await api("/api/outbounds",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("o_name").value,
+        protocol:$("o_protocol").value,
+        server:$("o_server").value,
+        port:$("o_port").value,
+        settings,
+        remark:$("o_remark").value,
+        enabled:$("o_enabled").checked
+      })
+    });
+
+    closeModal();
+    toast("Outbound created");
+    outbound();
+  });
+}
+
+/* ROUTING */
+
+async function routing(){
+  const rows=await api("/api/routing");
+
+  $("content").innerHTML=genericTable(
+    "Routing",
+    "+ Add Rule",
+    "createRule()",
+    ["Name","Domains","IPs","Outbound","Status","Actions"],
+    rows.map(r=>[
+      escapeHtml(r.name),
+      escapeHtml((r.domains||[]).join(", ")||"-"),
+      escapeHtml((r.ips||[]).join(", ")||"-"),
+      escapeHtml(r.outbound_tag||"-"),
+      `<span class="badge ${r.enabled?'green':'red'}">${r.enabled?'Enabled':'Disabled'}</span>`,
+      `<button class="action delete" onclick="deleteItem('/api/routing/${r.id}')">Delete</button>`
+    ])
+  );
+}
+
+function createRule(){
+  modal("Add Routing Rule",`
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Name</label>
+        <input id="r_name">
+      </div>
+
+      <div class="field">
+        <label>Outbound Tag</label>
+        <input id="r_outbound" placeholder="direct">
+      </div>
+
+      <div class="field full">
+        <label>Domains</label>
+        <input id="r_domains" placeholder="google.com, youtube.com">
+      </div>
+
+      <div class="field full">
+        <label>IPs</label>
+        <input id="r_ips" placeholder="1.1.1.1, 8.8.8.8">
+      </div>
+
+      <div class="field full">
+        <label>Source</label>
+        <input id="r_sources">
+      </div>
+
+      <div class="field full">
+        <label>Remark</label>
+        <textarea id="r_remark"></textarea>
+      </div>
+
+    </div>
+
+    <label class="checkbox">
+      <input id="r_enabled" type="checkbox" checked>
+      Enabled
+    </label>
+  `,async()=>{
+    await api("/api/routing",{
+      method:"POST",
+      body:JSON.stringify({
+        name:$("r_name").value,
+        outbound_tag:$("r_outbound").value,
+        domains:$("r_domains").value,
+        ips:$("r_ips").value,
+        sources:$("r_sources").value,
+        remark:$("r_remark").value,
+        enabled:$("r_enabled").checked
+      })
+    });
+
+    closeModal();
+    toast("Rule created");
+    routing();
+  });
+}
+
+/* SETTINGS */
+
+async function settings(){
+  const s=await api("/api/settings");
+
+  $("content").innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Panel Settings</span>
+      </div>
+
+      <div style="padding:20px">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Panel Name</label>
+            <input id="set_name" value="${escapeHtml(s.panel_name||"Xray Panel")}">
+          </div>
+
+          <div class="field">
+            <label>Default Inbound Network</label>
+            <select id="set_network">
+              <option ${s.default_network==="tcp"?"selected":""}>tcp</option>
+              <option ${s.default_network==="ws"?"selected":""}>ws</option>
+              <option ${s.default_network==="grpc"?"selected":""}>grpc</option>
+              <option ${s.default_network==="xhttp"?"selected":""}>xhttp</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>Subscription Base URL</label>
+            <input id="set_sub" value="${escapeHtml(s.subscription_url||"")}">
+          </div>
+
+        </div>
+
+        <button class="add" onclick="saveSettings()">Save Settings</button>
+
+      </div>
+    </div>
+  `;
+}
+
+async function saveSettings(){
+  await api("/api/settings",{
+    method:"PUT",
+    body:JSON.stringify({
+      panel_name:$("set_name").value,
+      default_network:$("set_network").value,
+      subscription_url:$("set_sub").value
+    })
+  });
+
+  toast("Settings saved");
+}
+
+/* XRAY */
+
+async function xray(){
+  const c=await api("/api/config");
+
+  $("content").innerHTML=`
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">CORE STATUS</div>
+        <div class="card-value">${c.xray_core_running?"ON":"OFF"}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">INBOUNDS</div>
+        <div class="card-value">${c.inbounds.length}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">CLIENTS</div>
+        <div class="card-value">${c.clients.length}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">OUTBOUNDS</div>
+        <div class="card-value">${c.outbounds.length}</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Generated Configuration</span>
+        <button class="add" onclick="downloadConfig()">Generate JSON</button>
+      </div>
+
+      <pre style="padding:20px;overflow:auto;color:#aaa">${escapeHtml(JSON.stringify(c,null,2))}</pre>
+    </div>
+  `;
+}
+
+async function downloadConfig(){
+  const c=await api("/api/config");
+
+  const blob=new Blob(
+    [JSON.stringify(c,null,2)],
+    {type:"application/json"}
+  );
+
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="xray-config.json";
+  a.click();
+}
+
+/* API */
+
+async function apiDocs(){
+  const docs=await api("/api/docs");
+
+  $("content").innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">API Endpoints</span>
+      </div>
+
+      ${docs.map(x=>`
+        <div style="padding:13px 17px;border-bottom:1px solid #181818;color:#aaa">
+          ${escapeHtml(x)}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+/* GENERIC TABLE */
+
+function genericTable(title,button,onclick,headers,rows){
+  return `
+    <div class="toolbar">
+      <button class="add" onclick="${onclick}">${button}</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">${title}</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              ${headers.map(x=>`<th>${x}</th>`).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${rows.length
+              ?rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")
+              :`<tr><td colspan="${headers.length}" class="empty">No data yet</td></tr>`
             }
-
-            if (page === "inbounds") {
-              loadInbounds();
-            }
-
-            if (page === "clients") {
-              loadClients();
-            }
-
-
-            document
-              .getElementById("sidebar")
-              .classList.remove("open");
-
-          }
-        );
-
-      });
-
-
-    /* =========================
-       DASHBOARD
-    ========================== */
-
-    async function loadDashboard() {
-
-      try {
-
-        const [inboundData, clientData] =
-          await Promise.all([
-            api("/api/inbounds"),
-            api("/api/clients")
-          ]);
-
-        inbounds = inboundData;
-        clients = clientData;
-
-        document.getElementById(
-          "statInbounds"
-        ).textContent =
-          inbounds.length;
-
-        document.getElementById(
-          "statClients"
-        ).textContent =
-          clients.length;
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-
-    }
-
-
-    /* =========================
-       INBOUNDS
-    ========================== */
-
-    async function loadInbounds() {
-
-      try {
-
-        inbounds =
-          await api("/api/inbounds");
-
-        renderInbounds();
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-
-    }
-
-
-    function renderInbounds(
-      filter = ""
-    ) {
-
-      const table =
-        document.getElementById(
-          "inboundsTable"
-        );
-
-      const empty =
-        document.getElementById(
-          "inboundsEmpty"
-        );
-
-
-      const search =
-        filter.toLowerCase();
-
-
-      const rows =
-        inbounds.filter(item => {
-
-          return (
-            String(item.name)
-              .toLowerCase()
-              .includes(search) ||
-
-            String(item.protocol)
-              .toLowerCase()
-              .includes(search) ||
-
-            String(item.port)
-              .includes(search) ||
-
-            String(item.remark || "")
-              .toLowerCase()
-              .includes(search)
-          );
-
-        });
-
-
-      table.innerHTML =
-        rows.map(item => `
-
-          <tr>
-
-            <td>
-              <strong style="color:#ddd;">
-                ${escapeHtml(item.name)}
-              </strong>
-            </td>
-
-            <td>
-              <span class="badge">
-                ${escapeHtml(item.protocol)}
-              </span>
-            </td>
-
-            <td>
-              ${escapeHtml(item.port)}
-            </td>
-
-            <td>
-              ${escapeHtml(item.remark || "-")}
-            </td>
-
-            <td>
-              ${new Date(item.created_at)
-                .toLocaleString()}
-            </td>
-
-            <td>
-
-              <div class="action-row">
-
-                <button
-                  class="small-btn"
-                  onclick="showInboundInfo('${item.id}')"
-                >
-                  View
-                </button>
-
-                <button
-                  class="small-btn"
-                  onclick="deleteInbound('${item.id}')"
-                  style="color:#d66;"
-                >
-                  Delete
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-
-        `).join("");
-
-
-      empty.style.display =
-        rows.length ? "none" : "block";
-
-    }
-
-
-    document.getElementById(
-      "inboundSearch"
-    ).addEventListener(
-      "input",
-      event => {
-
-        renderInbounds(
-          event.target.value
-        );
-
-      }
-    );
-
-
-    async function deleteInbound(id) {
-
-      if (
-        !confirm(
-          "Delete this inbound?"
-        )
-      ) {
-        return;
-      }
-
-
-      try {
-
-        await api(
-          "/api/inbounds/" + id,
-          {
-            method: "DELETE"
-          }
-        );
-
-        await loadInbounds();
-        await loadDashboard();
-
-      } catch (error) {
-
-        alert(error.message);
-
-      }
-
-    }
-
-
-    function showInboundInfo(id) {
-
-      const item =
-        inbounds.find(
-          x => x.id === id
-        );
-
-      if (!item) return;
-
-      alert(
-        "Name: " + item.name +
-        "\nProtocol: " + item.protocol +
-        "\nPort: " + item.port +
-        "\nRemark: " + (item.remark || "-")
-      );
-
-    }
-
-
-    /* =========================
-       CLIENTS
-    ========================== */
-
-    async function loadClients() {
-
-      try {
-
-        clients =
-          await api("/api/clients");
-
-        renderClients();
-
-      } catch (error) {
-
-        console.error(error);
-
-      }
-
-    }
-
-
-    function renderClients(
-      filter = ""
-    ) {
-
-      const table =
-        document.getElementById(
-          "clientsTable"
-        );
-
-      const empty =
-        document.getElementById(
-          "clientsEmpty"
-        );
-
-
-      const search =
-        filter.toLowerCase();
-
-
-      const rows =
-        clients.filter(item => {
-
-          return (
-            String(item.email)
-              .toLowerCase()
-              .includes(search) ||
-
-            String(item.inbound_name || "")
-              .toLowerCase()
-              .includes(search) ||
-
-            String(item.uuid)
-              .toLowerCase()
-              .includes(search)
-          );
-
-        });
-
-
-      table.innerHTML =
-        rows.map(item => `
-
-          <tr>
-
-            <td>
-              <strong style="color:#ddd;">
-                ${escapeHtml(item.email)}
-              </strong>
-            </td>
-
-            <td>
-              ${escapeHtml(
-                item.inbound_name || "-"
-              )}
-            </td>
-
-            <td
-              style="
-                max-width:210px;
-                overflow:hidden;
-                text-overflow:ellipsis;
-              "
-            >
-              ${escapeHtml(item.uuid)}
-            </td>
-
-            <td>
-
-              ${
-                Number(item.enabled)
-                ?
-                `<span class="badge green">Enabled</span>`
-                :
-                `<span class="badge red">Disabled</span>`
-              }
-
-            </td>
-
-            <td>
-              ${new Date(item.created_at)
-                .toLocaleString()}
-            </td>
-
-            <td>
-
-              <div class="action-row">
-
-                <button
-                  class="small-btn"
-                  onclick="showClientInfo('${item.id}')"
-                >
-                  View
-                </button>
-
-                <button
-                  class="small-btn"
-                  onclick="deleteClient('${item.id}')"
-                  style="color:#d66;"
-                >
-                  Delete
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-
-        `).join("");
-
-
-      empty.style.display =
-        rows.length ? "none" : "block";
-
-    }
-
-
-    document.getElementById(
-      "clientSearch"
-    ).addEventListener(
-      "input",
-      event => {
-
-        renderClients(
-          event.target.value
-        );
-
-      }
-    );
-
-
-    async function deleteClient(id) {
-
-      if (
-        !confirm(
-          "Delete this client?"
-        )
-      ) {
-        return;
-      }
-
-
-      try {
-
-        await api(
-          "/api/clients/" + id,
-          {
-            method: "DELETE"
-          }
-        );
-
-        await loadClients();
-        await loadDashboard();
-
-      } catch (error) {
-
-        alert(error.message);
-
-      }
-
-    }
-
-
-    function showClientInfo(id) {
-
-      const item =
-        clients.find(
-          x => x.id === id
-        );
-
-      if (!item) return;
-
-      alert(
-        "Email: " + item.email +
-        "\nUUID: " + item.uuid +
-        "\nInbound: " +
-        (item.inbound_name || "-")
-      );
-
-    }
-
-
-    /* =========================
-       ADD INBOUND MODAL
-    ========================== */
-
-    const inboundModal =
-      document.getElementById(
-        "inboundModal"
-      );
-
-
-    document.getElementById(
-      "addInboundBtn"
-    ).addEventListener(
-      "click",
-      () => {
-
-        inboundModal.classList.add(
-          "show"
-        );
-
-      }
-    );
-
-
-    function closeInboundModal() {
-
-      inboundModal.classList.remove(
-        "show"
-      );
-
-      document.getElementById(
-        "inboundForm"
-      ).reset();
-
-    }
-
-
-    document.getElementById(
-      "closeInboundModal"
-    ).addEventListener(
-      "click",
-      closeInboundModal
-    );
-
-
-    document.getElementById(
-      "cancelInbound"
-    ).addEventListener(
-      "click",
-      closeInboundModal
-    );
-
-
-    inboundModal.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target === inboundModal
-        ) {
-          closeInboundModal();
-        }
-
-      }
-    );
-
-
-    document.getElementById(
-      "inboundForm"
-    ).addEventListener(
-      "submit",
-      async event => {
-
-        event.preventDefault();
-
-
-        const payload = {
-
-          name:
-            document.getElementById(
-              "inboundName"
-            ).value.trim(),
-
-          protocol:
-            document.getElementById(
-              "inboundProtocol"
-            ).value,
-
-          port:
-            Number(
-              document.getElementById(
-                "inboundPort"
-              ).value
-            ),
-
-          remark:
-            document.getElementById(
-              "inboundRemark"
-            ).value.trim()
-
-        };
-
-
-        try {
-
-          await api(
-            "/api/inbounds",
-            {
-              method: "POST",
-              body: JSON.stringify(
-                payload
-              )
-            }
-          );
-
-
-          closeInboundModal();
-
-          await loadInbounds();
-          await loadDashboard();
-
-
-        } catch (error) {
-
-          alert(error.message);
-
-        }
-
-      }
-    );
-
-
-    /* =========================
-       REFRESH
-    ========================== */
-
-    document.getElementById(
-      "refreshBtn"
-    ).addEventListener(
-      "click",
-      async () => {
-
-        const active =
-          document.querySelector(
-            ".nav-item.active"
-          );
-
-        if (!active) return;
-
-        const page =
-          active.dataset.page;
-
-        if (page === "dashboard") {
-          await loadDashboard();
-        }
-
-        if (page === "inbounds") {
-          await loadInbounds();
-        }
-
-        if (page === "clients") {
-          await loadClients();
-        }
-
-      }
-    );
-
-
-    /* =========================
-       MOBILE MENU
-    ========================== */
-
-    document.getElementById(
-      "mobileMenu"
-    ).addEventListener(
-      "click",
-      () => {
-
-        document
-          .getElementById("sidebar")
-          .classList.toggle("open");
-
-      }
-    );
-
-
-    /* =========================
-       INITIAL SESSION CHECK
-    ========================== */
-
-    async function checkSession() {
-
-      if (!token) {
-        return;
-      }
-
-
-      try {
-
-        const me =
-          await api("/api/me");
-
-
-        document.getElementById(
-          "currentUser"
-        ).textContent =
-          me.username || "admin";
-
-
-        loginScreen.style.display =
-          "none";
-
-        document.getElementById("app")
-          .classList.add("visible");
-
-
-        await loadDashboard();
-
-
-      } catch (error) {
-
-        localStorage.removeItem(
-          "xray_panel_token"
-        );
-
-        token = "";
-
-      }
-
-    }
-
-
-    checkSession();
-
-  </script>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* PAGE LOADER */
+
+async function loadPage(){
+  try{
+    if(currentPage==="dashboard") await dashboard();
+    else if(currentPage==="inbounds") await inbounds();
+    else if(currentPage==="clients") await clients();
+    else if(currentPage==="groups") await groups();
+    else if(currentPage==="nodes") await nodes();
+    else if(currentPage==="hosts") await hosts();
+    else if(currentPage==="xray") await xray();
+    else if(currentPage==="outbound") await outbound();
+    else if(currentPage==="routing") await routing();
+    else if(currentPage==="settings") await settings();
+    else if(currentPage==="api") await apiDocs();
+  }catch(e){
+    $("content").innerHTML=`
+      <div class="panel">
+        <div class="empty" style="color:#ff4757">
+          ${escapeHtml(e.message)}
+        </div>
+      </div>
+    `;
+  }
+}
+
+/* SESSION */
+
+async function checkSession(){
+  if(!token) return;
+
+  try{
+    await api("/api/me");
+
+    $("loginScreen").classList.add("hidden");
+    $("app").classList.remove("hidden");
+
+    nav("dashboard");
+  }catch{
+    localStorage.removeItem("xray_token");
+    token=null;
+  }
+}
+
+checkSession();
+</script>
 
 </body>
 </html>
-```
