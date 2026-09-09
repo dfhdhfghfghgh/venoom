@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Xray Panel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    .container {
+      width: min(1100px, 94%);
+      margin: 30px auto;
+    }
+
+    .header {
+      background: #111827;
+      color: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.06);
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .login {
+      max-width: 430px;
+      margin: 80px auto;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 15px;
+    }
+
+    button {
+      border: none;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    .danger {
+      background: #dc2626;
+    }
+
+    .secondary {
+      background: #475569;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: right;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    .uuid {
+      direction: ltr;
+      text-align: left;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .container {
+        width: 96%;
+        margin: 15px auto;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Login -->
+  <div id="loginPage" class="container">
+    <div class="card login">
+
+      <h2>ورود به پنل Xray</h2>
+
+      <div id="loginMessage" class="message hidden"></div>
+
+      <label>نام کاربری</label>
+      <input
+        id="username"
+        type="text"
+        placeholder="admin"
+      />
+
+      <label>رمز عبور</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="رمز عبور"
+      />
+
+      <button onclick="login()">
+        ورود
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- Panel -->
+  <div id="panelPage" class="container hidden">
+
+    <div class="header">
+      <h1>مدیریت Xray</h1>
+      <p>پنل مدیریت Inbound و Client</p>
+    </div>
+
+
+    <!-- Inbound -->
+    <div class="card">
+
+      <h2>ساخت Inbound</h2>
+
+      <input
+        id="inboundName"
+        type="text"
+        placeholder="نام Inbound"
+      />
+
+      <select id="protocol">
+        <option value="vless">VLESS</option>
+        <option value="vmess">VMess</option>
+        <option value="trojan">Trojan</option>
+      </select>
+
+      <input
+        id="port"
+        type="number"
+        placeholder="Port"
+        value="443"
+      />
+
+      <input
+        id="remark"
+        type="text"
+        placeholder="توضیحات"
+      />
+
+      <button onclick="createInbound()">
+        ساخت Inbound
+      </button>
+
+    </div>
+
+
+    <!-- Inbounds table -->
+    <div class="card">
+
+      <h2>Inbound ها</h2>
+
+      <div id="inboundsMessage" class="message hidden"></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>نام</th>
+            <th>پروتکل</th>
+            <th>پورت</th>
+            <th>توضیحات</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+
+        <tbody id="inboundsTable"></tbody>
+      </table>
+
+    </div>
+
+
+    <!-- Client -->
+    <div class="card">
+
+      <h2>ساخت Client</h2>
+
+      <select id="clientInbound">
+        <option value="">
+          ابتدا یک Inbound بسازید
+        </option>
+      </select>
+
+      <input
+        id="clientEmail"
+        type="text"
+        placeholder="Email / نام کاربر"
+      />
+
+      <button onclick="createClient()">
+        ساخت Client
+      </button>
+
+    </div>
+
+
+    <!-- Clients table -->
+    <div class="card">
+
+      <h2>Client ها</h2>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>کاربر</th>
+            <th>Inbound</th>
+            <th>UUID</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+
+        <tbody id="clientsTable"></tbody>
+
+      </table>
+
+    </div>
+
+
+    <button
+      class="secondary"
+      onclick="logout()"
+    >
+      خروج از پنل
+    </button>
+
+  </div>
+
+
+<script>
+
+let token = localStorage.getItem("xray_token");
+
+
+function showMessage(elementId, text) {
+
+  const el = document.getElementById(elementId);
+
+  el.textContent = text;
+  el.classList.remove("hidden");
+
+}
+
+
+function hideMessage(elementId) {
+
+  document
+    .getElementById(elementId)
+    .classList.add("hidden");
+
+}
+
+
+async function login() {
+
+  const username =
+    document.getElementById("username").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  hideMessage("loginMessage");
+
+  try {
+
+    const response = await fetch("/api/login", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        username,
+        password
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+      showMessage(
+        "loginMessage",
+        data.error || "ورود ناموفق بود"
+      );
+
+      return;
+    }
+
+    token = data.token;
+
+    localStorage.setItem(
+      "xray_token",
+      token
+    );
+
+    showPanel();
+
+  } catch (error) {
+
+    showMessage(
+      "loginMessage",
+      "خطا در اتصال به سرور"
+    );
+
+  }
+
+}
+
+
+function showPanel() {
+
+  document
+    .getElementById("loginPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("panelPage")
+    .classList.remove("hidden");
+
+  loadData();
+
+}
+
+
+function logout() {
+
+  localStorage.removeItem("xray_token");
+
+  token = null;
+
+  location.reload();
+
+}
+
+
+async function api(url, options = {}) {
+
+  options.headers = {
+
+    ...(options.headers || {}),
+
+    Authorization:
+      "Bearer " + token,
+
+    "Content-Type":
+      "application/json"
+
+  };
+
+  const response =
+    await fetch(url, options);
+
+  if (response.status === 401) {
+
+    logout();
+
+    return null;
+
+  }
+
+  return response;
+
+}
+
+
+async function loadData() {
+
+  await loadInbounds();
+
+  await loadClients();
+
+}
+
+
+async function loadInbounds() {
+
+  const response =
+    await api("/api/inbounds");
+
+  if (!response) return;
+
+  const data =
+    await response.json();
+
+  const table =
+    document.getElementById("inboundsTable");
+
+  const select =
+    document.getElementById("clientInbound");
+
+  table.innerHTML = "";
+
+  select.innerHTML =
+    '<option value="">انتخاب Inbound</option>';
+
+  data.forEach(item => {
+
+    const row =
+      document.createElement("tr");
+
+    row.innerHTML = `
+
+      <td>${escapeHtml(item.name)}</td>
+
+      <td>${escapeHtml(item.protocol)}</td>
+
+      <td>${item.port}</td>
+
+      <td>${escapeHtml(item.remark || "")}</td>
+
+      <td>
+        <button
+          class="danger"
+          onclick="deleteInbound('${item.id}')"
+        >
+          حذف
+        </button>
+      </td>
+
+    `;
+
+    table.appendChild(row);
+
+
+    const option =
+      document.createElement("option");
+
+    option.value = item.id;
+
+    option.textContent =
+      item.name +
+      " (" +
+      item.protocol +
+      ":" +
+      item.port +
+      ")";
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function createInbound() {
+
+  const name =
+    document.getElementById("inboundName").value.trim();
+
+  const protocol =
+    document.getElementById("protocol").value;
+
+  const port =
+    document.getElementById("port").value;
+
+  const remark =
+    document.getElementById("remark").value.trim();
+
+
+  if (!name || !port) {
+
+    showMessage(
+      "inboundsMessage",
+      "نام و پورت را وارد کنید"
+    );
+
+    return;
+
+  }
+
+
+  const response =
+    await api("/api/inbounds", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        name,
+        protocol,
+        port,
+        remark
+
+      })
+
+    });
+
+
+  if (!response) return;
+
+  const data =
+    await response.json();
+
+
+  if (!response.ok) {
+
+    showMessage(
+      "inboundsMessage",
+      data.error || "خطا در ساخت Inbound"
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("inboundName")
+    .value = "";
+
+  document
+    .getElementById("remark")
+    .value = "";
+
+
+  await loadInbounds();
+
+}
+
+
+async function deleteInbound(id) {
+
+  if (!confirm("این Inbound حذف شود؟")) {
+    return;
+  }
+
+
+  const response =
+    await api(
+      "/api/inbounds/" + id,
+      {
+        method: "DELETE"
+      }
+    );
+
+
+  if (!response) return;
+
+  await loadData();
+
+}
+
+
+async function loadClients() {
+
+  const response =
+    await api("/api/clients");
+
+  if (!response) return;
+
+  const data =
+    await response.json();
+
+  const table =
+    document.getElementById("clientsTable");
+
+  table.innerHTML = "";
+
+
+  data.forEach(item => {
+
+    const row =
+      document.createElement("tr");
+
+    row.innerHTML = `
+
+      <td>${escapeHtml(item.email)}</td>
+
+      <td>${escapeHtml(item.inbound_name || "-")}</td>
+
+      <td class="uuid">
+        ${escapeHtml(item.uuid)}
+      </td>
+
+      <td>
+
+        <button
+          class="danger"
+          onclick="deleteClient('${item.id}')"
+        >
+          حذف
+        </button>
+
+      </td>
+
+    `;
+
+    table.appendChild(row);
+
+  });
+
+}
+
+
+async function createClient() {
+
+  const inbound_id =
+    document.getElementById("clientInbound").value;
+
+  const email =
+    document.getElementById("clientEmail").value.trim();
+
+
+  if (!inbound_id || !email) {
+
+    alert(
+      "Inbound و نام کاربر را وارد کنید"
+    );
+
+    return;
+
+  }
+
+
+  const response =
+    await api("/api/clients", {
+
+      method: "POST",
+
+      body: JSON.stringify({
+
+        inbound_id,
+        email
+
+      })
+
+    });
+
+
+  if (!response) return;
+
+  const data =
+    await response.json();
+
+
+  if (!response.ok) {
+
+    alert(
+      data.error ||
+      "خطا در ساخت Client"
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("clientEmail")
+    .value = "";
+
+
+  await loadClients();
+
+}
+
+
+async function deleteClient(id) {
+
+  if (!confirm("این Client حذف شود؟")) {
+    return;
+  }
+
+
+  const response =
+    await api(
+      "/api/clients/" + id,
+      {
+        method: "DELETE"
+      }
+    );
+
+
+  if (!response) return;
+
+  await loadClients();
+
+}
+
+
+function escapeHtml(value) {
+
+  return String(value)
+
+    .replaceAll("&", "&amp;")
+
+    .replaceAll("<", "&lt;")
+
+    .replaceAll(">", "&gt;")
+
+    .replaceAll('"', "&quot;")
+
+    .replaceAll("'", "&#039;");
+
+}
+
+
+if (token) {
+
+  showPanel();
+
+}
+
+</script>
+
+</body>
+</html>
