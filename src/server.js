@@ -1,68 +1,8 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const Database = require("better-sqlite3");
-const path = require("path");
-const fs = require("fs");
-
-const app = express();
-
-const PORT = process.env.PORT || 3000;
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "change-this-password";
-const JWT_SECRET =
-  process.env.JWT_SECRET || "change-this-to-a-long-random-secret";
-const DB_PATH = process.env.DB_PATH || "./data/panel.db";
-
-const dbDir = path.dirname(DB_PATH);
-
-if (dbDir && dbDir !== ".") {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-const db = new Database(DB_PATH);
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS inbounds (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    protocol TEXT NOT NULL,
-    port INTEGER NOT NULL,
-    remark TEXT DEFAULT '',
-    created_at TEXT NOT NULL
+app.use((req, res) => {
+  res.sendFile(
+    path.join(__dirname, "../public/index.html")
   );
-
-  CREATE TABLE IF NOT EXISTS clients (
-    id TEXT PRIMARY KEY,
-    inbound_id TEXT NOT NULL,
-    email TEXT NOT NULL,
-    uuid TEXT NOT NULL,
-    enabled INTEGER DEFAULT 1,
-    created_at TEXT NOT NULL
-  );
-`);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.static(path.join(__dirname, "../public")));
-
-function createToken() {
-  return jwt.sign(
-    {
-      username: ADMIN_USER
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "7d"
-    }
-  );
-}
-
-function auth(req, res, next) {
-  const header = req.headers.authorization || "";
-
-  if (!header.startsWith("Bearer ")) {
+});  if (!header.startsWith("Bearer ")) {
     return res.status(401).json({
       error: "Unauthorized"
     });
