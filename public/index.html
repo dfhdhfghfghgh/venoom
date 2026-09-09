@@ -7,22 +7,19 @@
 
   <style>
     :root {
-      --bg: #050505;
-      --bg2: #0a0a0a;
-      --panel: #0d0d0d;
-      --panel2: #111111;
+      --bg: #030303;
+      --bg2: #070707;
+      --panel: #0b0b0b;
+      --panel2: #101010;
       --panel3: #151515;
-      --border: #242424;
+      --border: #202020;
       --border2: #303030;
 
-      --text: #f1f1f1;
-      --muted: #8b8b8b;
-      --muted2: #666;
+      --text: #f2f2f2;
+      --muted: #888;
+      --muted2: #555;
 
-      --primary: #ffffff;
-      --primary-text: #000000;
-
-      --success: #21c77a;
+      --success: #22c77a;
       --danger: #ff4d4d;
       --warning: #f5b942;
       --info: #4da3ff;
@@ -39,8 +36,7 @@
     body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
+      min-height: 100%;
       background: var(--bg);
       color: var(--text);
       font-family:
@@ -72,6 +68,118 @@
     }
 
     /* =========================
+       ANIMATIONS
+    ========================= */
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideRight {
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideLeft {
+      from {
+        opacity: 0;
+        transform: translateX(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 199, 122, 0.35);
+      }
+
+      70% {
+        box-shadow: 0 0 0 7px rgba(34, 199, 122, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 199, 122, 0);
+      }
+    }
+
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 0 rgba(255,255,255,0);
+      }
+
+      50% {
+        box-shadow: 0 0 28px rgba(255,255,255,0.08);
+      }
+
+      100% {
+        box-shadow: 0 0 0 rgba(255,255,255,0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -500px 0;
+      }
+
+      100% {
+        background-position: 500px 0;
+      }
+    }
+
+    /* =========================
        LOGIN
     ========================= */
 
@@ -80,35 +188,51 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background:
-        radial-gradient(circle at top, #171717 0%, #080808 38%, #000 100%);
       padding: 20px;
+
+      background:
+        radial-gradient(
+          circle at 50% 0%,
+          #1a1a1a 0%,
+          #090909 32%,
+          #020202 75%,
+          #000000 100%
+        );
     }
 
     .login-box {
       width: 100%;
       max-width: 390px;
-      background: #0d0d0d;
-      border: 1px solid #282828;
+      background: rgba(12, 12, 12, 0.96);
+      border: 1px solid #292929;
       border-radius: 12px;
       padding: 32px;
+
       box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255,255,255,0.02);
+        0 30px 100px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255,255,255,0.015);
+
+      animation: slideUp 0.45s ease-out;
     }
 
     .login-logo {
-      width: 58px;
-      height: 58px;
-      border-radius: 12px;
+      width: 60px;
+      height: 60px;
+      border-radius: 13px;
+
       background: #fff;
       color: #000;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
+      font-size: 21px;
       font-weight: 900;
-      font-size: 22px;
+
       margin: 0 auto 18px;
+
+      animation: glow 2.8s infinite;
     }
 
     .login-title {
@@ -126,59 +250,77 @@
     }
 
     /* =========================
-       LAYOUT
+       APP
     ========================= */
 
     #app {
       min-height: 100vh;
       display: flex;
       background: var(--bg);
+      animation: fadeIn 0.3s ease-out;
     }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
 
     .sidebar {
       width: var(--sidebar);
       min-height: 100vh;
+
       position: fixed;
       left: 0;
       top: 0;
       bottom: 0;
-      background: #080808;
+
+      background: #070707;
       border-right: 1px solid #202020;
+
       z-index: 100;
+
       display: flex;
       flex-direction: column;
+
+      transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
     }
 
     .brand {
       height: 68px;
       padding: 0 20px;
+
       display: flex;
       align-items: center;
       gap: 12px;
+
       border-bottom: 1px solid #202020;
     }
 
     .brand-icon {
-      width: 34px;
-      height: 34px;
+      width: 35px;
+      height: 35px;
+
       border-radius: 8px;
+
       background: #fff;
       color: #000;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
+      font-size: 13px;
       font-weight: 900;
-      font-size: 14px;
     }
 
     .brand-name {
       font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.2px;
     }
 
     .brand-version {
-      color: #777;
+      color: #666;
       font-size: 10px;
       margin-top: 2px;
     }
@@ -190,38 +332,53 @@
     }
 
     .menu-section {
-      color: #555;
+      color: #4e4e4e;
       font-size: 10px;
       font-weight: 700;
+
       text-transform: uppercase;
       letter-spacing: 1px;
+
       padding: 14px 11px 7px;
     }
 
     .menu-item {
       width: 100%;
+
       border: 0;
       background: transparent;
-      color: #8c8c8c;
+
+      color: #858585;
+
       padding: 10px 11px;
       border-radius: 7px;
+
       display: flex;
       align-items: center;
       gap: 11px;
+
       text-align: left;
+
       margin-bottom: 2px;
-      transition: 0.15s;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
     }
 
     .menu-item:hover {
       color: #fff;
-      background: #141414;
+      background: #131313;
+      transform: translateX(3px);
     }
 
     .menu-item.active {
       color: #fff;
-      background: #1b1b1b;
-      box-shadow: inset 2px 0 0 #fff;
+      background: #191919;
+
+      box-shadow:
+        inset 2px 0 0 #fff;
     }
 
     .menu-icon {
@@ -241,60 +398,82 @@
 
     .logout-btn {
       width: 100%;
-      background: #111;
+
+      background: #101010;
       border: 1px solid #292929;
-      color: #aaa;
+
+      color: #999;
+
       border-radius: 7px;
       padding: 9px;
+
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
     }
 
     .logout-btn:hover {
-      background: #1a1a1a;
+      background: #191919;
       color: #fff;
+      transform: translateY(-1px);
     }
+
+    /* =========================
+       MAIN
+    ========================= */
 
     .main {
       margin-left: var(--sidebar);
       width: calc(100% - var(--sidebar));
       min-height: 100vh;
-      background: #050505;
+      background: #030303;
     }
 
     .topbar {
       height: 68px;
+
       border-bottom: 1px solid #202020;
-      background: rgba(8,8,8,0.95);
+      background: rgba(7, 7, 7, 0.94);
+
       display: flex;
       align-items: center;
       justify-content: space-between;
+
       padding: 0 25px;
+
       position: sticky;
       top: 0;
+
       z-index: 50;
-      backdrop-filter: blur(10px);
+
+      backdrop-filter: blur(12px);
     }
 
     .page-title {
       font-size: 18px;
       font-weight: 650;
+      animation: slideRight 0.25s ease-out;
     }
 
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     .status-dot {
       width: 8px;
       height: 8px;
+
       background: var(--success);
       border-radius: 50%;
-      box-shadow: 0 0 8px rgba(33,199,122,0.7);
+
+      animation: pulse 2s infinite;
     }
 
     .status-text {
-      color: #888;
+      color: #777;
       font-size: 12px;
     }
 
@@ -328,10 +507,19 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 18px;
+
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .card:hover {
-      border-color: #2e2e2e;
+      transform: translateY(-2px);
+      border-color: #363636;
+
+      box-shadow:
+        0 10px 35px rgba(0,0,0,0.35);
     }
 
     .stat-card {
@@ -351,7 +539,7 @@
     }
 
     .stat-desc {
-      color: #666;
+      color: #5e5e5e;
       font-size: 11px;
       margin-top: 7px;
     }
@@ -367,19 +555,31 @@
     ========================= */
 
     .btn {
-      border: 1px solid var(--border2);
-      background: #111;
+      border: 1px solid #303030;
+      background: #101010;
       color: #ddd;
+
       border-radius: 6px;
       padding: 8px 13px;
+
       font-size: 12px;
-      transition: 0.15s;
+
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
     }
 
     .btn:hover {
-      background: #1b1b1b;
+      background: #1a1a1a;
       border-color: #444;
       color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
     }
 
     .btn-primary {
@@ -393,6 +593,9 @@
       background: #ddd;
       border-color: #ddd;
       color: #000;
+
+      box-shadow:
+        0 6px 25px rgba(255,255,255,0.08);
     }
 
     .btn-danger {
@@ -402,8 +605,8 @@
     }
 
     .btn-danger:hover {
-      background: #240c0c;
-      border-color: #6a2a2a;
+      background: #250c0c;
+      border-color: #6b2a2a;
     }
 
     .btn-small {
@@ -419,8 +622,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+
       gap: 12px;
       margin-bottom: 15px;
+
+      animation: slideUp 0.25s ease-out;
     }
 
     .toolbar-left,
@@ -440,9 +646,12 @@
 
     .table-wrap {
       overflow-x: auto;
+
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
+
+      animation: slideUp 0.3s ease-out;
     }
 
     table {
@@ -452,23 +661,33 @@
     }
 
     th {
-      color: #6e6e6e;
+      color: #666;
+
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.7px;
       font-weight: 650;
+
       text-align: left;
+
       padding: 13px 15px;
-      background: #0a0a0a;
+
+      background: #090909;
+
       border-bottom: 1px solid #222;
+
       white-space: nowrap;
     }
 
     td {
       color: #ccc;
+
       font-size: 12px;
+
       padding: 13px 15px;
+
       border-bottom: 1px solid #191919;
+
       white-space: nowrap;
     }
 
@@ -476,14 +695,27 @@
       border-bottom: 0;
     }
 
-    tr:hover td {
+    tbody tr {
+      transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background: #101010;
+      transform: translateX(2px);
+    }
+
+    tbody tr:hover td {
       background: #101010;
     }
 
     .empty {
       padding: 45px 20px;
+
       text-align: center;
-      color: #666;
+
+      color: #606060;
       font-size: 13px;
     }
 
@@ -495,33 +727,44 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
+
       border-radius: 20px;
+
       padding: 4px 8px;
+
       font-size: 10px;
       font-weight: 600;
     }
 
     .badge-success {
       color: #65e5a5;
+
       background: rgba(33,199,122,0.08);
+
       border: 1px solid rgba(33,199,122,0.15);
     }
 
     .badge-danger {
       color: #ff7070;
+
       background: rgba(255,77,77,0.08);
+
       border: 1px solid rgba(255,77,77,0.15);
     }
 
     .badge-warning {
       color: #f3ca68;
+
       background: rgba(245,185,66,0.08);
+
       border: 1px solid rgba(245,185,66,0.15);
     }
 
     .badge-neutral {
       color: #999;
+
       background: #151515;
+
       border: 1px solid #242424;
     }
 
@@ -535,8 +778,11 @@
 
     label {
       display: block;
+
       color: #999;
+
       font-size: 11px;
+
       margin-bottom: 7px;
     }
 
@@ -544,20 +790,40 @@
     select,
     textarea {
       width: 100%;
+
       background: #080808;
+
       border: 1px solid #292929;
+
       color: #eee;
+
       border-radius: 6px;
+
       padding: 10px 11px;
+
       outline: none;
-      transition: 0.15s;
+
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    input:hover,
+    select:hover,
+    textarea:hover {
+      border-color: #383838;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
       border-color: #666;
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.03);
+
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.035);
+
+      transform: translateY(-1px);
     }
 
     input::placeholder,
@@ -588,29 +854,47 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.78);
+
+      background: rgba(0,0,0,0.8);
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       padding: 20px;
+
       z-index: 500;
-      backdrop-filter: blur(5px);
+
+      backdrop-filter: blur(6px);
+
+      animation: fadeIn 0.2s ease-out;
     }
 
     .modal {
       width: 100%;
       max-width: 720px;
+
       max-height: 90vh;
+
       overflow-y: auto;
-      background: #0c0c0c;
+
+      background: #0b0b0b;
+
       border: 1px solid #303030;
+
       border-radius: 10px;
-      box-shadow: 0 30px 100px rgba(0,0,0,0.85);
+
+      box-shadow:
+        0 30px 100px rgba(0,0,0,0.9);
+
+      animation: modalIn 0.25s ease-out;
     }
 
     .modal-header {
       padding: 18px 20px;
+
       border-bottom: 1px solid #222;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -624,17 +908,27 @@
     .close {
       width: 30px;
       height: 30px;
+
       border-radius: 6px;
+
       background: transparent;
+
       border: 1px solid transparent;
+
       color: #777;
+
       font-size: 18px;
+
+      transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
     }
 
     .close:hover {
       background: #191919;
       color: #fff;
-      border-color: #292929;
+      transform: rotate(90deg);
     }
 
     .modal-body {
@@ -643,9 +937,12 @@
 
     .modal-footer {
       padding: 15px 20px;
+
       border-top: 1px solid #222;
+
       display: flex;
       justify-content: flex-end;
+
       gap: 8px;
     }
 
@@ -656,19 +953,32 @@
     .tabs {
       display: flex;
       gap: 4px;
+
       border-bottom: 1px solid #242424;
+
       margin-bottom: 20px;
+
       overflow-x: auto;
     }
 
     .tab {
       border: 0;
+
       background: transparent;
+
       color: #777;
+
       padding: 10px 13px;
+
       border-bottom: 2px solid transparent;
+
       font-size: 12px;
+
       white-space: nowrap;
+
+      transition:
+        color 0.2s ease,
+        border-color 0.2s ease;
     }
 
     .tab:hover {
@@ -686,6 +996,7 @@
 
     .welcome {
       margin-bottom: 22px;
+      animation: slideUp 0.3s ease-out;
     }
 
     .welcome h2 {
@@ -701,38 +1012,67 @@
 
     .progress {
       height: 5px;
+
       background: #191919;
+
       border-radius: 10px;
+
       overflow: hidden;
+
       margin-top: 12px;
     }
 
     .progress-bar {
       height: 100%;
+
       background: #ddd;
+
       border-radius: 10px;
+
       width: 35%;
+
+      transition: width 0.6s ease;
     }
 
     .quick-actions {
       display: grid;
+
       grid-template-columns: repeat(4, 1fr);
+
       gap: 10px;
     }
 
     .quick-action {
       background: #0c0c0c;
+
       border: 1px solid #242424;
+
       border-radius: 8px;
+
       padding: 15px;
+
       color: #aaa;
+
       text-align: left;
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
     }
 
     .quick-action:hover {
+      transform: translateY(-3px);
+
       background: #151515;
+
       color: #fff;
-      border-color: #363636;
+
+      border-color: #3a3a3a;
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35);
     }
 
     .quick-action-title {
@@ -747,34 +1087,46 @@
     }
 
     /* =========================
-       PAGE PLACEHOLDER
+       PLACEHOLDER
     ========================= */
 
     .placeholder {
       min-height: 350px;
+
       display: flex;
       align-items: center;
       justify-content: center;
+
       text-align: center;
+
       background: #0b0b0b;
+
       border: 1px solid #222;
+
       border-radius: 8px;
+
+      animation: scaleIn 0.3s ease-out;
     }
 
     .placeholder-icon {
       font-size: 35px;
+
       opacity: 0.5;
+
       margin-bottom: 12px;
     }
 
     .placeholder h3 {
       margin: 0 0 7px;
+
       font-size: 15px;
     }
 
     .placeholder p {
       margin: 0;
+
       color: #666;
+
       font-size: 12px;
     }
 
@@ -784,18 +1136,31 @@
 
     #toast {
       position: fixed;
+
       right: 20px;
       bottom: 20px;
+
       min-width: 230px;
       max-width: 350px;
+
       background: #151515;
+
       border: 1px solid #333;
+
       color: #eee;
+
       padding: 12px 15px;
+
       border-radius: 7px;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+
+      box-shadow:
+        0 15px 50px rgba(0,0,0,0.7);
+
       z-index: 1000;
+
       font-size: 12px;
+
+      animation: slideLeft 0.3s ease-out;
     }
 
     #toast.success {
@@ -812,15 +1177,33 @@
 
     .mobile-menu {
       display: none;
+
       border: 1px solid #292929;
+
       background: #111;
+
       color: #ddd;
+
       border-radius: 6px;
+
       width: 34px;
       height: 34px;
+
+      transition:
+        background 0.2s ease,
+        transform 0.15s ease;
+    }
+
+    .mobile-menu:hover {
+      background: #1c1c1c;
+    }
+
+    .mobile-menu:active {
+      transform: scale(0.94);
     }
 
     @media (max-width: 1100px) {
+
       .grid-4 {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -828,21 +1211,27 @@
       .quick-actions {
         grid-template-columns: repeat(2, 1fr);
       }
+
     }
 
     @media (max-width: 800px) {
+
       :root {
         --sidebar: 0px;
       }
 
       .sidebar {
         transform: translateX(-100%);
-        transition: 0.2s;
+        transition: transform 0.25s ease;
+
         width: 250px;
       }
 
       .sidebar.open {
         transform: translateX(0);
+
+        box-shadow:
+          20px 0 60px rgba(0,0,0,0.65);
       }
 
       .main {
@@ -874,9 +1263,11 @@
       .search {
         width: 150px;
       }
+
     }
 
     @media (max-width: 520px) {
+
       .grid-4 {
         grid-template-columns: 1fr;
       }
@@ -902,20 +1293,38 @@
       .login-box {
         padding: 25px 20px;
       }
+
+    }
+
+    /* =========================
+       REDUCED MOTION
+    ========================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
     }
   </style>
 </head>
 
 <body>
 
-  <!-- =========================
-       LOGIN PAGE
-  ========================= -->
+  <!-- LOGIN -->
 
   <div id="loginPage">
+
     <div class="login-box">
 
-      <div class="login-logo">XR</div>
+      <div class="login-logo">
+        XR
+      </div>
 
       <div class="login-title">
         Xray Panel
@@ -928,7 +1337,11 @@
       <form id="loginForm">
 
         <div class="form-group">
-          <label>Username</label>
+
+          <label>
+            Username
+          </label>
+
           <input
             id="username"
             type="text"
@@ -936,10 +1349,15 @@
             autocomplete="username"
             required
           />
+
         </div>
 
         <div class="form-group">
-          <label>Password</label>
+
+          <label>
+            Password
+          </label>
+
           <input
             id="password"
             type="password"
@@ -947,6 +1365,7 @@
             autocomplete="current-password"
             required
           />
+
         </div>
 
         <button
@@ -958,24 +1377,31 @@
         </button>
 
       </form>
+
     </div>
+
   </div>
 
 
-  <!-- =========================
-       APPLICATION
-  ========================= -->
+  <!-- APP -->
 
   <div id="app" class="hidden">
 
     <!-- SIDEBAR -->
 
-    <aside class="sidebar" id="sidebar">
+    <aside
+      class="sidebar"
+      id="sidebar"
+    >
 
       <div class="brand">
-        <div class="brand-icon">XR</div>
+
+        <div class="brand-icon">
+          XR
+        </div>
 
         <div>
+
           <div class="brand-name">
             Xray Panel
           </div>
@@ -983,7 +1409,9 @@
           <div class="brand-version">
             Management Console
           </div>
+
         </div>
+
       </div>
 
 
@@ -993,17 +1421,26 @@
           Main
         </div>
 
-        <button class="menu-item active" data-page="dashboard">
+        <button
+          class="menu-item active"
+          data-page="dashboard"
+        >
           <span class="menu-icon">▦</span>
           <span class="menu-label">Dashboard</span>
         </button>
 
-        <button class="menu-item" data-page="inbounds">
+        <button
+          class="menu-item"
+          data-page="inbounds"
+        >
           <span class="menu-icon">⇥</span>
           <span class="menu-label">Inbounds</span>
         </button>
 
-        <button class="menu-item" data-page="clients">
+        <button
+          class="menu-item"
+          data-page="clients"
+        >
           <span class="menu-icon">◉</span>
           <span class="menu-label">Clients</span>
         </button>
@@ -1013,17 +1450,26 @@
           Management
         </div>
 
-        <button class="menu-item" data-page="groups">
+        <button
+          class="menu-item"
+          data-page="groups"
+        >
           <span class="menu-icon">◫</span>
           <span class="menu-label">Groups</span>
         </button>
 
-        <button class="menu-item" data-page="nodes">
+        <button
+          class="menu-item"
+          data-page="nodes"
+        >
           <span class="menu-icon">⌘</span>
           <span class="menu-label">Nodes</span>
         </button>
 
-        <button class="menu-item" data-page="hosts">
+        <button
+          class="menu-item"
+          data-page="hosts"
+        >
           <span class="menu-icon">⌁</span>
           <span class="menu-label">Hosts</span>
         </button>
@@ -1033,17 +1479,26 @@
           Xray
         </div>
 
-        <button class="menu-item" data-page="xray">
+        <button
+          class="menu-item"
+          data-page="xray"
+        >
           <span class="menu-icon">◇</span>
           <span class="menu-label">Xray</span>
         </button>
 
-        <button class="menu-item" data-page="outbound">
+        <button
+          class="menu-item"
+          data-page="outbound"
+        >
           <span class="menu-icon">→</span>
           <span class="menu-label">Outbound</span>
         </button>
 
-        <button class="menu-item" data-page="routing">
+        <button
+          class="menu-item"
+          data-page="routing"
+        >
           <span class="menu-icon">↝</span>
           <span class="menu-label">Routing</span>
         </button>
@@ -1053,12 +1508,18 @@
           System
         </div>
 
-        <button class="menu-item" data-page="settings">
+        <button
+          class="menu-item"
+          data-page="settings"
+        >
           <span class="menu-icon">⚙</span>
           <span class="menu-label">Settings</span>
         </button>
 
-        <button class="menu-item" data-page="api">
+        <button
+          class="menu-item"
+          data-page="api"
+        >
           <span class="menu-icon">{ }</span>
           <span class="menu-label">API Docs</span>
         </button>
@@ -1067,12 +1528,14 @@
 
 
       <div class="sidebar-footer">
+
         <button
           class="logout-btn"
           id="logoutBtn"
         >
           Sign Out
         </button>
+
       </div>
 
     </aside>
@@ -1084,7 +1547,13 @@
 
       <header class="topbar">
 
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:12px;
+          "
+        >
 
           <button
             class="mobile-menu"
@@ -1120,9 +1589,13 @@
 
         <!-- DASHBOARD -->
 
-        <section id="page-dashboard" class="page">
+        <section
+          id="page-dashboard"
+          class="page"
+        >
 
           <div class="welcome">
+
             <h2>
               Dashboard
             </h2>
@@ -1130,12 +1603,14 @@
             <p>
               Xray management overview
             </p>
+
           </div>
 
 
           <div class="grid grid-4">
 
             <div class="card stat-card">
+
               <div class="stat-title">
                 Inbounds
               </div>
@@ -1150,10 +1625,12 @@
               <div class="stat-desc">
                 Configured inbounds
               </div>
+
             </div>
 
 
             <div class="card stat-card">
+
               <div class="stat-title">
                 Clients
               </div>
@@ -1168,10 +1645,12 @@
               <div class="stat-desc">
                 Registered clients
               </div>
+
             </div>
 
 
             <div class="card stat-card">
+
               <div class="stat-title">
                 Traffic
               </div>
@@ -1183,10 +1662,12 @@
               <div class="stat-desc">
                 Total traffic
               </div>
+
             </div>
 
 
             <div class="card stat-card">
+
               <div class="stat-title">
                 Xray Status
               </div>
@@ -1198,6 +1679,7 @@
               <div class="stat-desc">
                 Core status
               </div>
+
             </div>
 
           </div>
@@ -1214,33 +1696,70 @@
                 System Resources
               </div>
 
+
               <div style="margin-bottom:14px;">
-                <div style="display:flex;justify-content:space-between;font-size:11px;">
-                  <span style="color:#777;">CPU</span>
-                  <span style="color:#aaa;">—</span>
+
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    font-size:11px;
+                  "
+                >
+
+                  <span style="color:#777;">
+                    CPU
+                  </span>
+
+                  <span style="color:#aaa;">
+                    —
+                  </span>
+
                 </div>
 
+
                 <div class="progress">
+
                   <div
                     class="progress-bar"
                     style="width:0%;"
                   ></div>
+
                 </div>
+
               </div>
 
 
               <div>
-                <div style="display:flex;justify-content:space-between;font-size:11px;">
-                  <span style="color:#777;">Memory</span>
-                  <span style="color:#aaa;">—</span>
+
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    font-size:11px;
+                  "
+                >
+
+                  <span style="color:#777;">
+                    Memory
+                  </span>
+
+                  <span style="color:#aaa;">
+                    —
+                  </span>
+
                 </div>
 
+
                 <div class="progress">
+
                   <div
                     class="progress-bar"
                     style="width:0%;"
                   ></div>
+
                 </div>
+
               </div>
 
             </div>
@@ -1252,12 +1771,14 @@
                 Quick Actions
               </div>
 
+
               <div class="quick-actions">
 
                 <button
                   class="quick-action"
                   onclick="openInboundModal()"
                 >
+
                   <div class="quick-action-title">
                     Add Inbound
                   </div>
@@ -1265,6 +1786,7 @@
                   <div class="quick-action-desc">
                     Create a new inbound
                   </div>
+
                 </button>
 
 
@@ -1272,6 +1794,7 @@
                   class="quick-action"
                   onclick="showPage('clients')"
                 >
+
                   <div class="quick-action-title">
                     Clients
                   </div>
@@ -1279,6 +1802,7 @@
                   <div class="quick-action-desc">
                     Manage clients
                   </div>
+
                 </button>
 
 
@@ -1286,6 +1810,7 @@
                   class="quick-action"
                   onclick="showPage('nodes')"
                 >
+
                   <div class="quick-action-title">
                     Nodes
                   </div>
@@ -1293,6 +1818,7 @@
                   <div class="quick-action-desc">
                     Manage nodes
                   </div>
+
                 </button>
 
 
@@ -1300,6 +1826,7 @@
                   class="quick-action"
                   onclick="showPage('settings')"
                 >
+
                   <div class="quick-action-title">
                     Settings
                   </div>
@@ -1307,6 +1834,7 @@
                   <div class="quick-action-desc">
                     Panel settings
                   </div>
+
                 </button>
 
               </div>
@@ -1365,6 +1893,7 @@
             <table>
 
               <thead>
+
                 <tr>
                   <th>Name</th>
                   <th>Protocol</th>
@@ -1375,6 +1904,7 @@
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
+
               </thead>
 
               <tbody id="inboundsTable">
@@ -1407,6 +1937,7 @@
 
             </div>
 
+
             <div class="toolbar-right">
 
               <button
@@ -1426,6 +1957,7 @@
             <table>
 
               <thead>
+
                 <tr>
                   <th>Email</th>
                   <th>Inbound</th>
@@ -1435,6 +1967,7 @@
                   <th>Expiry</th>
                   <th>Actions</th>
                 </tr>
+
               </thead>
 
               <tbody id="clientsTable">
@@ -1457,7 +1990,10 @@
           <div class="toolbar">
 
             <div>
-              <div class="section-title" style="margin:0;">
+              <div
+                class="section-title"
+                style="margin:0;"
+              >
                 Groups
               </div>
             </div>
@@ -1467,6 +2003,7 @@
             </button>
 
           </div>
+
 
           <div class="placeholder">
 
@@ -1501,9 +2038,14 @@
           <div class="toolbar">
 
             <div>
-              <div class="section-title" style="margin:0;">
+
+              <div
+                class="section-title"
+                style="margin:0;"
+              >
                 Nodes
               </div>
+
             </div>
 
             <button class="btn btn-primary">
@@ -1511,6 +2053,7 @@
             </button>
 
           </div>
+
 
           <div class="placeholder">
 
@@ -1580,13 +2123,17 @@
                 Xray Core
               </div>
 
-              <div style="color:#777;font-size:12px;margin-bottom:15px;">
+              <div
+                style="
+                  color:#777;
+                  font-size:12px;
+                  margin-bottom:15px;
+                "
+              >
                 Xray Core status and configuration
               </div>
 
-              <div
-                class="badge badge-warning"
-              >
+              <div class="badge badge-warning">
                 Not Connected
               </div>
 
@@ -1599,7 +2146,12 @@
                 Actions
               </div>
 
-              <div style="display:flex;gap:8px;">
+              <div
+                style="
+                  display:flex;
+                  gap:8px;
+                "
+              >
 
                 <button class="btn">
                   Start
@@ -1697,6 +2249,7 @@
                 General Settings
               </div>
 
+
               <div class="form-group">
 
                 <label>
@@ -1717,6 +2270,7 @@
                 </label>
 
                 <select>
+
                   <option selected>
                     Dark
                   </option>
@@ -1724,6 +2278,7 @@
                   <option>
                     Light
                   </option>
+
                 </select>
 
               </div>
@@ -1742,7 +2297,13 @@
                 Security
               </div>
 
-              <div style="color:#777;font-size:12px;line-height:1.8;">
+              <div
+                style="
+                  color:#777;
+                  font-size:12px;
+                  line-height:1.8;
+                "
+              >
                 Authentication is handled by the panel backend.
               </div>
 
@@ -1765,6 +2326,7 @@
             <div class="section-title">
               API Documentation
             </div>
+
 
             <div
               style="
@@ -1802,9 +2364,7 @@
   </div>
 
 
-  <!-- =========================
-       INBOUND MODAL
-  ========================= -->
+  <!-- INBOUND MODAL -->
 
   <div
     id="inboundModal"
@@ -2075,9 +2635,13 @@
 
 
   <script>
-    let token = localStorage.getItem("xray_token");
+
+    let token =
+      localStorage.getItem("xray_token");
+
 
     const pageTitles = {
+
       dashboard: "Dashboard",
       inbounds: "Inbounds",
       clients: "Clients",
@@ -2089,22 +2653,34 @@
       routing: "Routing",
       settings: "Settings",
       api: "API Docs"
+
     };
 
 
-    function showToast(message, type = "") {
-      const toast = document.getElementById("toast");
+    function showToast(
+      message,
+      type = ""
+    ) {
+
+      const toast =
+        document.getElementById("toast");
 
       toast.textContent = message;
+
       toast.className = type;
 
       setTimeout(() => {
-        toast.className = "hidden";
+
+        toast.className =
+          "hidden";
+
       }, 3000);
+
     }
 
 
     function showApp() {
+
       document
         .getElementById("loginPage")
         .classList.add("hidden");
@@ -2114,10 +2690,12 @@
         .classList.remove("hidden");
 
       loadDashboard();
+
     }
 
 
     function showLogin() {
+
       document
         .getElementById("app")
         .classList.add("hidden");
@@ -2125,105 +2703,38 @@
       document
         .getElementById("loginPage")
         .classList.remove("hidden");
+
     }
 
 
-    async function api(url, options = {}) {
+    async function api(
+      url,
+      options = {}
+    ) {
 
       options.headers = {
+
         ...(options.headers || {}),
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
+
+        Authorization:
+          `Bearer ${token}`,
+
+        "Content-Type":
+          "application/json"
+
       };
 
-      const response = await fetch(url, options);
 
-      if (response.status === 401) {
-        localStorage.removeItem("xray_token");
-        token = null;
-        showLogin();
-        throw new Error("Unauthorized");
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Request failed");
-      }
-
-      return data;
-    }
-
-
-    async function login(username, password) {
-
-      const response = await fetch(
-        "/api/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username,
-            password
-          })
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Login failed"
+      const response =
+        await fetch(
+          url,
+          options
         );
-      }
-
-      token = data.token;
-
-      localStorage.setItem(
-        "xray_token",
-        token
-      );
-
-      showApp();
-    }
 
 
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", async (event) => {
-
-        event.preventDefault();
-
-        const username =
-          document.getElementById("username").value;
-
-        const password =
-          document.getElementById("password").value;
-
-        try {
-
-          await login(
-            username,
-            password
-          );
-
-        } catch (error) {
-
-          showToast(
-            error.message,
-            "error"
-          );
-
-        }
-
-      });
-
-
-    document
-      .getElementById("logoutBtn")
-      .addEventListener("click", () => {
+      if (
+        response.status === 401
+      ) {
 
         localStorage.removeItem(
           "xray_token"
@@ -2233,16 +2744,161 @@
 
         showLogin();
 
-      });
+        throw new Error(
+          "Unauthorized"
+        );
+
+      }
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          "Request failed"
+        );
+
+      }
+
+
+      return data;
+
+    }
+
+
+    async function login(
+      username,
+      password
+    ) {
+
+      const response =
+        await fetch(
+          "/api/login",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body:
+              JSON.stringify({
+                username,
+                password
+              })
+          }
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error ||
+          "Login failed"
+        );
+
+      }
+
+
+      token = data.token;
+
+
+      localStorage.setItem(
+        "xray_token",
+        token
+      );
+
+
+      showApp();
+
+    }
+
+
+    document
+      .getElementById("loginForm")
+      .addEventListener(
+        "submit",
+        async (event) => {
+
+          event.preventDefault();
+
+
+          const username =
+            document
+              .getElementById(
+                "username"
+              )
+              .value;
+
+
+          const password =
+            document
+              .getElementById(
+                "password"
+              )
+              .value;
+
+
+          try {
+
+            await login(
+              username,
+              password
+            );
+
+          } catch (error) {
+
+            showToast(
+              error.message,
+              "error"
+            );
+
+          }
+
+        }
+      );
+
+
+    document
+      .getElementById("logoutBtn")
+      .addEventListener(
+        "click",
+        () => {
+
+          localStorage.removeItem(
+            "xray_token"
+          );
+
+          token = null;
+
+          showLogin();
+
+        }
+      );
 
 
     function showPage(page) {
 
       document
         .querySelectorAll(".page")
-        .forEach((element) => {
-          element.classList.add("hidden");
-        });
+        .forEach(
+          (element) => {
+
+            element.classList.add(
+              "hidden"
+            );
+
+          }
+        );
 
 
       const target =
@@ -2250,27 +2906,37 @@
           `page-${page}`
         );
 
+
       if (target) {
-        target.classList.remove("hidden");
+
+        target.classList.remove(
+          "hidden"
+        );
+
       }
 
 
       document
-        .querySelectorAll(".menu-item")
-        .forEach((item) => {
+        .querySelectorAll(
+          ".menu-item"
+        )
+        .forEach(
+          (item) => {
 
-          item.classList.toggle(
-            "active",
-            item.dataset.page === page
-          );
+            item.classList.toggle(
+              "active",
+              item.dataset.page === page
+            );
 
-        });
+          }
+        );
 
 
       document.getElementById(
         "pageTitle"
       ).textContent =
-        pageTitles[page] || page;
+        pageTitles[page] ||
+        page;
 
 
       document
@@ -2278,35 +2944,55 @@
         .classList.remove("open");
 
 
-      if (page === "dashboard") {
+      if (
+        page === "dashboard"
+      ) {
+
         loadDashboard();
+
       }
 
-      if (page === "inbounds") {
+
+      if (
+        page === "inbounds"
+      ) {
+
         loadInbounds();
+
       }
 
-      if (page === "clients") {
+
+      if (
+        page === "clients"
+      ) {
+
         loadClients();
+
       }
 
     }
 
 
     document
-      .querySelectorAll(".menu-item")
-      .forEach((item) => {
+      .querySelectorAll(
+        ".menu-item"
+      )
+      .forEach(
+        (item) => {
 
-        item.addEventListener(
-          "click",
-          () => {
-            showPage(
-              item.dataset.page
-            );
-          }
-        );
+          item.addEventListener(
+            "click",
+            () => {
 
-      });
+              showPage(
+                item.dataset.page
+              );
+
+            }
+          );
+
+        }
+      );
 
 
     async function loadDashboard() {
@@ -2314,20 +3000,28 @@
       try {
 
         const inbounds =
-          await api("/api/inbounds");
+          await api(
+            "/api/inbounds"
+          );
+
 
         const clients =
-          await api("/api/clients");
+          await api(
+            "/api/clients"
+          );
+
 
         document.getElementById(
           "statInbounds"
         ).textContent =
           inbounds.length;
 
+
         document.getElementById(
           "statClients"
         ).textContent =
           clients.length;
+
 
       } catch (error) {
 
@@ -2343,111 +3037,184 @@
       try {
 
         const rows =
-          await api("/api/inbounds");
+          await api(
+            "/api/inbounds"
+          );
+
 
         const tbody =
           document.getElementById(
             "inboundsTable"
           );
 
+
         if (!rows.length) {
 
           tbody.innerHTML = `
+
             <tr>
+
               <td colspan="8">
+
                 <div class="empty">
                   No inbounds found
                 </div>
+
               </td>
+
             </tr>
+
           `;
 
           return;
+
         }
 
 
         tbody.innerHTML =
-          rows.map((row) => {
+          rows.map(
+            (row) => {
 
-            return `
-              <tr>
+              return `
 
-                <td>
-                  <strong style="color:#eee;">
-                    ${escapeHtml(row.name)}
-                  </strong>
+                <tr>
 
-                  ${
-                    row.remark
-                      ? `<div style="color:#555;font-size:10px;margin-top:3px;">
-                          ${escapeHtml(row.remark)}
-                         </div>`
-                      : ""
-                  }
+                  <td>
 
-                </td>
-
-                <td>
-                  <span class="badge badge-neutral">
-                    ${escapeHtml(row.protocol)}
-                  </span>
-                </td>
-
-                <td>
-                  ${row.port}
-                </td>
-
-                <td>
-                  TCP
-                </td>
-
-                <td>
-                  None
-                </td>
-
-                <td>
-                  0 B
-                </td>
-
-                <td>
-                  <span class="badge badge-success">
-                    ● Enabled
-                  </span>
-                </td>
-
-                <td>
-
-                  <div style="display:flex;gap:5px;">
-
-                    <button
-                      class="btn btn-small"
-                      onclick="showToast('Share link will be available later')"
+                    <strong
+                      style="color:#eee;"
                     >
-                      Share
-                    </button>
+                      ${escapeHtml(
+                        row.name
+                      )}
+                    </strong>
 
-                    <button
-                      class="btn btn-small"
-                      onclick="showToast('QR code will be available later')"
+                    ${
+                      row.remark
+
+                        ? `
+                          <div
+                            style="
+                              color:#555;
+                              font-size:10px;
+                              margin-top:3px;
+                            "
+                          >
+                            ${escapeHtml(
+                              row.remark
+                            )}
+                          </div>
+                        `
+
+                        : ""
+                    }
+
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="badge badge-neutral"
                     >
-                      QR
-                    </button>
+                      ${escapeHtml(
+                        row.protocol
+                      )}
+                    </span>
 
-                    <button
-                      class="btn btn-small btn-danger"
-                      onclick="deleteInbound('${row.id}')"
+                  </td>
+
+
+                  <td>
+                    ${row.port}
+                  </td>
+
+
+                  <td>
+                    TCP
+                  </td>
+
+
+                  <td>
+                    None
+                  </td>
+
+
+                  <td>
+                    0 B
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="badge badge-success"
                     >
-                      Delete
-                    </button>
+                      ● Enabled
+                    </span>
 
-                  </div>
+                  </td>
 
-                </td>
 
-              </tr>
-            `;
+                  <td>
 
-          }).join("");
+                    <div
+                      style="
+                        display:flex;
+                        gap:5px;
+                      "
+                    >
+
+                      <button
+                        class="btn btn-small"
+                        onclick="
+                          showToast(
+                            'Share link will be available later'
+                          )
+                        "
+                      >
+                        Share
+                      </button>
+
+
+                      <button
+                        class="btn btn-small"
+                        onclick="
+                          showToast(
+                            'QR code will be available later'
+                          )
+                        "
+                      >
+                        QR
+                      </button>
+
+
+                      <button
+                        class="
+                          btn
+                          btn-small
+                          btn-danger
+                        "
+                        onclick="
+                          deleteInbound(
+                            '${row.id}'
+                          )
+                        "
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              `;
+
+            }
+          ).join("");
+
 
       } catch (error) {
 
@@ -2466,88 +3233,152 @@
       try {
 
         const rows =
-          await api("/api/clients");
+          await api(
+            "/api/clients"
+          );
+
 
         const tbody =
           document.getElementById(
             "clientsTable"
           );
 
+
         if (!rows.length) {
 
           tbody.innerHTML = `
+
             <tr>
+
               <td colspan="7">
+
                 <div class="empty">
                   No clients found
                 </div>
+
               </td>
+
             </tr>
+
           `;
 
           return;
+
         }
 
 
         tbody.innerHTML =
-          rows.map((row) => {
+          rows.map(
+            (row) => {
 
-            return `
-              <tr>
+              return `
 
-                <td>
-                  <strong style="color:#eee;">
-                    ${escapeHtml(row.email)}
-                  </strong>
-                </td>
+                <tr>
 
-                <td>
-                  ${escapeHtml(
-                    row.inbound_name || "-"
-                  )}
-                </td>
+                  <td>
 
-                <td>
-                  <span style="font-family:monospace;color:#888;">
-                    ${escapeHtml(row.uuid)}
-                  </span>
-                </td>
+                    <strong
+                      style="color:#eee;"
+                    >
+                      ${escapeHtml(
+                        row.email
+                      )}
+                    </strong>
 
-                <td>
-                  ${
-                    row.enabled
-                      ? `<span class="badge badge-success">
-                           ● Enabled
-                         </span>`
-                      : `<span class="badge badge-danger">
-                           Disabled
-                         </span>`
-                  }
-                </td>
+                  </td>
 
-                <td>
-                  0 B
-                </td>
 
-                <td>
-                  —
-                </td>
+                  <td>
+                    ${escapeHtml(
+                      row.inbound_name ||
+                      "-"
+                    )}
+                  </td>
 
-                <td>
 
-                  <button
-                    class="btn btn-small btn-danger"
-                    onclick="deleteClient('${row.id}')"
-                  >
-                    Delete
-                  </button>
+                  <td>
 
-                </td>
+                    <span
+                      style="
+                        font-family:monospace;
+                        color:#888;
+                      "
+                    >
+                      ${escapeHtml(
+                        row.uuid
+                      )}
+                    </span>
 
-              </tr>
-            `;
+                  </td>
 
-          }).join("");
+
+                  <td>
+
+                    ${
+                      row.enabled
+
+                        ? `
+                          <span
+                            class="
+                              badge
+                              badge-success
+                            "
+                          >
+                            ● Enabled
+                          </span>
+                        `
+
+                        : `
+                          <span
+                            class="
+                              badge
+                              badge-danger
+                            "
+                          >
+                            Disabled
+                          </span>
+                        `
+                    }
+
+                  </td>
+
+
+                  <td>
+                    0 B
+                  </td>
+
+
+                  <td>
+                    —
+                  </td>
+
+
+                  <td>
+
+                    <button
+                      class="
+                        btn
+                        btn-small
+                        btn-danger
+                      "
+                      onclick="
+                        deleteClient(
+                          '${row.id}'
+                        )
+                      "
+                    >
+                      Delete
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              `;
+
+            }
+          ).join("");
+
 
       } catch (error) {
 
@@ -2568,8 +3399,11 @@
           "Delete this inbound and its clients?"
         )
       ) {
+
         return;
+
       }
+
 
       try {
 
@@ -2580,13 +3414,17 @@
           }
         );
 
+
         showToast(
           "Inbound deleted",
           "success"
         );
 
+
         loadInbounds();
+
         loadDashboard();
+
 
       } catch (error) {
 
@@ -2607,8 +3445,11 @@
           "Delete this client?"
         )
       ) {
+
         return;
+
       }
+
 
       try {
 
@@ -2619,13 +3460,17 @@
           }
         );
 
+
         showToast(
           "Client deleted",
           "success"
         );
 
+
         loadClients();
+
         loadDashboard();
+
 
       } catch (error) {
 
@@ -2642,8 +3487,12 @@
     function openInboundModal() {
 
       document
-        .getElementById("inboundModal")
-        .classList.remove("hidden");
+        .getElementById(
+          "inboundModal"
+        )
+        .classList.remove(
+          "hidden"
+        );
 
     }
 
@@ -2651,41 +3500,59 @@
     function closeInboundModal() {
 
       document
-        .getElementById("inboundModal")
-        .classList.add("hidden");
+        .getElementById(
+          "inboundModal"
+        )
+        .classList.add(
+          "hidden"
+        );
 
     }
 
 
     document
-      .getElementById("inboundForm")
+      .getElementById(
+        "inboundForm"
+      )
       .addEventListener(
         "submit",
         async (event) => {
 
           event.preventDefault();
 
+
           const name =
-            document.getElementById(
-              "inboundName"
-            ).value;
+            document
+              .getElementById(
+                "inboundName"
+              )
+              .value;
+
 
           const protocol =
-            document.getElementById(
-              "inboundProtocol"
-            ).value;
+            document
+              .getElementById(
+                "inboundProtocol"
+              )
+              .value;
+
 
           const port =
             Number(
-              document.getElementById(
-                "inboundPort"
-              ).value
+              document
+                .getElementById(
+                  "inboundPort"
+                )
+                .value
             );
 
+
           const remark =
-            document.getElementById(
-              "inboundRemark"
-            ).value;
+            document
+              .getElementById(
+                "inboundRemark"
+              )
+              .value;
 
 
           try {
@@ -2695,17 +3562,19 @@
               {
                 method: "POST",
 
-                body: JSON.stringify({
-                  name,
-                  protocol,
-                  port,
-                  remark
-                })
+                body:
+                  JSON.stringify({
+                    name,
+                    protocol,
+                    port,
+                    remark
+                  })
               }
             );
 
 
             closeInboundModal();
+
 
             document
               .getElementById(
@@ -2721,7 +3590,9 @@
 
 
             loadInbounds();
+
             loadDashboard();
+
 
           } catch (error) {
 
@@ -2737,49 +3608,62 @@
 
 
     document
-      .getElementById("mobileMenu")
+      .getElementById(
+        "mobileMenu"
+      )
       .addEventListener(
         "click",
         () => {
 
           document
-            .getElementById("sidebar")
-            .classList.toggle("open");
+            .getElementById(
+              "sidebar"
+            )
+            .classList.toggle(
+              "open"
+            );
 
         }
       );
 
 
     document
-      .getElementById("inboundSearch")
+      .getElementById(
+        "inboundSearch"
+      )
       .addEventListener(
         "input",
         function () {
 
           const query =
             this.value.toLowerCase();
+
 
           document
             .querySelectorAll(
               "#inboundsTable tr"
             )
-            .forEach((row) => {
+            .forEach(
+              (row) => {
 
-              row.style.display =
-                row.textContent
-                  .toLowerCase()
-                  .includes(query)
+                row.style.display =
+                  row.textContent
+                    .toLowerCase()
+                    .includes(query)
                     ? ""
                     : "none";
 
-            });
+              }
+            );
 
         }
       );
 
 
     document
-      .getElementById("clientSearch")
+      .getElementById(
+        "clientSearch"
+      )
       .addEventListener(
         "input",
         function () {
@@ -2787,20 +3671,23 @@
           const query =
             this.value.toLowerCase();
 
+
           document
             .querySelectorAll(
               "#clientsTable tr"
             )
-            .forEach((row) => {
+            .forEach(
+              (row) => {
 
-              row.style.display =
-                row.textContent
-                  .toLowerCase()
-                  .includes(query)
+                row.style.display =
+                  row.textContent
+                    .toLowerCase()
+                    .includes(query)
                     ? ""
                     : "none";
 
-            });
+              }
+            );
 
         }
       );
@@ -2808,12 +3695,29 @@
 
     function escapeHtml(value) {
 
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return String(
+        value ?? ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
 
     }
 
@@ -2821,15 +3725,22 @@
     async function checkAuth() {
 
       if (!token) {
+
         showLogin();
+
         return;
+
       }
+
 
       try {
 
-        await api("/api/me");
+        await api(
+          "/api/me"
+        );
 
         showApp();
+
 
       } catch (error) {
 
